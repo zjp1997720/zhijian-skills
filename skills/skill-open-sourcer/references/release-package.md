@@ -96,7 +96,7 @@ Required README sections:
 ```text
 # <Skill Display Name>
 
-[中文文档](README.zh-CN.md)
+`README.zh-CN.md`
 
 One short value proposition.
 

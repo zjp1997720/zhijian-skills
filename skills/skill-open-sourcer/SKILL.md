@@ -1,13 +1,26 @@
 ---
 name: skill-open-sourcer
-description: Package and publish a local agent skill as a polished open-source GitHub repository. Use when the user gives a local SKILL.md path or skill directory and asks to open-source, publish, release, share, make installable with npx skills, prepare or beautify the release README, create a public skill repo, or generate launch/social copy for a local Codex, Agents, Claude, or compatible skill. The workflow includes release safety, project-native README design, GitHub-safe visual assets when evidence supports them, validation, and publishing.
+description: Package and publish one local agent Skill, or audit and release a Registry-driven public Skill portfolio, as polished installable GitHub packages. Use when the user gives a SKILL.md, Skill directory, or multi-Skill repository and asks to open-source, publish, release, share, validate, detect drift, synchronize mirrors, manage versions, make installable with npx skills, prepare release documentation, or generate launch copy. The workflow includes safety, self-containment, declared capabilities, project-native README design, isolated installation, release planning, and publishing.
 ---
 
 # Skill Open Sourcer
 
-Turn one local skill into a clean public release package. The normal input is only a `SKILL.md` path or a skill directory.
+Turn one local Skill into a clean public release package, or govern a complete public Skill portfolio from one canonical repository.
 
 Default posture: move fast, but stop on release risk. If the safety scan finds secrets, private paths, client data, unpublished proprietary material, or ambiguous ownership, report the blockers and do not publish until the user resolves them.
+
+## Select the mode
+
+- A `SKILL.md` path or directory containing `SKILL.md` uses **Single-Skill mode** and follows the existing workflow below.
+- A repository root containing `registry/skills.json` uses **Portfolio mode**. Read [Portfolio mode](references/portfolio-mode.md) and [Registry contract](references/registry-contract.md) before auditing or releasing.
+- A directory matching neither contract is an input error. Do not guess which nested directory is authoritative.
+
+Run the repository-owned validator in either mode:
+
+```bash
+python3 <skill-open-sourcer-dir>/scripts/portfolio.py validate-skill /path/to/skill
+python3 <skill-open-sourcer-dir>/scripts/portfolio.py audit --repo /path/to/portfolio --strict
+```
 
 ## Quick Start
 
@@ -93,18 +106,18 @@ Low-risk auto publish is allowed only when the scanner and manual review find no
 2. If required commands are missing, stop and report the exact blockers. If only `gh` is missing, continue only when GitHub MCP/app is available or the release repo already has an authenticated `origin` remote.
 3. Build the release repo locally, including the README package and any licensed proof assets.
 4. Run `scripts/audit_release_readme.py <release-repo> --strict`. Fix hard failures and review every warning; visual taste still requires local rendering and inspection.
-5. Validate with the system skill validator when available:
+5. Validate with the repository-owned validator:
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/.system/skill-creator/scripts/quick_validate.py" .
+python3 "$SKILL_OPEN_SOURCER_DIR/scripts/portfolio.py" validate-skill /path/to/packaged/skill
 ```
 
 6. Create or update the GitHub repository using the available GitHub surface (`gh`, GitHub MCP/app, or existing remote). Avoid force push.
 7. Push the branch or `main`.
-8. Verify listing:
+8. Verify listing. In a Portfolio repository use its lockfile and `--no-install`; for a standalone release environment without a pinned dependency, record the resolved CLI version in the release evidence:
 
 ```bash
-npx skills add <owner>/<repo> --list
+npx --no-install skills add <owner>/<repo> --list
 ```
 
 9. Run an isolated real install with copy mode, then verify the expected support files exist under the temporary agent skill directory. Use the exact target agent intended by the release. Never treat `--list` as sufficient package validation.

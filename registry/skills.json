@@ -68,7 +68,7 @@
         "live_smoke": "python3 skills/codex-skill-admin/scripts/codex_skill_admin.py verify --cwd ."
       },
       "capabilities": {
-        "network": "none",
+        "network": "required",
         "subprocess": "required",
         "filesystem": "read",
         "credentials": "none"
@@ -189,7 +189,7 @@
         "live_smoke": null
       },
       "capabilities": {
-        "network": "none",
+        "network": "required",
         "subprocess": "required",
         "filesystem": "write",
         "credentials": "none"
