@@ -1,0 +1,10 @@
+{
+  "name": "codex-doctor",
+  "entrypoint_sha256": "0f3ecdf0d600147fa8787881d0b992d7b845a93bfd1436efb9ac996a2777f8e5",
+  "required_paths": [
+    "SKILL.md",
+    "scripts/scan_workspace.py",
+    "references/checks-and-repair-policy.md",
+    "tests/test_scan_workspace.py"
+  ]
+}

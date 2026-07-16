@@ -1,0 +1,10 @@
+{
+  "name": "wechat-article-search",
+  "candidate_digest": "7e25da908915a160422bc005bf70761c0357b16fef1a0e9331eaa3a72c22cd37",
+  "required_paths": [
+    "SKILL.md",
+    "package.json",
+    "package-lock.json",
+    "scripts/search_wechat.js"
+  ]
+}

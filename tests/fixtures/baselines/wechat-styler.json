@@ -1,0 +1,14 @@
+{
+  "name": "wechat-styler",
+  "candidate_digest": "7e8601e8bd7ecf20f31b95f647718f15caaa93625a9db3dc8ebe4a0f73cad550",
+  "required_paths": [
+    "SKILL.md",
+    "package.json",
+    "package-lock.json",
+    "scripts/convert.mjs",
+    "scripts/inject-to-wechat.mjs",
+    "references/component-guide.md",
+    "themes/zhijian.yaml",
+    "tests/output-contract.test.mjs"
+  ]
+}

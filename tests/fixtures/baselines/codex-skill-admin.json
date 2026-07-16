@@ -1,0 +1,10 @@
+{
+  "name": "codex-skill-admin",
+  "source_commit": "536c3be4ed7450530cee82b187a251c2939475e0",
+  "payload_digest": "ff5b22540d457c0ec56f4dcb6c48eb11266f9209f1ffadf6c83e124f01f12acf",
+  "required_paths": [
+    "SKILL.md",
+    "scripts/codex_skill_admin.py",
+    "references/app-server-protocol.md"
+  ]
+}

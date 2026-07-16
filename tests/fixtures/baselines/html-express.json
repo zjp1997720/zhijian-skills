@@ -1,0 +1,11 @@
+{
+  "name": "html-express",
+  "candidate_digest": "53c35ade489160d74d559f33db4f648278ab9ba93a5412467b538582748c17ae",
+  "required_paths": [
+    "SKILL.md",
+    "assets/skeleton.html",
+    "assets/tokens.css",
+    "assets/components/data-table.html",
+    "assets/components/timeline.html"
+  ]
+}

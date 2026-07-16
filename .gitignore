@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/
+*.pyc
+node_modules/
+coverage/
+dist/
+tmp/
+.release/
+*.log
+preview.html
+_preview_frames/
+_preview_magazine/
+reports/
+

@@ -1,0 +1,12 @@
+{
+  "name": "enterprise-clone-builder",
+  "source_commit": "7ccd2c55dd88a4b4d9bfd591abd59a9c870b266d",
+  "required_paths": [
+    "SKILL.md",
+    "references/directory-spec.md",
+    "references/extraction-guide.md",
+    "references/local-intake-guide.md",
+    "references/voice-analysis-guide.md",
+    "references/web-clipper-usage.md"
+  ]
+}

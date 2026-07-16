@@ -1,0 +1,12 @@
+{
+  "name": "codex-model-routing-team",
+  "source_commit": "90e7717f0baa0d206db04dabb57fa4adb7a2b457",
+  "payload_digest": "157e1eb4789870c15ef455c0d636ebda8b6712fb2d377f3ec24fb9a5a2464e33",
+  "required_paths": [
+    "SKILL.md",
+    "references/routing-policy.md",
+    "references/task-packet.md",
+    "references/thread-lifecycle.md",
+    "references/upstream-skill-adapter.md"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "name": "skill-open-sourcer",
+  "candidate_digest": "efffc0926453640beb4b1522f8eafd2820ee1bfb13a5287c153a8c3fedfe967d",
+  "required_paths": [
+    "SKILL.md",
+    "scripts/scan_skill_release.py",
+    "scripts/check_release_env.py",
+    "scripts/audit_release_readme.py",
+    "tests/test_audit_release_readme.py"
+  ]
+}
