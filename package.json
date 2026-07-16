@@ -1,0 +1,14 @@
+{
+  "name": "zhijian-skills",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Canonical source and governance toolkit for Zhijian AI public agent skills.",
+  "license": "MIT",
+  "devDependencies": {
+    "skills": "1.5.18"
+  },
+  "scripts": {
+    "skills:list": "skills add . --list",
+    "test": "python3 -m unittest discover -s tests -v"
+  }
+}

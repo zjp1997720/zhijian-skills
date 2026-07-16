@@ -1,0 +1,68 @@
+<!-- timeline：时间线 / 里程碑 / 路线图。
+     适用：项目阶段、交付节奏、演进史。左侧竖线，节点用暖陶圆点。 -->
+
+<style>
+  .hx-timeline {
+    position: relative;
+    margin: var(--sp-lg) 0;
+    padding-left: var(--sp-xl);
+  }
+  .hx-timeline::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--border);
+  }
+  .hx-timeline .hx-event {
+    position: relative;
+    margin-bottom: var(--sp-lg);
+  }
+  .hx-timeline .hx-event:last-child { margin-bottom: 0; }
+  .hx-timeline .hx-event::before {
+    content: "";
+    position: absolute;
+    left: calc(-1 * var(--sp-xl) + 2px);
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--r-full);
+    background: var(--terracotta);
+    border: 2px solid var(--paper);
+  }
+  .hx-timeline .hx-when {
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--terracotta);
+    letter-spacing: 0.04em;
+    margin: 0 0 var(--sp-xs);
+  }
+  .hx-timeline .hx-what {
+    font-family: var(--font-head);
+    font-size: var(--fs-h3);
+    font-weight: 500;
+    color: var(--trust);
+    margin: 0 0 var(--sp-xs);
+  }
+  .hx-timeline .hx-desc {
+    font-size: var(--fs-small);
+    color: var(--olive);
+    margin: 0;
+  }
+</style>
+
+<div class="hx-timeline">
+  <div class="hx-event">
+    <p class="hx-when">第 1 周</p>
+    <p class="hx-what">需求诊断</p>
+    <p class="hx-desc">锁定业务场景和验收标准</p>
+  </div>
+  <div class="hx-event">
+    <p class="hx-when">第 2-3 周</p>
+    <p class="hx-what">方案落地</p>
+    <p class="hx-desc">搭建工具链并跑通最小闭环</p>
+  </div>
+</div>

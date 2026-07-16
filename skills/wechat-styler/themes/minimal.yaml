@@ -1,0 +1,43 @@
+name: minimal
+description: 极简主义主题 - Noto Sans + Inter
+renderer_preset: minimal-notes
+font_family_cn: "'Noto Sans SC','PingFang SC',sans-serif"
+font_family_en: "'Inter','Helvetica Neue',sans-serif"
+font_size: 15
+line_height: 2.0
+accent_color: "#333333"
+accent_secondary: "#757575"
+background_color: "#f8f7f2"
+surface_color: "#ffffff"
+text_color: "#2c2c2c"
+secondary_color: "#888888"
+heading_font: "'Noto Sans SC',sans-serif"
+code_font: "'JetBrains Mono',monospace"
+code_bg: "#f0f0f0"
+code_color: "#555555"
+quote_border: "#cccccc"
+quote_bg: "#f8f8f8"
+divider_color: "#e0e0e0"
+border_color: "#e6e6e6"
+tag_bg: "#f0f0f0"
+max_width: 580
+type_scale:
+  h1: 25
+  h2: 20
+  h3: 17
+  body: 15
+  caption: 12
+  code: 13
+rhythm:
+  body_line_height: 2.0
+  heading_line_height: 1.35
+  paragraph_margin: 20
+  section_padding_first: 22
+  section_padding: 34
+  list_item_margin: 9
+block_style:
+  heading_style: whitespace
+  quote_style: hairline
+  list_style: minimal
+  code_style: quiet
+  image_style: bare

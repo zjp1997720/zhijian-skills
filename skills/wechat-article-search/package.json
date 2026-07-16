@@ -1,0 +1,9 @@
+{
+  "name": "wechat-article-search",
+  "version": "0.1.0",
+  "private": true,
+  "description": "搜索微信公众号文章（搜狗微信搜索），deepsight_vault skill 内嵌依赖",
+  "dependencies": {
+    "cheerio": "^1.0.0"
+  }
+}

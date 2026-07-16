@@ -1,0 +1,3 @@
+display_name: WeChat Styler
+short_description: Turn Markdown into paste-ready, inline-styled HTML for WeChat Official Account. 10 themes, deterministic validation, placeholder support.
+default_prompt: Use $wechat-styler to convert this Markdown article into WeChat Official Account HTML. Pick a theme that matches the article tone (e.g. zhijian for brand content, magazine-ink for deep analysis, minimal for essays). Run the conversion script, then verify the output passes the WeChat compatibility check.

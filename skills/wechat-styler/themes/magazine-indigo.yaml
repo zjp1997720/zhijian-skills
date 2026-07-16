@@ -1,0 +1,47 @@
+name: magazine-indigo
+description: 杂志靛蓝瓷主题 - deep indigo + porcelain paper
+renderer_preset: magazine-editorial
+magazine_variant: indigo-research
+top_label: "RESEARCH NOTE"
+font_family_cn: "'Inter','SF Pro Text','PingFang SC','Noto Sans SC','Microsoft YaHei',Arial,sans-serif"
+font_family_en: "'Source Serif 4','Charter',Georgia,'Times New Roman',serif"
+font_size: 16
+line_height: 1.75
+accent_color: "#0a1f3d"
+accent_secondary: "#485463"
+background_color: "#f1f3f5"
+surface_color: "#fbfcfd"
+text_color: "#0a1f3d"
+secondary_color: "#485463"
+tertiary_color: "#7b8490"
+heading_font: "'Source Serif 4','Noto Serif SC','Source Han Serif SC','Songti SC','STSong',Georgia,serif"
+ui_font: "'IBM Plex Mono','JetBrains Mono','SF Mono',Menlo,Consolas,monospace"
+code_font: "'IBM Plex Mono','JetBrains Mono','SF Mono',Menlo,Consolas,'Noto Serif SC',monospace"
+code_bg: "#e4e8ec"
+code_color: "#152a4a"
+quote_border: "#0a1f3d"
+quote_bg: "#fbfcfd"
+divider_color: "#d8dee4"
+border_color: "#e0e5ea"
+tag_bg: "#e4e8ec"
+max_width: 600
+type_scale:
+  h1: 32
+  h2: 23
+  h3: 18
+  body: 16
+  caption: 12
+  code: 14
+rhythm:
+  body_line_height: 1.68
+  heading_line_height: 1.18
+  paragraph_margin: 16
+  section_padding_first: 22
+  section_padding: 32
+  list_item_margin: 8
+block_style:
+  heading_style: research-bar
+  quote_style: research-note
+  list_style: research
+  code_style: technical
+  image_style: doc-frame

@@ -1,0 +1,43 @@
+name: elegant
+description: 优雅复古主题 - 方正书宋 + Garamond
+renderer_preset: elegant-essay
+font_family_cn: "'FZShuSong-Z01','Garamond','Songti SC',STSong,serif"
+font_family_en: "'Garamond','FZShuSong-Z01',serif"
+font_size: 16
+line_height: 1.9
+accent_color: "#cf4436"
+accent_secondary: "#8b7355"
+background_color: "#f7f6f1"
+surface_color: "#fffdf8"
+text_color: "#4a4a45"
+secondary_color: "#8a8a82"
+heading_font: "'Noto Serif SC','Songti SC',STSong,Georgia,serif"
+code_font: "'JetBrains Mono','SF Mono',Menlo,Consolas,monospace"
+code_bg: "#efeee8"
+code_color: "#007aaa"
+quote_border: "#cf4436"
+quote_bg: "#fffdf8"
+divider_color: "#e2dfd3"
+border_color: "#e8e5da"
+tag_bg: "#f2ebe8"
+max_width: 580
+type_scale:
+  h1: 28
+  h2: 23
+  h3: 18
+  body: 16
+  caption: 12
+  code: 14
+rhythm:
+  body_line_height: 1.9
+  heading_line_height: 1.32
+  paragraph_margin: 20
+  section_padding_first: 24
+  section_padding: 36
+  list_item_margin: 10
+block_style:
+  heading_style: centered-rule
+  quote_style: excerpt
+  list_style: essay
+  code_style: quiet
+  image_style: classic

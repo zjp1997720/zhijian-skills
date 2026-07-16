@@ -1,0 +1,3 @@
+display_name: WeChat Article Search
+short_description: Search WeChat public account articles by keyword.
+default_prompt: Use $wechat-article-search to search WeChat public account articles for the keyword "<query>".

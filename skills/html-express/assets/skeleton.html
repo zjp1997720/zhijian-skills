@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><!-- 填标题 --></title>
+
+  <!-- ============ 品牌 token（来自 tokens.css）============
+     预览阶段：用 @import 引用同目录 tokens.css 即可。
+     交付阶段：把 assets/tokens.css 的完整内容粘贴到这里替换掉 @import，
+     保证产物单文件可双击打开（自包含，零依赖）。-->
+  <style>
+    @import url("tokens.css");
+  </style>
+
+  <!-- ============ 骨架布局 ============ -->
+  <style>
+    .hx-page {
+      max-width: var(--content-width);
+      margin: 0 auto;
+      padding: var(--sp-xxl) var(--sp-lg);
+    }
+    .hx-header {
+      margin-bottom: var(--sp-xl);
+      padding-bottom: var(--sp-lg);
+      border-bottom: 1px solid var(--border);
+    }
+    .hx-header .hx-eyebrow {
+      font-family: var(--font-ui);
+      font-size: var(--fs-label);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--terracotta);
+      text-transform: uppercase;
+      margin: 0 0 var(--sp-sm);
+    }
+    .hx-header h1 {
+      font-size: var(--fs-h1);
+      color: var(--trust);
+      margin: 0 0 var(--sp-sm);
+    }
+    .hx-header .hx-sub {
+      color: var(--olive);
+      font-size: var(--fs-body-lg);
+      margin: 0;
+    }
+    .hx-section { margin-bottom: var(--sp-section); }
+    .hx-section > h2 {
+      font-size: var(--fs-h2);
+      border-left: 3px solid var(--terracotta);
+      padding-left: var(--sp-md);
+    }
+    .hx-footer {
+      margin-top: var(--sp-xxl);
+      padding-top: var(--sp-lg);
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: var(--fs-small);
+    }
+  </style>
+</head>
+<body>
+  <main class="hx-page">
+
+    <header class="hx-header">
+      <p class="hx-eyebrow"><!-- 阶段名 / 类别，如「调研」 --></p>
+      <h1><!-- 主标题：像结论，不像广告语 --></h1>
+      <p class="hx-sub"><!-- 一句话说明这个页面解决什么问题 --></p>
+    </header>
+
+    <!-- ===== 在这里插入组件 ===== -->
+
+    <section class="hx-section">
+      <h2>第一个板块</h2>
+      <!-- 组件放这里 -->
+    </section>
+
+    <footer class="hx-footer">
+      <!-- 来源 / 日期 / 口径说明。数据必须可核查或标注来源。 -->
+    </footer>
+
+  </main>
+</body>
+</html>

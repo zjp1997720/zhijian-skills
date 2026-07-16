@@ -1,0 +1,52 @@
+<!-- checklist：要点清单 / 步骤 / SOP。
+     适用：执行步骤、检查项、要点罗列。可带序号或勾选。 -->
+
+<style>
+  .hx-checklist {
+    list-style: none;
+    padding: 0;
+    margin: var(--sp-md) 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-sm);
+  }
+  .hx-checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--sp-sm);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: var(--sp-sm) var(--sp-md);
+    font-size: var(--fs-small);
+  }
+  .hx-checklist .hx-mark {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--r-sm);
+    border: 2px solid var(--terracotta);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--terracotta);
+    font-size: 13px;
+    line-height: 1;
+  }
+  .hx-checklist .hx-mark.is-done {
+    background: var(--terracotta);
+    color: var(--surface);
+  }
+  .hx-checklist .hx-step {
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--trust);
+    margin-right: var(--sp-xs);
+  }
+</style>
+
+<ul class="hx-checklist">
+  <li><span class="hx-mark is-done">✓</span><div><span class="hx-step">步骤 1</span>锁定验收标准</div></li>
+  <li><span class="hx-mark">○</span><div><span class="hx-step">步骤 2</span>搭最小闭环</div></li>
+</ul>

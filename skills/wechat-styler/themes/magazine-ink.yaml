@@ -1,0 +1,47 @@
+name: magazine-ink
+description: 杂志墨水经典主题 - Monocle-style ink + warm paper
+renderer_preset: magazine-editorial
+magazine_variant: ink-classic
+top_label: "VOL. 01"
+font_family_cn: "'Noto Sans SC','Inter','PingFang SC','Microsoft YaHei',Arial,sans-serif"
+font_family_en: "'Source Serif 4','Playfair Display',Georgia,'Times New Roman',serif"
+font_size: 16
+line_height: 1.75
+accent_color: "#0a0a0b"
+accent_secondary: "#54514a"
+background_color: "#f1efea"
+surface_color: "#faf9f5"
+text_color: "#0a0a0b"
+secondary_color: "#54514a"
+tertiary_color: "#817d73"
+heading_font: "'Noto Serif SC','Source Han Serif SC','Songti SC','STSong','Playfair Display',Georgia,serif"
+ui_font: "'IBM Plex Mono','JetBrains Mono','SF Mono',Menlo,Consolas,monospace"
+code_font: "'IBM Plex Mono','JetBrains Mono','SF Mono',Menlo,Consolas,'Noto Serif SC',monospace"
+code_bg: "#e8e5de"
+code_color: "#18181a"
+quote_border: "#0a0a0b"
+quote_bg: "#faf9f5"
+divider_color: "#d9d5ca"
+border_color: "#e1ddd2"
+tag_bg: "#e8e5de"
+max_width: 600
+type_scale:
+  h1: 32
+  h2: 26
+  h3: 19
+  body: 16
+  caption: 12
+  code: 13
+rhythm:
+  body_line_height: 1.75
+  heading_line_height: 1.14
+  paragraph_margin: 18
+  section_padding_first: 22
+  section_padding: 34
+  list_item_margin: 9
+block_style:
+  heading_style: rule
+  quote_style: pullquote
+  list_style: editorial
+  code_style: archive
+  image_style: editorial-frame

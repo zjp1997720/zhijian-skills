@@ -1,0 +1,38 @@
+<!-- quote-card：引用卡。大鹏判断 / 客户原话 / 金句。
+     适用：观点表达、信任锚点、活人感。 -->
+
+<style>
+  .hx-quote {
+    background: var(--paper);
+    border-left: 3px solid var(--human);
+    border-radius: var(--r-md);
+    padding: var(--sp-lg) var(--sp-xl);
+    margin: var(--sp-lg) 0;
+  }
+  .hx-quote blockquote {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--fs-body-lg);
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .hx-quote blockquote::before {
+    content: "“";
+    font-family: var(--font-head);
+    font-size: 1.4em;
+    color: var(--human);
+    line-height: 0;
+    vertical-align: -0.2em;
+    margin-right: 0.1em;
+  }
+  .hx-quote .hx-cite {
+    margin-top: var(--sp-md);
+    font-size: var(--fs-small);
+    color: var(--muted);
+  }
+</style>
+
+<figure class="hx-quote">
+  <blockquote>AI 不是魔法，是一套可以被设计、训练、部署和复盘的工作系统。</blockquote>
+  <figcaption class="hx-cite">—— 大鹏 / 智见AI</figcaption>
+</figure>

@@ -1,0 +1,31 @@
+<!-- badge：状态徽章。胶囊形。
+     类型：success（已落地）/ warning（风险/边界）/ neutral（中性标签）/ trust（结构标签）。
+     只用于短文本，别塞一句话进去。 -->
+
+<style>
+  .hx-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-xs);
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    padding: var(--sp-xs) var(--sp-sm);
+    border-radius: var(--r-full);
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+  }
+  .hx-badge--success { background: var(--success); color: var(--surface); }
+  .hx-badge--warning { background: var(--warning); color: var(--surface); }
+  .hx-badge--trust   { background: #EEF2F7; color: var(--trust); }
+  .hx-badge--neutral { background: var(--surface-muted); color: var(--olive); }
+  .hx-badge--accent  { background: var(--paper); color: var(--terracotta); }
+</style>
+
+<p>
+  <span class="hx-badge hx-badge--success">已验证</span>
+  <span class="hx-badge hx-badge--warning">需复核</span>
+  <span class="hx-badge hx-badge--trust">方法论</span>
+  <span class="hx-badge hx-badge--neutral">内部记录</span>
+  <span class="hx-badge hx-badge--accent">关键</span>
+</p>

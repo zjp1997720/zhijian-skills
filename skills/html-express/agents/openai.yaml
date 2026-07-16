@@ -1,0 +1,3 @@
+display_name: html-express
+short_description: Create self-contained HTML reports from dense information.
+default_prompt: "Use $html-express when the user asks for an HTML report, visual summary, dashboard, comparison page, checklist page, timeline, or a single local .html file."

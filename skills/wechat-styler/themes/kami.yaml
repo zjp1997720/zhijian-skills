@@ -1,0 +1,45 @@
+name: kami
+description: kami 纸感主题 - warm parchment + ink blue + editorial serif
+renderer_preset: kami-document
+font_family_cn: "'Inter','TsangerJinKai02','Source Han Sans SC','Noto Sans CJK SC','PingFang SC','Microsoft YaHei',Arial,sans-serif"
+font_family_en: "'Newsreader','Source Serif 4','Source Serif Pro','Charter',Georgia,'Times New Roman',serif"
+font_size: 16
+line_height: 1.55
+accent_color: "#1B365D"
+accent_secondary: "#5e5d59"
+background_color: "#f5f4ed"
+surface_color: "#faf9f5"
+text_color: "#141413"
+secondary_color: "#5e5d59"
+tertiary_color: "#87867f"
+heading_font: "'TsangerJinKai02','Source Han Serif SC','Noto Serif CJK SC','Songti SC','STSong',Georgia,serif"
+ui_font: "'Inter','TsangerJinKai02','Source Han Sans SC','Noto Sans CJK SC','PingFang SC','Microsoft YaHei',Arial,sans-serif"
+code_font: "'JetBrains Mono','SF Mono','Fira Code',Consolas,Monaco,'TsangerJinKai02','Source Han Serif SC',monospace"
+code_bg: "#EEF2F7"
+code_color: "#1B365D"
+quote_border: "#1B365D"
+quote_bg: "#faf9f5"
+divider_color: "#e0ddd2"
+border_color: "#e8e5da"
+tag_bg: "#EEF2F7"
+max_width: 580
+type_scale:
+  h1: 29
+  h2: 21
+  h3: 18
+  body: 16
+  caption: 12
+  code: 14
+rhythm:
+  body_line_height: 1.58
+  heading_line_height: 1.22
+  paragraph_margin: 20
+  section_padding_first: 20
+  section_padding: 32
+  list_item_margin: 8
+block_style:
+  heading_style: left-bar
+  quote_style: lifted
+  list_style: standard
+  code_style: document
+  image_style: soft-frame

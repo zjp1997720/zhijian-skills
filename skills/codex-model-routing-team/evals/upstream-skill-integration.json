@@ -1,0 +1,25 @@
+{
+  "skill_name": "codex-model-routing-team",
+  "evals": [
+    {
+      "id": "deep-research-project-bound",
+      "prompt": "Deep Research 已拆成四个 researcher，要求写入 01_项目/调研，并在后面运行 verifier 和 reviewer。",
+      "expected_output": "接受上游 Scale，不重复拆分；绑定 vault project local；预留 verifier、reviewer 和两次重试；每个 researcher 使用唯一文件。"
+    },
+    {
+      "id": "deep-research-stage-gate",
+      "prompt": "researcher 已完成，但 draft 和 cited 文件都不存在，请继续并行创建 verifier 和 reviewer。",
+      "expected_output": "拒绝并行创建；由主 Agent 先写 draft，再创建 verifier；cited 通过检查后才能创建 reviewer。"
+    },
+    {
+      "id": "upstream-ledger-reuse",
+      "prompt": "上游 Skill 已有 plan、task ledger 和 run summary，这个任务预计运行一小时。",
+      "expected_output": "进入耐久语义但复用上游账本，不创建第二套 agent_team/state.json。"
+    },
+    {
+      "id": "pure-chat-projectless",
+      "prompt": "并行查询三个独立事实，只在聊天中返回结果，不写任何工作区文件。",
+      "expected_output": "允许 projectless；仍执行实体化健康探针、6/8 上限和禁止递归。"
+    }
+  ]
+}

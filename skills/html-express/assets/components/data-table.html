@@ -1,0 +1,46 @@
+<!-- data-table：数据表格。结构化数据罗列（非对比）。
+     适用：清单型数据、多字段记录、事实罗列。对比请用 comparison-table。 -->
+
+<style>
+  .hx-data-wrap {
+    overflow-x: auto;
+    margin: var(--sp-md) 0;
+  }
+  .hx-data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-small);
+  }
+  .hx-data th, .hx-data td {
+    padding: var(--sp-sm) var(--sp-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  .hx-data th {
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 2px solid var(--border);
+  }
+  .hx-data tbody tr:hover { background: var(--surface); }
+  .hx-data .hx-num-cell {
+    font-family: var(--font-code);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+</style>
+
+<div class="hx-data-wrap">
+<table class="hx-data">
+  <thead>
+    <tr><th>名称</th><th>类型</th><th class="hx-num-cell">数值</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>项 A</td><td>事实</td><td class="hx-num-cell">128</td></tr>
+    <tr><td>项 B</td><td>估算</td><td class="hx-num-cell">64</td></tr>
+  </tbody>
+</table>
+</div>

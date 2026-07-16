@@ -1,0 +1,47 @@
+name: magazine-forest
+description: 杂志森林墨主题 - forest ink + ivory paper
+renderer_preset: magazine-editorial
+magazine_variant: forest-fieldnote
+top_label: "FIELD NOTE"
+font_family_cn: "'Kaiti SC','Noto Serif SC','Songti SC','STSong','PingFang SC',serif"
+font_family_en: "'Source Serif 4','Playfair Display',Georgia,'Times New Roman',serif"
+font_size: 16
+line_height: 1.75
+accent_color: "#1a2e1f"
+accent_secondary: "#52604f"
+background_color: "#f5f1e8"
+surface_color: "#fffaf0"
+text_color: "#1a2e1f"
+secondary_color: "#52604f"
+tertiary_color: "#858879"
+heading_font: "'Noto Serif SC','Kaiti SC','Source Han Serif SC','Songti SC','STSong',Georgia,serif"
+ui_font: "'Inter','IBM Plex Mono','JetBrains Mono','SF Mono',Menlo,Consolas,monospace"
+code_font: "'IBM Plex Mono','JetBrains Mono','SF Mono',Menlo,Consolas,'Noto Serif SC',monospace"
+code_bg: "#ece7da"
+code_color: "#253d2c"
+quote_border: "#1a2e1f"
+quote_bg: "#fffaf0"
+divider_color: "#ddd6c7"
+border_color: "#e8dfcf"
+tag_bg: "#ece7da"
+max_width: 600
+type_scale:
+  h1: 31
+  h2: 24
+  h3: 18
+  body: 16
+  caption: 12
+  code: 13
+rhythm:
+  body_line_height: 1.82
+  heading_line_height: 1.22
+  paragraph_margin: 18
+  section_padding_first: 22
+  section_padding: 36
+  list_item_margin: 10
+block_style:
+  heading_style: fieldnote-rule
+  quote_style: fieldnote
+  list_style: fieldnote
+  code_style: annotated
+  image_style: natural-frame

@@ -1,0 +1,200 @@
+{
+  "$schema": "./skills.schema.json",
+  "schema_version": "1.0.0",
+  "skills": [
+    {
+      "name": "codex-doctor",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/codex-doctor",
+      "mirror": "zjp1997720/codex-doctor",
+      "documentation": "docs/skills/codex-doctor/README.md",
+      "documentation_zh": "docs/skills/codex-doctor/README.zh-CN.md",
+      "changelog": "docs/changelogs/codex-doctor.md",
+      "canonical_tag": "codex-doctor/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [
+          "python3 -m unittest discover -s skills/codex-doctor/tests -v"
+        ],
+        "live_smoke": "codex doctor --json"
+      },
+      "capabilities": {
+        "network": "none",
+        "subprocess": "required",
+        "filesystem": "read",
+        "credentials": "none"
+      },
+      "harnesses": ["codex"]
+    },
+    {
+      "name": "codex-model-routing-team",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/codex-model-routing-team",
+      "mirror": "zjp1997720/codex-model-routing-team",
+      "documentation": "docs/skills/codex-model-routing-team/README.md",
+      "documentation_zh": "docs/skills/codex-model-routing-team/README.zh-CN.md",
+      "changelog": "docs/changelogs/codex-model-routing-team.md",
+      "canonical_tag": "codex-model-routing-team/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [
+          "python3 -m unittest tests.skills.test_codex_model_routing_team -v"
+        ],
+        "live_smoke": "Create and read one Codex App background task with an explicit model and thinking level"
+      },
+      "capabilities": {
+        "network": "required",
+        "subprocess": "none",
+        "filesystem": "write",
+        "credentials": "required"
+      },
+      "harnesses": ["codex"]
+    },
+    {
+      "name": "codex-skill-admin",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/codex-skill-admin",
+      "mirror": "zjp1997720/codex-skill-admin",
+      "documentation": "docs/skills/codex-skill-admin/README.md",
+      "documentation_zh": "docs/skills/codex-skill-admin/README.zh-CN.md",
+      "changelog": "docs/changelogs/codex-skill-admin.md",
+      "canonical_tag": "codex-skill-admin/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [],
+        "live_smoke": "python3 skills/codex-skill-admin/scripts/codex_skill_admin.py verify --cwd ."
+      },
+      "capabilities": {
+        "network": "none",
+        "subprocess": "required",
+        "filesystem": "read",
+        "credentials": "none"
+      },
+      "harnesses": ["codex"]
+    },
+    {
+      "name": "enterprise-clone-builder",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/enterprise-clone-builder",
+      "mirror": "zjp1997720/enterprise-clone-builder",
+      "documentation": "docs/skills/enterprise-clone-builder/README.md",
+      "documentation_zh": "docs/skills/enterprise-clone-builder/README.zh-CN.md",
+      "changelog": "docs/changelogs/enterprise-clone-builder.md",
+      "canonical_tag": "enterprise-clone-builder/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [],
+        "live_smoke": null
+      },
+      "capabilities": {
+        "network": "required",
+        "subprocess": "required",
+        "filesystem": "write",
+        "credentials": "none"
+      },
+      "harnesses": ["codex", "claude-code", "agents"]
+    },
+    {
+      "name": "html-express",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/html-express",
+      "mirror": "zjp1997720/html-express",
+      "documentation": "docs/skills/html-express/README.md",
+      "documentation_zh": "docs/skills/html-express/README.zh-CN.md",
+      "changelog": "docs/changelogs/html-express.md",
+      "canonical_tag": "html-express/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [],
+        "live_smoke": null
+      },
+      "capabilities": {
+        "network": "none",
+        "subprocess": "none",
+        "filesystem": "write",
+        "credentials": "none"
+      },
+      "harnesses": ["codex", "claude-code", "agents"]
+    },
+    {
+      "name": "skill-open-sourcer",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/skill-open-sourcer",
+      "mirror": "zjp1997720/skill-open-sourcer",
+      "documentation": "docs/skills/skill-open-sourcer/README.md",
+      "documentation_zh": "docs/skills/skill-open-sourcer/README.zh-CN.md",
+      "changelog": "docs/changelogs/skill-open-sourcer.md",
+      "canonical_tag": "skill-open-sourcer/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [
+          "python3 -m unittest discover -s skills/skill-open-sourcer/tests -v"
+        ],
+        "live_smoke": "python3 skills/skill-open-sourcer/scripts/check_release_env.py"
+      },
+      "capabilities": {
+        "network": "required",
+        "subprocess": "required",
+        "filesystem": "write",
+        "credentials": "required"
+      },
+      "harnesses": ["codex", "claude-code", "agents"]
+    },
+    {
+      "name": "wechat-article-search",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/wechat-article-search",
+      "mirror": "zjp1997720/wechat-article-search",
+      "documentation": "docs/skills/wechat-article-search/README.md",
+      "documentation_zh": "docs/skills/wechat-article-search/README.zh-CN.md",
+      "changelog": "docs/changelogs/wechat-article-search.md",
+      "canonical_tag": "wechat-article-search/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [
+          "npm test --prefix skills/wechat-article-search"
+        ],
+        "live_smoke": "node skills/wechat-article-search/scripts/search_wechat.js Codex"
+      },
+      "capabilities": {
+        "network": "required",
+        "subprocess": "required",
+        "filesystem": "read",
+        "credentials": "none"
+      },
+      "harnesses": ["codex", "claude-code", "agents"]
+    },
+    {
+      "name": "wechat-styler",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/wechat-styler",
+      "mirror": "zjp1997720/wechat-styler",
+      "documentation": "docs/skills/wechat-styler/README.md",
+      "documentation_zh": "docs/skills/wechat-styler/README.zh-CN.md",
+      "changelog": "docs/changelogs/wechat-styler.md",
+      "canonical_tag": "wechat-styler/v1.0.0",
+      "mirror_tag": "v1.0.0",
+      "validation": {
+        "commands": [
+          "npm test --prefix skills/wechat-styler"
+        ],
+        "live_smoke": null
+      },
+      "capabilities": {
+        "network": "none",
+        "subprocess": "required",
+        "filesystem": "write",
+        "credentials": "none"
+      },
+      "harnesses": ["codex", "claude-code", "agents"]
+    }
+  ]
+}

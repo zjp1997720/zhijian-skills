@@ -1,0 +1,44 @@
+<!-- code-block：代码 / 命令 / 配置示例。暖黑底。
+     适用：Claude Code、Skills、提示词、终端命令。能讲清一个动作即可，长的要拆步骤。 -->
+
+<style>
+  .hx-code {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: var(--r-lg);
+    padding: var(--sp-lg);
+    overflow-x: auto;
+    margin: var(--sp-md) 0;
+  }
+  .hx-code pre {
+    margin: 0;
+    font-family: var(--font-code);
+    font-size: var(--fs-mono);
+    line-height: 1.55;
+    white-space: pre;
+  }
+  .hx-code .hx-code-lang {
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--surface-muted);
+    margin-bottom: var(--sp-sm);
+    letter-spacing: 0.06em;
+  }
+  /* 行内 code */
+  .hx-code-inline {
+    background: var(--surface-muted);
+    color: var(--ink);
+    border-radius: var(--r-sm);
+    padding: 1px var(--sp-xs);
+    font-family: var(--font-code);
+    font-size: 0.9em;
+  }
+</style>
+
+<div class="hx-code">
+  <p class="hx-code-lang">bash</p>
+<pre>git add . && git commit -m "feat: 上线一个动作"</pre>
+</div>
+
+<p>行内代码示例：<code class="hx-code-inline">html-express</code>。</p>

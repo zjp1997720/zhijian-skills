@@ -1,0 +1,114 @@
+/* html-express · 品牌设计 token
+   抽自 智见AI DESIGN.md（04_系统/品牌系统/DESIGN.md）
+   只改 :root 变量值即可换肤；组件一律走 class 引用，不重复定义。 */
+
+:root {
+  /* —— 颜色 —— */
+  --paper: #F5F4ED;            /* 页面背景，永远不纯白 */
+  --surface: #FAF9F5;          /* 卡片底 */
+  --surface-muted: #E8E6DC;    /* 次级按钮 / 浅模块 */
+  --ink: #141413;              /* 主文字（近黑） */
+  --olive: #504E49;            /* 辅助文字 */
+  --muted: #6B6A64;            /* 脚注 / 日期 / 来源 */
+  --border: #E5E3D8;           /* 分隔线 / 卡片线框 */
+
+  --terracotta: #B85235;       /* 主行动色：记忆点 / 主转折 */
+  --trust: #1B365D;            /* 结构色：标题栏 / 章节 / 方法论 */
+  --accent-text: #A04A2E;      /* 正文安全暖色：链接 / 内联高亮（对比度 ≥5.5:1） */
+  --human: #C96442;            /* 人味点缀，仅装饰或 ≥22px，不可做正文 */
+
+  --success: #2F6F4E;          /* 已落地 / 已验证 */
+  --warning: #9A5A2D;          /* 风险 / 边界提示 */
+
+  --code-bg: #30302E;          /* 代码块底 */
+  --code-fg: #F5F4ED;          /* 代码块字 */
+
+  /* —— 字体（不嵌入，靠 fallback） —— */
+  --font-head: "Source Han Serif SC VF", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", SimSun, Georgia, serif;
+  --font-body: "Source Han Serif SC VF", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", SimSun, Georgia, serif;
+  --font-ui:   "Source Han Serif SC VF", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", SimSun, Georgia, serif;
+  --font-code: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Source Han Serif SC VF", "Source Han Serif SC", monospace;
+
+  /* —— 字号层级 —— */
+  --fs-display: 40px;   /* 日常版从 lg 起步，不做 56px display（太重） */
+  --fs-h1: 32px;
+  --fs-h2: 24px;
+  --fs-h3: 19px;
+  --fs-body: 16px;
+  --fs-body-lg: 18px;
+  --fs-small: 14px;
+  --fs-label: 13px;
+  --fs-mono: 14px;
+
+  /* —— 间距 —— */
+  --sp-xs: 4px;
+  --sp-sm: 8px;
+  --sp-md: 16px;
+  --sp-lg: 24px;
+  --sp-xl: 32px;
+  --sp-xxl: 48px;
+  --sp-section: 64px;
+
+  /* —— 圆角（克制，一页通常只用 md+lg 两档） —— */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 20px;
+  --r-full: 9999px;
+
+  /* —— 内容宽度 —— */
+  --content-width: 760px;
+  --max-width: 1120px;
+
+  /* —— 投影（克制，纸面叠放感，非玻璃拟物） —— */
+  --shadow-whisper: 0 8px 32px rgba(20, 20, 19, 0.06);
+}
+
+/* —— 基础重置 —— */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  letter-spacing: 0.008em;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--accent-text); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+h1, h2, h3, h4 {
+  font-family: var(--font-head);
+  font-weight: 500;
+  color: var(--trust);
+  line-height: 1.2;
+  margin: 0 0 var(--sp-md);
+}
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+
+p { margin: 0 0 var(--sp-md); }
+
+code, pre {
+  font-family: var(--font-code);
+  font-size: var(--fs-mono);
+}
+
+/* —— 移动端 —— */
+@media (max-width: 768px) {
+  :root {
+    --fs-display: 28px;
+    --fs-h1: 26px;
+    --fs-h2: 20px;
+    --fs-h3: 17px;
+    --fs-body: 16px;        /* 正文不低于 16px */
+    --sp-section: 40px;
+  }
+}

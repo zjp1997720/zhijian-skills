@@ -1,0 +1,3 @@
+display_name: Enterprise Clone Builder
+short_description: Build a structured enterprise digital twin knowledge base from company materials + public info
+default_prompt: Use $enterprise-clone-builder to build an enterprise avatar repository from the company name and materials I provide.

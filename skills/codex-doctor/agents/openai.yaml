@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Doctor"
+  short_description: "Audit Codex health and workspace context safely"
+  default_prompt: "Use $codex-doctor to run a complete read-only Codex and workspace health check."

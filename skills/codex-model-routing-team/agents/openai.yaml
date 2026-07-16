@@ -1,0 +1,6 @@
+interface:
+  display_name: "Codex 模型路由团队"
+  short_description: "为复杂任务自动路由不同模型的后台 Codex Worker"
+  default_prompt: "使用 $codex-model-routing-team 判断这个任务是否值得并行，并在需要时组织受控的后台模型团队完成它。"
+policy:
+  allow_implicit_invocation: true

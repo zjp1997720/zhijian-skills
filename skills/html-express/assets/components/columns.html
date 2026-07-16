@@ -1,0 +1,41 @@
+<!-- columns：分栏布局。2-3 个观点/项目并置。
+     适用：优劣势并置、多视角对照、卡片墙。窄屏自动塌成单列。 -->
+
+<style>
+  .hx-columns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--sp-md);
+    margin: var(--sp-md) 0;
+  }
+  .hx-columns > .hx-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: var(--sp-lg);
+  }
+  .hx-columns .hx-col-title {
+    font-family: var(--font-head);
+    font-size: var(--fs-h3);
+    font-weight: 500;
+    color: var(--trust);
+    margin: 0 0 var(--sp-sm);
+  }
+  .hx-columns .hx-col-title.is-accent { color: var(--terracotta); }
+  .hx-columns .hx-col-body {
+    font-size: var(--fs-small);
+    color: var(--olive);
+    margin: 0;
+  }
+</style>
+
+<div class="hx-columns">
+  <div class="hx-col">
+    <p class="hx-col-title">优势</p>
+    <p class="hx-col-body">这里写一个视角的要点。</p>
+  </div>
+  <div class="hx-col">
+    <p class="hx-col-title is-accent">风险</p>
+    <p class="hx-col-body">这里写另一个视角的要点。</p>
+  </div>
+</div>

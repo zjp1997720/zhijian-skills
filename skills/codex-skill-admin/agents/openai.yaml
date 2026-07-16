@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Skill Admin"
+  short_description: "Audit, enable, and disable Codex skills"
+  default_prompt: "Use $codex-skill-admin to audit recent skill usage and disable unused skills."

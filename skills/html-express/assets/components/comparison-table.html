@@ -1,0 +1,63 @@
+<!-- comparison-table：对比矩阵。多方案横向对比。
+     适用：选型、方案对比、工具对比。第一列是维度，其余列是方案。
+     原则：对比是主要任务时才用表格，否则用清单。 -->
+
+<style>
+  .hx-compare-wrap {
+    overflow-x: auto;
+    margin: var(--sp-md) 0;
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+  }
+  .hx-compare {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-small);
+    min-width: 540px;
+  }
+  .hx-compare th, .hx-compare td {
+    padding: var(--sp-sm) var(--sp-md);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .hx-compare thead th {
+    background: var(--trust);
+    color: var(--surface);
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .hx-compare tbody td:first-child {
+    background: var(--surface);
+    font-family: var(--font-ui);
+    color: var(--trust);
+    font-weight: 500;
+  }
+  .hx-compare tbody tr:last-child td { border-bottom: none; }
+  .hx-compare .hx-yes { color: var(--success); font-weight: 500; }
+  .hx-compare .hx-no { color: var(--muted); }
+</style>
+
+<div class="hx-compare-wrap">
+<table class="hx-compare">
+  <thead>
+    <tr><th>维度</th><th>方案 A</th><th>方案 B</th><th>方案 C</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>上手成本</td>
+      <td><span class="hx-yes">低</span></td>
+      <td>中</td>
+      <td><span class="hx-no">高</span></td>
+    </tr>
+    <tr>
+      <td>可控性</td>
+      <td><span class="hx-no">弱</span></td>
+      <td>中</td>
+      <td><span class="hx-yes">强</span></td>
+    </tr>
+  </tbody>
+</table>
+</div>

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>html-express · 组件总览</title>
+
+  <!-- ============ 品牌 token（内联，保证单文件自包含）============ -->
+  <style>
+    :root {
+      --paper: #F5F4ED; --surface: #FAF9F5; --surface-muted: #E8E6DC;
+      --ink: #141413; --olive: #504E49; --muted: #6B6A64; --border: #E5E3D8;
+      --terracotta: #B85235; --trust: #1B365D; --accent-text: #A04A2E; --human: #C96442;
+      --success: #2F6F4E; --warning: #9A5A2D; --code-bg: #30302E; --code-fg: #F5F4ED;
+      --font-head: "Source Han Serif SC VF", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", SimSun, Georgia, serif;
+      --font-body: "Source Han Serif SC VF", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", SimSun, Georgia, serif;
+      --font-ui:   "Source Han Serif SC VF", "Source Han Serif SC", "Noto Serif CJK SC", "Songti SC", "STSong", SimSun, Georgia, serif;
+      --font-code: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Source Han Serif SC VF", "Source Han Serif SC", monospace;
+      --fs-display: 40px; --fs-h1: 32px; --fs-h2: 24px; --fs-h3: 19px;
+      --fs-body: 16px; --fs-body-lg: 18px; --fs-small: 14px; --fs-label: 13px; --fs-mono: 14px;
+      --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px; --sp-xl: 32px; --sp-xxl: 48px; --sp-section: 64px;
+      --r-sm: 4px; --r-md: 8px; --r-lg: 12px; --r-xl: 20px; --r-full: 9999px;
+      --content-width: 760px; --max-width: 1120px; --shadow-whisper: 0 8px 32px rgba(20, 20, 19, 0.06);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-body); font-size: var(--fs-body); line-height: 1.6; letter-spacing: 0.008em; -webkit-font-smoothing: antialiased; }
+    a { color: var(--accent-text); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 500; color: var(--trust); line-height: 1.2; margin: 0 0 var(--sp-md); }
+    h1 { font-size: var(--fs-h1); } h2 { font-size: var(--fs-h2); } h3 { font-size: var(--fs-h3); }
+    p { margin: 0 0 var(--sp-md); }
+    code, pre { font-family: var(--font-code); font-size: var(--fs-mono); }
+    @media (max-width: 768px) {
+      :root { --fs-display: 28px; --fs-h1: 26px; --fs-h2: 20px; --fs-h3: 17px; --fs-body: 16px; --sp-section: 40px; }
+    }
+
+    /* ===== 骨架布局 ===== */
+    .hx-page { max-width: var(--content-width); margin: 0 auto; padding: var(--sp-xxl) var(--sp-lg); }
+    .hx-header { margin-bottom: var(--sp-xl); padding-bottom: var(--sp-lg); border-bottom: 1px solid var(--border); }
+    .hx-header .hx-eyebrow { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; letter-spacing: 0.06em; color: var(--terracotta); text-transform: uppercase; margin: 0 0 var(--sp-sm); }
+    .hx-header h1 { font-size: var(--fs-h1); color: var(--trust); margin: 0 0 var(--sp-sm); }
+    .hx-header .hx-sub { color: var(--olive); font-size: var(--fs-body-lg); margin: 0; }
+    .hx-section { margin-bottom: var(--sp-section); }
+    .hx-section > h2 { font-size: var(--fs-h2); border-left: 3px solid var(--terracotta); padding-left: var(--sp-md); }
+    .hx-demo-note { font-size: var(--fs-small); color: var(--muted); margin: 0 0 var(--sp-md); }
+    .hx-footer { margin-top: var(--sp-xxl); padding-top: var(--sp-lg); border-top: 1px solid var(--border); color: var(--muted); font-size: var(--fs-small); }
+
+    /* ===== metric-card ===== */
+    .hx-metric-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--sp-md); margin: var(--sp-md) 0; }
+    .hx-metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--sp-lg); }
+    .hx-metric .hx-num { font-family: var(--font-head); font-size: 36px; color: var(--terracotta); line-height: 1.1; margin: 0 0 var(--sp-xs); }
+    .hx-metric .hx-label { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; color: var(--trust); margin: 0 0 var(--sp-sm); }
+    .hx-metric .hx-note { font-size: var(--fs-small); color: var(--olive); margin: 0; }
+
+    /* ===== quote-card ===== */
+    .hx-quote { background: var(--paper); border-left: 3px solid var(--human); border-radius: var(--r-md); padding: var(--sp-lg) var(--sp-xl); margin: var(--sp-lg) 0; }
+    .hx-quote blockquote { margin: 0; font-family: var(--font-body); font-size: var(--fs-body-lg); line-height: 1.55; color: var(--ink); }
+    .hx-quote blockquote::before { content: "“"; font-family: var(--font-head); font-size: 1.4em; color: var(--human); line-height: 0; vertical-align: -0.2em; margin-right: 0.1em; }
+    .hx-quote .hx-cite { margin-top: var(--sp-md); font-size: var(--fs-small); color: var(--muted); }
+
+    /* ===== code-block ===== */
+    .hx-code { background: var(--code-bg); color: var(--code-fg); border-radius: var(--r-lg); padding: var(--sp-lg); overflow-x: auto; margin: var(--sp-md) 0; }
+    .hx-code pre { margin: 0; font-family: var(--font-code); font-size: var(--fs-mono); line-height: 1.55; white-space: pre; }
+    .hx-code .hx-code-lang { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; color: var(--surface-muted); margin-bottom: var(--sp-sm); letter-spacing: 0.06em; }
+    .hx-code-inline { background: var(--surface-muted); color: var(--ink); border-radius: var(--r-sm); padding: 1px var(--sp-xs); font-family: var(--font-code); font-size: 0.9em; }
+
+    /* ===== badge ===== */
+    .hx-badge { display: inline-flex; align-items: center; gap: var(--sp-xs); font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; padding: var(--sp-xs) var(--sp-sm); border-radius: var(--r-full); line-height: 1.25; letter-spacing: 0.04em; }
+    .hx-badge--success { background: var(--success); color: var(--surface); }
+    .hx-badge--warning { background: var(--warning); color: var(--surface); }
+    .hx-badge--trust   { background: #EEF2F7; color: var(--trust); }
+    .hx-badge--neutral { background: var(--surface-muted); color: var(--olive); }
+    .hx-badge--accent  { background: var(--paper); color: var(--terracotta); }
+
+    /* ===== comparison-table ===== */
+    .hx-compare-wrap { overflow-x: auto; margin: var(--sp-md) 0; border: 1px solid var(--border); border-radius: var(--r-md); }
+    .hx-compare { width: 100%; border-collapse: collapse; font-size: var(--fs-small); min-width: 540px; }
+    .hx-compare th, .hx-compare td { padding: var(--sp-sm) var(--sp-md); text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .hx-compare thead th { background: var(--trust); color: var(--surface); font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; letter-spacing: 0.04em; }
+    .hx-compare tbody td:first-child { background: var(--surface); font-family: var(--font-ui); color: var(--trust); font-weight: 500; }
+    .hx-compare tbody tr:last-child td { border-bottom: none; }
+    .hx-compare .hx-yes { color: var(--success); font-weight: 500; }
+    .hx-compare .hx-no { color: var(--muted); }
+
+    /* ===== data-table ===== */
+    .hx-data-wrap { overflow-x: auto; margin: var(--sp-md) 0; }
+    .hx-data { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }
+    .hx-data th, .hx-data td { padding: var(--sp-sm) var(--sp-md); text-align: left; border-bottom: 1px solid var(--border); }
+    .hx-data th { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+    .hx-data tbody tr:hover { background: var(--surface); }
+    .hx-data .hx-num-cell { font-family: var(--font-code); font-variant-numeric: tabular-nums; text-align: right; }
+
+    /* ===== timeline ===== */
+    .hx-timeline { position: relative; margin: var(--sp-lg) 0; padding-left: var(--sp-xl); }
+    .hx-timeline::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+    .hx-timeline .hx-event { position: relative; margin-bottom: var(--sp-lg); }
+    .hx-timeline .hx-event:last-child { margin-bottom: 0; }
+    .hx-timeline .hx-event::before { content: ""; position: absolute; left: calc(-1 * var(--sp-xl) + 2px); top: 6px; width: 12px; height: 12px; border-radius: var(--r-full); background: var(--terracotta); border: 2px solid var(--paper); }
+    .hx-timeline .hx-when { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; color: var(--terracotta); letter-spacing: 0.04em; margin: 0 0 var(--sp-xs); }
+    .hx-timeline .hx-what { font-family: var(--font-head); font-size: var(--fs-h3); color: var(--trust); margin: 0 0 var(--sp-xs); }
+    .hx-timeline .hx-desc { font-size: var(--fs-small); color: var(--olive); margin: 0; }
+
+    /* ===== checklist ===== */
+    .hx-checklist { list-style: none; padding: 0; margin: var(--sp-md) 0; display: flex; flex-direction: column; gap: var(--sp-sm); }
+    .hx-checklist li { display: flex; align-items: flex-start; gap: var(--sp-sm); background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--sp-sm) var(--sp-md); font-size: var(--fs-small); }
+    .hx-checklist .hx-mark { flex-shrink: 0; width: 20px; height: 20px; border-radius: var(--r-sm); border: 2px solid var(--terracotta); display: inline-flex; align-items: center; justify-content: center; color: var(--terracotta); font-size: 13px; line-height: 1; }
+    .hx-checklist .hx-mark.is-done { background: var(--terracotta); color: var(--surface); }
+    .hx-checklist .hx-step { font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; color: var(--trust); margin-right: var(--sp-xs); }
+
+    /* ===== details ===== */
+    .hx-details { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); margin: var(--sp-md) 0; overflow: hidden; }
+    .hx-details summary { cursor: pointer; padding: var(--sp-md); font-family: var(--font-ui); font-size: var(--fs-label); font-weight: 500; color: var(--trust); list-style: none; display: flex; align-items: center; justify-content: space-between; transition: background 200ms ease-out; }
+    .hx-details summary:hover { background: var(--paper); }
+    .hx-details summary::-webkit-details-marker { display: none; }
+    .hx-details summary::after { content: "▸"; color: var(--terracotta); transition: transform 200ms ease-out; }
+    .hx-details[open] summary::after { transform: rotate(90deg); }
+    .hx-details .hx-details-body { padding: 0 var(--sp-md) var(--sp-md); font-size: var(--fs-small); color: var(--olive); }
+
+    /* ===== columns ===== */
+    .hx-columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--sp-md); margin: var(--sp-md) 0; }
+    .hx-columns > .hx-col { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: var(--sp-lg); }
+    .hx-columns .hx-col-title { font-family: var(--font-head); font-size: var(--fs-h3); color: var(--trust); margin: 0 0 var(--sp-sm); }
+    .hx-columns .hx-col-title.is-accent { color: var(--terracotta); }
+    .hx-columns .hx-col-body { font-size: var(--fs-small); color: var(--olive); margin: 0; }
+  </style>
+</head>
+<body>
+  <main class="hx-page">
+
+    <header class="hx-header">
+      <p class="hx-eyebrow">html-express 组件总览</p>
+      <h1>十个组件，一页看完</h1>
+      <p class="hx-sub">Agent 的日常 HTML 表达层——双击即开，零依赖。</p>
+    </header>
+
+    <section class="hx-section">
+      <h2>① 指标卡 metric-card</h2>
+      <p class="hx-demo-note">关键指标、数据看点。2-4 个并排。</p>
+      <div class="hx-metric-row">
+        <div class="hx-metric"><p class="hx-num">3.2×</p><p class="hx-label">提效倍数</p><p class="hx-note">某客户实测口径</p></div>
+        <div class="hx-metric"><p class="hx-num">48h</p><p class="hx-label">交付周期</p><p class="hx-note">诊断到首版方案</p></div>
+        <div class="hx-metric"><p class="hx-num">299</p><p class="hx-label">客单价</p><p class="hx-note">分身系统课程</p></div>
+      </div>
+    </section>
+
+    <section class="hx-section">
+      <h2>② 引用卡 quote-card</h2>
+      <p class="hx-demo-note">判断、原话、金句。</p>
+      <figure class="hx-quote">
+        <blockquote>AI 不是魔法，是一套可以被设计、训练、部署和复盘的工作系统。</blockquote>
+        <figcaption class="hx-cite">—— 大鹏 / 智见AI</figcaption>
+      </figure>
+    </section>
+
+    <section class="hx-section">
+      <h2>③ 代码块 code-block</h2>
+      <p class="hx-demo-note">代码、命令、配置。行内用 <code class="hx-code-inline">.hx-code-inline</code>。</p>
+      <div class="hx-code">
+        <p class="hx-code-lang">bash</p>
+<pre>git add . && git commit -m "feat: 上线一个动作"</pre>
+      </div>
+    </section>
+
+    <section class="hx-section">
+      <h2>④ 徽章 badge</h2>
+      <p class="hx-demo-note">状态标签。success / warning / trust / neutral / accent。</p>
+      <p>
+        <span class="hx-badge hx-badge--success">已验证</span>
+        <span class="hx-badge hx-badge--warning">需复核</span>
+        <span class="hx-badge hx-badge--trust">方法论</span>
+        <span class="hx-badge hx-badge--neutral">内部记录</span>
+        <span class="hx-badge hx-badge--accent">关键</span>
+      </p>
+    </section>
+
+    <section class="hx-section">
+      <h2>⑤ 对比矩阵 comparison-table</h2>
+      <p class="hx-demo-note">多方案横向对比。对比是主要任务时才用。</p>
+      <div class="hx-compare-wrap">
+      <table class="hx-compare">
+        <thead><tr><th>维度</th><th>方案 A</th><th>方案 B</th><th>方案 C</th></tr></thead>
+        <tbody>
+          <tr><td>上手成本</td><td><span class="hx-yes">低</span></td><td>中</td><td><span class="hx-no">高</span></td></tr>
+          <tr><td>可控性</td><td><span class="hx-no">弱</span></td><td>中</td><td><span class="hx-yes">强</span></td></tr>
+          <tr><td>长期成本</td><td>低</td><td><span class="hx-yes">中</span></td><td>高</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section class="hx-section">
+      <h2>⑥ 数据表格 data-table</h2>
+      <p class="hx-demo-note">结构化数据罗列（非对比）。</p>
+      <div class="hx-data-wrap">
+      <table class="hx-data">
+        <thead><tr><th>名称</th><th>类型</th><th class="hx-num-cell">数值</th></tr></thead>
+        <tbody>
+          <tr><td>已激活学员</td><td>事实</td><td class="hx-num-cell">128</td></tr>
+          <tr><td>续费率</td><td>事实</td><td class="hx-num-cell">73%</td></tr>
+          <tr><td>潜在需求</td><td>估算</td><td class="hx-num-cell">400</td></tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <section class="hx-section">
+      <h2>⑦ 时间线 timeline</h2>
+      <p class="hx-demo-note">阶段、里程碑、路线图。</p>
+      <div class="hx-timeline">
+        <div class="hx-event"><p class="hx-when">第 1 周</p><p class="hx-what">需求诊断</p><p class="hx-desc">锁定业务场景和验收标准</p></div>
+        <div class="hx-event"><p class="hx-when">第 2-3 周</p><p class="hx-what">方案落地</p><p class="hx-desc">搭建工具链并跑通最小闭环</p></div>
+        <div class="hx-event"><p class="hx-when">第 4 周</p><p class="hx-what">复盘交付</p><p class="hx-desc">固化流程并沉淀为资产</p></div>
+      </div>
+    </section>
+
+    <section class="hx-section">
+      <h2>⑧ 清单 checklist</h2>
+      <p class="hx-demo-note">步骤、SOP、检查项。</p>
+      <ul class="hx-checklist">
+        <li><span class="hx-mark is-done">✓</span><div><span class="hx-step">步骤 1</span>锁定验收标准</div></li>
+        <li><span class="hx-mark">○</span><div><span class="hx-step">步骤 2</span>搭最小闭环</div></li>
+        <li><span class="hx-mark">○</span><div><span class="hx-step">步骤 3</span>复盘固化</div></li>
+      </ul>
+    </section>
+
+    <section class="hx-section">
+      <h2>⑨ 折叠面板 details</h2>
+      <p class="hx-demo-note">长内容折叠，原生 &lt;details&gt;，零 JS。</p>
+      <details class="hx-details">
+        <summary>展开查看技术细节</summary>
+        <div class="hx-details-body">
+          这里是收起来的补充内容。默认折叠，点击 summary 展开。适合放技术细节、补充说明、长引用，避免一屏太满。
+        </div>
+      </details>
+    </section>
+
+    <section class="hx-section">
+      <h2>⑩ 分栏 columns</h2>
+      <p class="hx-demo-note">多视角并置、优劣势对照。窄屏自动塌单列。</p>
+      <div class="hx-columns">
+        <div class="hx-col"><p class="hx-col-title">优势</p><p class="hx-col-body">可控、可沉淀、长期成本低。</p></div>
+        <div class="hx-col"><p class="hx-col-title is-accent">风险</p><p class="hx-col-body">前期搭建投入、需要持续维护。</p></div>
+        <div class="hx-col"><p class="hx-col-title">边界</p><p class="hx-col-body">不在能力边界外承诺结果。</p></div>
+      </div>
+    </section>
+
+    <footer class="hx-footer">
+      html-express · 智见AI 日常 HTML 表达层 · 品牌 token 抽自 DESIGN.md · 2026-06-29
+    </footer>
+
+  </main>
+</body>
+</html>

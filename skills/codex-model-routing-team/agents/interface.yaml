@@ -1,0 +1,20 @@
+interface:
+  display_name: "Codex 模型路由团队"
+  short_description: "为复杂任务自动路由不同模型的后台 Codex Worker"
+  default_prompt: "使用 $codex-model-routing-team 判断这个任务是否值得并行，并在需要时组织受控的后台模型团队完成它。"
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets:
+    - "openai"
+  activation:
+    mode: "implicit-with-standing-user-authorization"
+    paths: []
+  execution:
+    context: "fork"
+    shell: "bash"
+  trust:
+    source_tier: "local"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "deny"
+  degradation:
+    openai: "If Codex App thread tools or explicit user authorization are unavailable, execute locally without delegation. Never fall back to MultiAgentV2 spawn_agent."

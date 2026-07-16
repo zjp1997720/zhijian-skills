@@ -1,0 +1,45 @@
+<!-- details：折叠面板。原生 <details>/<summary>，零 JS，自包含。
+     适用：长内容折叠、避免一屏太满、技术细节收起、补充说明。 -->
+
+<style>
+  .hx-details {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    margin: var(--sp-md) 0;
+    overflow: hidden;
+  }
+  .hx-details summary {
+    cursor: pointer;
+    padding: var(--sp-md);
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--trust);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 200ms ease-out;
+  }
+  .hx-details summary:hover { background: var(--paper); }
+  .hx-details summary::-webkit-details-marker { display: none; }
+  .hx-details summary::after {
+    content: "▸";
+    color: var(--terracotta);
+    transition: transform 200ms ease-out;
+  }
+  .hx-details[open] summary::after { transform: rotate(90deg); }
+  .hx-details .hx-details-body {
+    padding: 0 var(--sp-md) var(--sp-md);
+    font-size: var(--fs-small);
+    color: var(--olive);
+  }
+</style>
+
+<details class="hx-details">
+  <summary>展开查看技术细节</summary>
+  <div class="hx-details-body">
+    这里是收起来的补充内容。默认折叠，点击 summary 展开。
+  </div>
+</details>

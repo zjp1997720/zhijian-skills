@@ -1,0 +1,50 @@
+<!-- metric-card：关键指标看点。大数字 + 标签 + 说明。
+     适用：数据看板、结论先行、结果证明。2-4 个并排效果最好。 -->
+
+<style>
+  .hx-metric-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--sp-md);
+    margin: var(--sp-md) 0;
+  }
+  .hx-metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-md);
+    padding: var(--sp-lg);
+  }
+  .hx-metric .hx-num {
+    font-family: var(--font-head);
+    font-size: 36px;
+    font-weight: 500;
+    color: var(--terracotta);
+    line-height: 1.1;
+    margin: 0 0 var(--sp-xs);
+  }
+  .hx-metric .hx-label {
+    font-family: var(--font-ui);
+    font-size: var(--fs-label);
+    font-weight: 500;
+    color: var(--trust);
+    margin: 0 0 var(--sp-sm);
+  }
+  .hx-metric .hx-note {
+    font-size: var(--fs-small);
+    color: var(--olive);
+    margin: 0;
+  }
+</style>
+
+<div class="hx-metric-row">
+  <div class="hx-metric">
+    <p class="hx-num">3.2×</p>
+    <p class="hx-label">提效倍数</p>
+    <p class="hx-note">某客户从手工到自动化后的实测口径</p>
+  </div>
+  <div class="hx-metric">
+    <p class="hx-num">48h</p>
+    <p class="hx-label">交付周期</p>
+    <p class="hx-note">从诊断到首版落地方案</p>
+  </div>
+</div>

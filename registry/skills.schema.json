@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/zjp1997720/zhijian-skills/registry/skills.schema.json",
+  "title": "Zhijian Skills Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "skills"],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "skills": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "lifecycle",
+          "version",
+          "path",
+          "mirror",
+          "documentation",
+          "documentation_zh",
+          "changelog",
+          "canonical_tag",
+          "mirror_tag",
+          "validation",
+          "capabilities",
+          "harnesses"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "lifecycle": {
+            "enum": ["active", "retired"]
+          },
+          "version": {
+            "type": "string",
+            "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+          },
+          "path": {
+            "type": "string",
+            "pattern": "^skills/[a-z0-9-]+$"
+          },
+          "mirror": {
+            "type": "string",
+            "pattern": "^zjp1997720/[a-z0-9-]+$"
+          },
+          "documentation": {
+            "type": "string",
+            "pattern": "^docs/skills/[a-z0-9-]+/README\\.md$"
+          },
+          "documentation_zh": {
+            "type": "string",
+            "pattern": "^docs/skills/[a-z0-9-]+/README\\.zh-CN\\.md$"
+          },
+          "changelog": {
+            "type": "string",
+            "pattern": "^docs/changelogs/[a-z0-9-]+\\.md$"
+          },
+          "canonical_tag": {
+            "type": "string"
+          },
+          "mirror_tag": {
+            "type": "string"
+          },
+          "validation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["commands", "live_smoke"],
+            "properties": {
+              "commands": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "live_smoke": {
+                "type": ["string", "null"]
+              }
+            }
+          },
+          "capabilities": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["network", "subprocess", "filesystem", "credentials"],
+            "properties": {
+              "network": {"enum": ["none", "required"]},
+              "subprocess": {"enum": ["none", "required"]},
+              "filesystem": {"enum": ["none", "read", "write"]},
+              "credentials": {"enum": ["none", "required"]}
+            }
+          },
+          "harnesses": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": ["codex", "claude-code", "agents"]
+            }
+          }
+        }
+      }
+    }
+  }
+}

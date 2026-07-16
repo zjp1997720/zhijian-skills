@@ -1,0 +1,43 @@
+name: modern
+description: 现代简约主题 - 墨蓝强调 + 苹方
+renderer_preset: modern-technical
+font_family_cn: "'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif"
+font_family_en: "'SF Pro Display','Helvetica Neue',sans-serif"
+font_size: 16
+line_height: 1.8
+accent_color: "#1B365D"
+accent_secondary: "#4a6080"
+background_color: "#faf9f5"
+surface_color: "#f5f4ef"
+text_color: "#1a1a1a"
+secondary_color: "#8a8a82"
+heading_font: "'PingFang SC','Hiragino Sans GB',sans-serif"
+code_font: "'SF Mono',Menlo,Consolas,monospace"
+code_bg: "#eeecea"
+code_color: "#1B365D"
+quote_border: "#1B365D"
+quote_bg: "#f0f2f6"
+divider_color: "#dddad2"
+border_color: "#dddad2"
+tag_bg: "#e8ecf2"
+max_width: 600
+type_scale:
+  h1: 28
+  h2: 23
+  h3: 18
+  body: 16
+  caption: 12
+  code: 14
+rhythm:
+  body_line_height: 1.78
+  heading_line_height: 1.24
+  paragraph_margin: 16
+  section_padding_first: 20
+  section_padding: 32
+  list_item_margin: 8
+block_style:
+  heading_style: technical
+  quote_style: note-card
+  list_style: checklist
+  code_style: technical
+  image_style: doc-frame
