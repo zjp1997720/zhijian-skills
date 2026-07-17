@@ -1,0 +1,65 @@
+{
+  "optimizer_hints": {
+    "capability": "Design, apply, verify, repair, and restore reversible Codex Desktop themes",
+    "inputs": ["brand guide", "theme export", "screenshots", "banner", "background", "品牌规范", "主题配置", "截图", "皮肤"],
+    "trigger_actions": ["redesign Codex", "apply a Codex theme", "repair an injected theme", "restore a custom theme", "给 Codex 换肤", "修复 Codex 主题", "还原 Codex 主题"],
+    "exclusions": ["general diagnostics", "website theming", "standalone illustration", "Windows", "Linux", "app.asar", "普通排障", "网页主题", "只生成图片"],
+    "artifacts": ["theme.json", "Banner", "page background", "backup", "verification screenshots"]
+  },
+  "fallback_positive_concepts": ["codex_theme", "theme_lifecycle"],
+  "positive_concepts": {
+    "codex_theme": {
+      "weight": 0.34,
+      "phrases": ["codex theme", "codex desktop theme", "codex skin", "custom theme", "custom skin", "theme injection", "codex 自定义皮肤", "codex 皮肤", "codex 主题", "codex 换肤"]
+    },
+    "theme_lifecycle": {
+      "weight": 0.3,
+      "phrases": ["redesign codex", "apply a custom skin", "apply a theme", "install the result", "repair", "fix the skin", "theme restore", "restore my previous codex", "rollback", "reapply", "重新设计", "安全注入", "修复 codex", "恢复原来的主题", "一键还原", "暂停当前 codex"]
+    },
+    "visual_assets": {
+      "weight": 0.22,
+      "phrases": ["codex homepage banner", "codex banner", "page background", "full-page background", "wide banner", "imagegen", "brand guide", "brand system", "品牌 design.md", "生成 banner", "codex 首页宽屏", "页面背景"]
+    },
+    "verification": {
+      "weight": 0.14,
+      "phrases": ["verify", "verified", "safe rollback", "rollback path", "home and task routes", "native interactions", "preserve", "检查备份", "保留一键还原", "主题适配"]
+    }
+  },
+  "negative_concepts": {
+    "general_diagnostics": {
+      "weight": 0.55,
+      "exclusive": true,
+      "phrases": ["general codex health", "health check", "app is slow", "login failed", "登录失败", "普通排障", "只排查"]
+    },
+    "website_theme": {
+      "weight": 0.6,
+      "exclusive": true,
+      "phrases": ["react website", "website theme", "theme for my website", "官网设计", "网页主题"]
+    },
+    "unsupported_platform": {
+      "weight": 0.6,
+      "exclusive": true,
+      "phrases": ["on windows", "on linux", "codex on windows", "codex on linux"]
+    },
+    "standalone_image": {
+      "weight": 0.45,
+      "exclusive": true,
+      "phrases": ["standalone mascot", "standalone illustration", "blog post", "只生成一张", "不需要用于 codex 主题"]
+    },
+    "bundle_patch": {
+      "weight": 0.65,
+      "exclusive": true,
+      "phrases": ["patch app.asar", "modify app.asar", "改 codex 的 app.asar", "修改 app.asar"]
+    },
+    "analysis_only": {
+      "weight": 0.4,
+      "exclusive": true,
+      "phrases": ["explain its architecture", "without changing codex", "do not install anything", "先不要换肤", "分析这个换肤项目"]
+    },
+    "native_only": {
+      "weight": 0.35,
+      "exclusive": true,
+      "phrases": ["only export", "native codex-theme-v1", "font for macos", "only need an image concept", "只帮我确认", "原生主题色"]
+    }
+  }
+}

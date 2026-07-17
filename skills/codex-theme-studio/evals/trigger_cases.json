@@ -1,0 +1,47 @@
+{
+  "recommended_threshold": 0.22,
+  "negative_patterns": [
+    "general diagnostics",
+    "website theme",
+    "Windows",
+    "Linux",
+    "app.asar",
+    "standalone illustration",
+    "只排查",
+    "网页主题",
+    "只生成图片",
+    "修改 app.asar"
+  ],
+  "should_trigger": [
+    {"text": "Use my brand guide to redesign Codex Desktop and install the result with a safe rollback path.", "family": "brand_to_theme"},
+    {"text": "Create and apply a custom skin for the official Codex macOS app, then verify it on home and task routes.", "family": "design_apply_verify"},
+    {"text": "Generate a wide Codex homepage banner with ImageGen and package it into a reversible theme.", "family": "imagegen_banner"},
+    {"text": "Make a restrained full-page background for Codex without reducing task-page readability.", "family": "full_page_art"},
+    {"text": "The selected session rail, top tabs, and suggestion cards look wrong after theme injection. Fix the skin and re-verify native interactions.", "family": "injected_theme_repair"},
+    {"text": "Restore my previous Codex appearance and preserve the custom theme so I can reapply it later.", "family": "theme_restore"},
+    {"text": "按我的品牌 DESIGN.md 给 Codex 重新设计一套皮肤，生成 Banner，安全注入，并保留一键还原能力。", "family": "cn_brand_to_theme"},
+    {"text": "帮我修复 Codex 换肤后消失的顶部标签、首页功能卡和生硬的会话选中态。", "family": "cn_theme_repair"},
+    {"text": "把这张 IP 形象做成适配 Codex 首页宽屏裁切的 Banner，再装进主题里。", "family": "cn_image_asset"},
+    {"text": "暂停当前 Codex 自定义皮肤，检查备份，然后恢复原来的主题配置。", "family": "cn_restore"}
+  ],
+  "should_not_trigger": [
+    {"text": "Run a general Codex health check and explain why the app is slow.", "family": "general_diagnostics"},
+    {"text": "Build a warm paper theme for my React website.", "family": "website_theming"},
+    {"text": "Generate a standalone mascot illustration for a blog post.", "family": "standalone_image_generation"},
+    {"text": "Show me how to theme Codex on Windows.", "family": "unsupported_platform"},
+    {"text": "Patch app.asar so Codex permanently uses my CSS.", "family": "forbidden_bundle_patch"},
+    {"text": "Explain how Chrome DevTools Protocol works without changing Codex.", "family": "explanation_only"},
+    {"text": "帮我排查 Codex 登录失败，和界面设计无关。", "family": "cn_general_diagnostics"},
+    {"text": "给我的官网设计一套 Codex 风格的网页主题。", "family": "cn_website_theming"},
+    {"text": "只生成一张小蓝 IP 插画，不需要用于 Codex 主题。", "family": "cn_standalone_image"},
+    {"text": "直接改 Codex 的 app.asar，别做备份。", "family": "cn_forbidden_bundle_patch"}
+  ],
+  "near_neighbor": [
+    {"text": "Only export a new native codex-theme-v1 palette; do not inject custom CSS or artwork.", "family": "native_theme_only"},
+    {"text": "Review the Codex-Dream-Skin repository and explain its architecture, but do not install anything.", "family": "repository_analysis_only"},
+    {"text": "Install a font for macOS and tell me how to select it in Codex settings.", "family": "font_install_only"},
+    {"text": "Create a mockup showing how Codex could look; I only need an image concept.", "family": "mockup_only"},
+    {"text": "只帮我确认现在的 Codex 原生主题色有没有被修改。", "family": "cn_native_palette_audit"},
+    {"text": "分析这个换肤项目的实现原理，先不要换肤。", "family": "cn_analysis_only"}
+  ]
+}

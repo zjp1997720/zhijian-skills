@@ -1,0 +1,13 @@
+{
+  "name": "codex-theme-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "./tests/run-tests.sh",
+    "doctor": "./scripts/doctor-macos.sh"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

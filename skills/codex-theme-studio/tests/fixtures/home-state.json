@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "mode": "home",
+  "installed": true,
+  "version": "1.0.0",
+  "stylePresent": true,
+  "chromePresent": true,
+  "chromePointerEvents": "none",
+  "viewport": { "width": 1440, "height": 900 },
+  "documentOverflow": { "x": false, "y": false },
+  "shell": {
+    "main": { "width": 1120, "height": 900, "visible": true },
+    "sidebar": { "width": 320, "height": 900, "visible": true },
+    "composer": { "width": 720, "height": 112, "visible": true },
+    "mainBackground": "rgb(245, 243, 238)",
+    "sidebarBackground": "rgb(241, 240, 236)",
+    "topBorderBottomWidth": 0
+  },
+  "home": {
+    "enhancementHookPresent": true,
+    "hero": { "width": 1080, "height": 224, "visible": true, "backgroundImage": "url(blob:hero)", "backgroundSize": "cover" },
+    "cardColumns": 4,
+    "cards": [
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true },
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true },
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true },
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true }
+    ],
+    "selectedSession": { "backgroundColor": "rgb(232, 230, 220)", "borderLeftWidth": 0 }
+  }
+}

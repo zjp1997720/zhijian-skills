@@ -1,0 +1,512 @@
+:root.codex-dream-skin {
+  color-scheme: light !important;
+  --ds-bg: #f5f3ee;
+  --ds-panel: #faf9f6;
+  --ds-panel-2: #eeece6;
+  --ds-sidebar: #f1f0ec;
+  --ds-selected: #e8e6dc;
+  --ds-border: #e4e1da;
+  --ds-green: #da7756;
+  --ds-lime: #cc7d5e;
+  --ds-cyan: #1b365d;
+  --ds-purple: #1b365d;
+  --ds-text: #1d1b16;
+  --ds-muted: #69675f;
+  --ds-line: rgba(20, 20, 19, .1);
+  --ds-paper-blue: #e7edf2;
+  --ds-white: #ffffff;
+  --ds-ui-font: "Source Han Serif SC", "Songti SC", ui-serif, Georgia, serif;
+  --ds-code-font: "SF Mono", ui-monospace, Menlo, monospace;
+  --ds-shadow-1: 0 3px 12px rgba(20, 20, 19, .045);
+  --ds-shadow-whisper: 0 6px 18px rgba(20, 20, 19, .065);
+}
+
+html.codex-dream-skin body {
+  background: var(--ds-bg) !important;
+  color: var(--ds-text) !important;
+  font-family: var(--ds-ui-font) !important;
+}
+
+html.codex-dream-skin code,
+html.codex-dream-skin pre,
+html.codex-dream-skin kbd,
+html.codex-dream-skin samp,
+html.codex-dream-skin .font-mono,
+html.codex-dream-skin [class*="font-mono"] {
+  font-family: var(--ds-code-font) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel {
+  background: var(--ds-sidebar) !important;
+  border: 0 !important;
+  border-right: 1px solid var(--ds-border) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--ds-text) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel nav {
+  background: transparent !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel button,
+html.codex-dream-skin aside.app-shell-left-panel a,
+html.codex-dream-skin aside.app-shell-left-panel [data-app-action-sidebar-thread-row] {
+  color: #373630 !important;
+  border-radius: 5px !important;
+  transition: background-color 150ms ease-out, color 150ms ease-out, box-shadow 150ms ease-out !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel button:hover,
+html.codex-dream-skin aside.app-shell-left-panel a:hover,
+html.codex-dream-skin aside.app-shell-left-panel [data-app-action-sidebar-thread-active="false"]:hover {
+  background: rgba(250, 249, 245, .62) !important;
+  color: var(--ds-text) !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel [data-app-action-sidebar-thread-active="true"] {
+  background: var(--ds-selected) !important;
+  border: 0 !important;
+  border-radius: 6px !important;
+  box-shadow: inset 0 0 0 1px rgba(27, 54, 93, .06) !important;
+  color: var(--ds-cyan) !important;
+  font-weight: 500 !important;
+}
+
+html.codex-dream-skin aside.app-shell-left-panel [data-app-action-sidebar-thread-active="true"] * {
+  color: inherit !important;
+}
+
+html.codex-dream-skin main.main-surface {
+  background: var(--ds-bg) !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+html.codex-dream-skin[data-dream-art-placement="all"] main.main-surface {
+  background-image: var(--dream-skin-art) !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: cover !important;
+}
+
+html.codex-dream-skin main.main-surface > header.app-header-tint {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html.codex-dream-skin [class~="group/tab"] {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  border: 1px solid rgba(20, 20, 19, .08) !important;
+  border-radius: 6px !important;
+  background: rgba(238, 237, 230, .72) !important;
+  color: var(--ds-text) !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .26) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.codex-dream-skin [class~="group/tab"]:hover,
+html.codex-dream-skin [class~="group/tab"]:focus-within {
+  background: var(--ds-panel) !important;
+  border-color: rgba(27, 54, 93, .16) !important;
+}
+
+html.codex-dream-skin [class~="group/tab"] button:not([aria-label^="Close "]) {
+  min-width: 0 !important;
+  color: var(--ds-text) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+html.codex-dream-skin [class~="group/tab"] [class~="italic"] {
+  color: var(--ds-text) !important;
+  font-style: normal !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+}
+
+html.codex-dream-skin [class~="group/tab"][data-dream-tab-title]::after {
+  content: attr(data-dream-tab-title);
+  position: absolute;
+  z-index: 20;
+  left: 32px;
+  right: 8px;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  background: var(--ds-panel-2);
+  color: var(--ds-cyan);
+  font: 500 13px/28px var(--ds-ui-font);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+html.codex-dream-skin [class~="group/tab"][data-dream-tab-title]:hover::after,
+html.codex-dream-skin [class~="group/tab"][data-dream-tab-title]:focus-within::after {
+  right: 28px;
+  background: var(--ds-panel);
+}
+
+html.codex-dream-skin main.main-surface [role="main"] {
+  background: transparent !important;
+  scrollbar-color: rgba(27, 54, 93, .24) transparent;
+}
+
+html.codex-dream-skin main.main-surface article {
+  background: rgba(250, 249, 245, .95) !important;
+  border: 1px solid rgba(20, 20, 19, .07) !important;
+  border-radius: 10px !important;
+  box-shadow: var(--ds-shadow-1) !important;
+}
+
+#codex-dream-skin-chrome {
+  position: fixed;
+  z-index: 31;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.dream-skin-brand {
+  position: absolute;
+  left: 22px;
+  top: 8px;
+  height: 30px;
+  display: none;
+  align-items: center;
+  gap: 7px;
+  color: var(--ds-text);
+}
+
+html.codex-dream-skin body:has([role="main"] [data-feature="game-source"]):has(.group\/home-suggestions)
+  #codex-dream-skin-chrome .dream-skin-brand {
+  display: flex;
+}
+
+.dream-skin-brand-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--ds-green);
+  box-shadow: 0 0 0 3px rgba(218, 119, 86, .12);
+}
+
+.dream-skin-brand-image {
+  width: auto;
+  max-width: 112px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.dream-skin-brand-label {
+  color: var(--ds-muted);
+  font: 600 10px/1 var(--ds-code-font);
+  letter-spacing: .12em;
+  white-space: nowrap;
+}
+
+#codex-dream-skin-chrome[data-dream-brand="hidden"] .dream-skin-brand {
+  display: none !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+  --thread-content-max-width: min(1120px, calc(100cqw - 48px)) !important;
+  overflow-x: hidden !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) > div {
+  min-height: 100% !important;
+  padding-top: 16px !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  > div > div:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+  min-height: 0 !important;
+  flex: 0 0 auto !important;
+  align-items: flex-start !important;
+  padding-bottom: 32px !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  div:has(> div > .group\/home-suggestions):has([data-feature="game-source"]) {
+  width: min(100%, var(--thread-content-max-width)) !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  gap: 24px !important;
+  padding: 0 12px !important;
+  overflow: visible !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  div:has(> div > .group\/home-suggestions):has([data-feature="game-source"])
+  > div:has([data-feature="game-source"]) {
+  position: relative !important;
+  isolation: isolate;
+  width: 100% !important;
+  height: 224px !important;
+  min-height: 224px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: 16px !important;
+  background-color: var(--ds-panel) !important;
+  background-image: var(--dream-skin-art) !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-position: center 54% !important;
+  box-shadow: var(--ds-shadow-1) !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  div:has(> div > .group\/home-suggestions) > div:has([data-feature="game-source"]) > div {
+  width: 100% !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-left: 34px !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  [data-testid="home-icon"] {
+  display: none !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  [data-feature="game-source"] {
+  display: block !important;
+  max-width: 54% !important;
+  color: var(--ds-text) !important;
+  font-size: clamp(21px, 1.9vw, 29px) !important;
+  font-weight: 650 !important;
+  line-height: 1.3 !important;
+  text-align: left !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  [data-feature="game-source"]::before {
+  content: var(--dream-skin-name, "Warm Paper Studio");
+  display: block;
+  margin-bottom: 10px;
+  color: var(--ds-green);
+  font: 500 12px/1.3 var(--ds-ui-font);
+  letter-spacing: .1em;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  [data-feature="game-source"] button {
+  margin: 0 5px;
+  padding: 0 1px 2px;
+  border: 0;
+  border-bottom: 1px solid rgba(184, 82, 53, .4);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ds-green) !important;
+  text-underline-offset: 4px;
+}
+
+html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  div:has(> .group\/home-suggestions) {
+  position: static !important;
+  inset: auto !important;
+  width: 100% !important;
+  margin: 0 !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions {
+  width: 100% !important;
+  overflow: visible !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions button {
+  position: relative !important;
+  min-height: 112px !important;
+  padding: 14px 13px 12px !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: 8px !important;
+  background: var(--ds-panel) !important;
+  color: #34332f !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  box-shadow: var(--ds-shadow-1) !important;
+  transition: border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions button:hover {
+  border-color: rgba(27, 54, 93, .28) !important;
+  box-shadow: var(--ds-shadow-whisper) !important;
+  transform: translateY(-1px) !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions button:focus-visible {
+  outline: 2px solid rgba(27, 54, 93, .45) !important;
+  outline-offset: 2px !important;
+  box-shadow: var(--ds-shadow-whisper) !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions button > span:first-child > span:first-child {
+  width: 28px;
+  height: 28px;
+  display: grid !important;
+  place-items: center;
+  align-content: center !important;
+  justify-content: center !important;
+  border: 1px solid rgba(27, 54, 93, .12);
+  border-radius: 6px;
+  background: var(--ds-paper-blue);
+  color: var(--ds-cyan) !important;
+  transition: color 160ms ease-out !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions button:hover > span:first-child > span:first-child {
+  color: var(--ds-green) !important;
+}
+
+html.codex-dream-skin .group\/home-suggestions button svg {
+  width: 17px !important;
+  height: 17px !important;
+  color: inherit !important;
+  margin: auto !important;
+}
+
+html.codex-dream-skin .composer-surface-chrome {
+  overflow: visible !important;
+  border: 1px solid var(--ds-border) !important;
+  border-radius: 12px !important;
+  background: var(--ds-panel) !important;
+  box-shadow: var(--ds-shadow-1) !important;
+}
+
+html.codex-dream-skin .composer-surface-chrome::before {
+  content: none;
+}
+
+html.codex-dream-skin .composer-surface-chrome:focus-within::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: 14px;
+  width: 3px;
+  height: 20px;
+  border-radius: 0 2px 2px 0;
+  background: var(--ds-green);
+}
+
+html.codex-dream-skin div:has(> .horizontal-scroll-fade-mask .group\/project-selector) {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html.codex-dream-skin .group\/project-selector > button {
+  border-color: rgba(20, 20, 19, .1) !important;
+  background: var(--ds-panel-2) !important;
+  color: var(--ds-text) !important;
+  box-shadow: none !important;
+}
+
+html.codex-dream-skin .ProseMirror {
+  color: var(--ds-text) !important;
+  caret-color: var(--ds-green) !important;
+}
+
+html.codex-dream-skin button[class~="bg-token-foreground"] {
+  background: var(--ds-cyan) !important;
+  color: var(--ds-white) !important;
+  box-shadow: none !important;
+}
+
+html.codex-dream-skin pre {
+  background: #232522 !important;
+  color: #f3f1e8 !important;
+  border: 1px solid rgba(20, 20, 19, .18) !important;
+  border-radius: 8px !important;
+}
+
+html.codex-dream-skin :not(pre) > code {
+  background: var(--ds-panel-2) !important;
+  color: #8f3f2b !important;
+  border-radius: 4px !important;
+}
+
+@media (min-width: 960px) {
+  html.codex-dream-skin .group\/home-suggestions > div > div {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (min-width: 680px) and (max-width: 959px) {
+  html.codex-dream-skin .group\/home-suggestions > div > div {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+    div:has(> div > .group\/home-suggestions):has([data-feature="game-source"])
+    > div:has([data-feature="game-source"]) {
+    height: 208px !important;
+    min-height: 208px !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .dream-skin-brand {
+    left: 15px;
+  }
+
+  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+    --thread-content-max-width: min(860px, calc(100cqw - 30px)) !important;
+  }
+
+  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+    [data-feature="game-source"] {
+    max-width: 60% !important;
+    font-size: 19px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+    --thread-content-max-width: calc(100cqw - 18px) !important;
+  }
+
+  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+    div:has(> div > .group\/home-suggestions):has([data-feature="game-source"])
+    > div:has([data-feature="game-source"]) {
+    height: 184px !important;
+    min-height: 184px !important;
+  }
+
+  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+    div:has(> div > .group\/home-suggestions) > div:has([data-feature="game-source"]) > div {
+    padding-left: 18px !important;
+  }
+
+  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+    [data-feature="game-source"] {
+    max-width: 58% !important;
+    font-size: 17px !important;
+  }
+}

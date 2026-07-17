@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Theme Studio"
+  short_description: "Design and safely apply reversible Codex themes"
+  default_prompt: "Use $codex-theme-studio to design, install, verify, and preserve rollback for a custom Codex Desktop theme."

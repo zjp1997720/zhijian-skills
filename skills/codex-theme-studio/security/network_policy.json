@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "default_policy": {
+    "outbound_internet": "deny",
+    "custom_hosts": "deny",
+    "loopback_only": true,
+    "review_rule": "Runtime scripts may connect only to the operator-selected Chrome DevTools port on 127.0.0.1. Image generation is delegated to the separately governed host ImageGen Skill."
+  },
+  "scripts": {
+    "scripts/injector.mjs": {
+      "purpose": "Discover verified Codex app pages and inject or remove the prepared theme through Chrome DevTools Protocol.",
+      "allowed_hosts": ["127.0.0.1", "localhost"],
+      "allowed_schemes": ["http", "ws"],
+      "allowed_path_prefixes": ["/json", "/json/list"],
+      "custom_host_policy": "not supported",
+      "auth": "none"
+    }
+  },
+  "external_capabilities": {
+    "imagegen": {
+      "runtime_owner": "host ImageGen Skill",
+      "required": false,
+      "network_managed_here": false,
+      "fallback": "Use a user-supplied asset or assets/default-banner.png and record missing evidence."
+    }
+  }
+}

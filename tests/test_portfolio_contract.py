@@ -11,6 +11,7 @@ EXPECTED_SKILLS = {
     "codex-doctor",
     "codex-model-routing-team",
     "codex-skill-admin",
+    "codex-theme-studio",
     "enterprise-clone-builder",
     "html-express",
     "skill-open-sourcer",

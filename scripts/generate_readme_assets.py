@@ -51,6 +51,12 @@ SKILLS = {
         "tagline": "Audit, disable, restore, and verify local Skills.",
         "motif": "admin",
     },
+    "codex-theme-studio": {
+        "title": "Codex Theme Studio",
+        "category": "CODEX EXPERIENCE",
+        "tagline": "Design, apply, verify, and restore reversible themes.",
+        "motif": "theme",
+    },
     "enterprise-clone-builder": {
         "title": "Enterprise Clone Builder",
         "category": "KNOWLEDGE SYSTEM",
@@ -134,6 +140,22 @@ def motif_admin() -> str:
     return "".join(parts)
 
 
+def motif_theme() -> str:
+    parts = [rect(726, 72, 390, 224, SURFACE, 14, BORDER)]
+    parts += [circle(748, 91, 4, CLAY), circle(762, 91, 4, "#D6A82A"), circle(776, 91, 4, SUCCESS)]
+    parts += [line(726, 106, 1116, 106, BORDER, 1), rect(742, 120, 82, 158, SURFACE_MUTED, 8)]
+    for y, width in ((138, 54), (162, 62), (186, 46), (222, 60), (246, 50)):
+        parts.append(rect(754, y, width, 5, MUTED, 2))
+    parts += [rect(840, 120, 258, 82, PAPER, 10, BORDER), rect(969, 120, 129, 82, "#EEE7D8", 10)]
+    parts += [rect(856, 139, 90, 7, CLAY, 3), rect(856, 160, 102, 5, TERTIARY, 2), rect(856, 176, 72, 4, SURFACE_MUTED, 2)]
+    parts += [rect(994, 143, 50, 36, NAVY, 6), circle(1006, 155, 3, SURFACE), circle(1032, 155, 3, SURFACE), line(1006, 169, 1032, 169, SURFACE, 2)]
+    for index, colour in enumerate((CLAY, NAVY, SUCCESS, SURFACE_MUTED)):
+        x = 852 + index * 62
+        parts += [rect(x, 218, 50, 48, SURFACE, 8, BORDER), circle(x + 25, 235, 7, colour), rect(x + 12, 251, 26, 4, SURFACE_MUTED, 2)]
+    parts += [text(1088, 282, "VERIFY ✓", 10, SUCCESS, 500, text_anchor="end", letter_spacing=".7")]
+    return "".join(parts)
+
+
 def motif_enterprise() -> str:
     parts = []
     for y, label in ((108, "DOCS"), (181, "WEB"), (254, "VOICE")):
@@ -186,6 +208,7 @@ MOTIFS = {
     "doctor": motif_doctor,
     "routing": motif_routing,
     "admin": motif_admin,
+    "theme": motif_theme,
     "enterprise": motif_enterprise,
     "html": motif_html,
     "release": motif_release,
@@ -228,30 +251,30 @@ def skill_hero(name: str, item: dict[str, str]) -> str:
 
 def portfolio_hero() -> str:
     cards = []
-    labels = ["DOCTOR", "ROUTING", "ADMIN", "CLONE", "HTML", "RELEASE", "SEARCH", "STYLER"]
+    labels = ["DOCTOR", "ROUTING", "ADMIN", "THEME", "CLONE", "HTML", "RELEASE", "SEARCH", "STYLER"]
     for index, label in enumerate(labels):
-        column = index % 2
-        row = index // 2
-        x = 704 + column * 202
-        y = 72 + row * 55
-        marker = CLAY if index in {1, 5} else NAVY
-        cards += [rect(x, y, 182, 40, SURFACE, 8, BORDER), rect(x, y, 4, 40, marker, 2), text(x + 22, y + 25, label, 11, TERTIARY, 500, letter_spacing=".7")]
+        column = index % 3
+        row = index // 3
+        x = 684 + column * 148
+        y = 78 + row * 67
+        marker = CLAY if label in {"ROUTING", "THEME", "RELEASE"} else NAVY
+        cards += [rect(x, y, 132, 46, SURFACE, 8, BORDER), rect(x, y, 4, 46, marker, 2), text(x + 18, y + 28, label, 10, TERTIARY, 500, letter_spacing=".45")]
     body = "".join(
         [
             text(64, 64, "智见 AI  /  PUBLIC AGENT SKILLS", 12, CLAY_TEXT, 500, letter_spacing="1.4"),
             text(64, 139, "Zhijian Skills", 48, INK, 500),
-            text(64, 183, "One source. Eight focused skills.", 20, TERTIARY, 400),
+            text(64, 183, "One source. Nine focused skills.", 20, TERTIARY, 400),
             text(64, 215, "Complete packages · verifiable releases", 16, MUTED, 400),
             rect(64, 254, 224, 36, NAVY, 8),
             text(176, 277, "CANONICAL PORTFOLIO", 11, SURFACE, 500, text_anchor="middle", letter_spacing="1"),
             rect(660, 40, 484, 264, SURFACE, 12, BORDER),
-            text(704, 56, "8 ACTIVE SKILLS", 10, NAVY, 500, letter_spacing="1.1"),
+            text(684, 58, "9 ACTIVE SKILLS", 10, NAVY, 500, letter_spacing="1.1"),
             *cards,
         ]
     )
     return svg_shell(
         "Zhijian Skills",
-        "A canonical portfolio of eight focused, installable, and independently released Agent Skills.",
+        "A canonical portfolio of nine focused, installable, and independently released Agent Skills.",
         body,
     )
 

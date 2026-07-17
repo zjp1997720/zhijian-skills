@@ -1,7 +1,7 @@
 # 智见 Skills
 
 <p align="center">
-  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="智见 Skills：由一个统一源码管理八个专注的 Agent Skill">
+  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="智见 Skills：由一个统一源码管理九个专注的 Agent Skill">
 </p>
 
 <p align="center"><strong>从一个可信源按需安装 Agent Skill；每个安装包都完整，每次发布都独立验证。</strong></p>
@@ -12,11 +12,11 @@
   <a href="./CONTRIBUTING.md">参与贡献</a>
 </p>
 
-智见 Skills 是 8 个专注型 Agent Skill 的统一源码，覆盖 Codex 管理、知识系统、内容调研、信息设计与发布流程。
+智见 Skills 是 9 个专注型 Agent Skill 的统一源码，覆盖 Codex 管理与体验、知识系统、内容调研、信息设计与发布流程。
 
 ## 30 秒开始使用
 
-查看全部 8 个 Skill：
+查看全部 9 个 Skill：
 
 ```bash
 npx skills add zjp1997720/zhijian-skills --list
@@ -44,6 +44,7 @@ npx skills add zjp1997720/zhijian-skills \
 | Codex 管理 | [`codex-doctor`](docs/skills/codex-doctor/README.zh-CN.md) | 只读诊断上下文、配置和工作区漂移 | [文档](docs/skills/codex-doctor/README.zh-CN.md) |
 | Codex 管理 | [`codex-model-routing-team`](docs/skills/codex-model-routing-team/README.zh-CN.md) | 把后台任务分配给明确的模型和推理强度 | [文档](docs/skills/codex-model-routing-team/README.zh-CN.md) |
 | Codex 管理 | [`codex-skill-admin`](docs/skills/codex-skill-admin/README.zh-CN.md) | 审计、关闭、恢复并验证本地 Codex Skill | [文档](docs/skills/codex-skill-admin/README.zh-CN.md) |
+| Codex 体验 | [`codex-theme-studio`](docs/skills/codex-theme-studio/README.zh-CN.md) | 设计、注入、验证并恢复可逆的 Codex Desktop 主题 | [文档](docs/skills/codex-theme-studio/README.zh-CN.md) |
 | 知识系统 | [`enterprise-clone-builder`](docs/skills/enterprise-clone-builder/README.zh-CN.md) | 从企业证据构建结构化数字分身仓库 | [文档](docs/skills/enterprise-clone-builder/README.zh-CN.md) |
 | 信息设计 | [`html-express`](docs/skills/html-express/README.zh-CN.md) | 把高密度材料做成自包含 HTML 报告 | [文档](docs/skills/html-express/README.zh-CN.md) |
 | 发布治理 | [`skill-open-sourcer`](docs/skills/skill-open-sourcer/README.zh-CN.md) | 审计、打包、文档化、验证并发布 Agent Skill | [文档](docs/skills/skill-open-sourcer/README.zh-CN.md) |

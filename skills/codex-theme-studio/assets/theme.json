@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "warm-paper-starter",
+  "name": "Warm Paper Studio",
+  "brandLabel": "THEME STUDIO",
+  "brandImage": "",
+  "showBrand": true,
+  "fonts": {
+    "ui": "\"Source Han Serif SC\", \"Songti SC\", ui-serif, Georgia, serif",
+    "code": "\"SF Mono\", ui-monospace, Menlo, monospace"
+  },
+  "tagline": "",
+  "projectPrefix": "",
+  "projectLabel": "工作区",
+  "statusText": "",
+  "quote": "",
+  "image": "default-banner.png",
+  "artPlacement": "hero",
+  "colors": {
+    "background": "#F5F3EE",
+    "panel": "#FAF9F6",
+    "panelAlt": "#EEECE6",
+    "sidebar": "#F1F0EC",
+    "selected": "#E8E6DC",
+    "border": "#E4E1DA",
+    "paperBlue": "#E7EDF2",
+    "accent": "#DA7756",
+    "accentAlt": "#CC7D5E",
+    "secondary": "#1B365D",
+    "highlight": "#1B365D",
+    "text": "#1D1B16",
+    "muted": "#69675F",
+    "line": "rgba(20, 20, 19, .12)"
+  }
+}

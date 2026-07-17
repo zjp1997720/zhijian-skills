@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0",
+  "reviewed_at": "2026-07-17",
+  "capabilities": {
+    "network": {
+      "decision": "approved",
+      "reviewer": "Zhijian AI",
+      "scope": "Loopback-only CDP connections to an operator-selected 127.0.0.1 port. No outbound internet is allowed by bundled scripts.",
+      "reason": "Live theme injection and verification require a local DevTools connection while the signed app bundle remains untouched.",
+      "expires_at": "2027-07-17",
+      "evidence": ["security/network_policy.json", "references/safety-and-rollback.md", "security/trust-baseline.md"],
+      "target_enforcement": {
+        "openai": "Skill instructions plus injector host validation",
+        "claude": "Skill instructions plus injector host validation",
+        "generic": "Skill instructions plus injector host validation"
+      }
+    },
+    "file_write": {
+      "decision": "approved",
+      "reviewer": "Zhijian AI",
+      "scope": "Prepared theme directories, ~/.codex/codex-theme-studio, and owner-only recovery state under ~/Library/Application Support/CodexThemeStudio.",
+      "reason": "Self-contained assets, atomic deployment, logs, and immutable backups are required for reproducible installation and recovery.",
+      "expires_at": "2027-07-17",
+      "evidence": ["references/safety-and-rollback.md", "tests/release-privacy.test.mjs", "security/trust-baseline.md"],
+      "target_enforcement": {
+        "openai": "Explicit install command and path allowlist",
+        "claude": "Explicit install command and path allowlist",
+        "generic": "Explicit install command and path allowlist"
+      }
+    },
+    "subprocess": {
+      "decision": "approved",
+      "reviewer": "Zhijian AI",
+      "scope": "Local Node.js and shell validation, macOS app identity checks, managed injector launch, optional Codex restart, and restore commands.",
+      "reason": "The runtime must validate the official app, launch a loopback-managed process, and perform deterministic verification; restart remains a separate user-authorization gate.",
+      "expires_at": "2027-07-17",
+      "evidence": ["references/safety-and-rollback.md", "references/verification-contract.md", "security/trust-baseline.md"],
+      "target_enforcement": {
+        "openai": "Explicit restart authorization in SKILL.md",
+        "claude": "Explicit restart authorization in SKILL.md",
+        "generic": "Explicit restart authorization in SKILL.md"
+      }
+    }
+  }
+}

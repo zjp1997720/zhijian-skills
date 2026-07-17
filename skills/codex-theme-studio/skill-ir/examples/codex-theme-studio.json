@@ -1,0 +1,113 @@
+{
+  "schema_version": "2.0.0",
+  "name": "codex-theme-studio",
+  "title": "Codex Theme Studio",
+  "job_to_be_done": "Turn a user's brand system, native theme export, annotated screenshots, and optional artwork into a self-contained, reversible, visually verified theme for the official Codex Desktop app on macOS.",
+  "trigger_surface": {
+    "description": "Design, generate visual assets for, safely install, verify, iterate, and restore custom themes for the official Codex Desktop app on macOS. Use when a user asks to redesign Codex UI, create/apply/inject/replace a Codex skin or theme, adapt Codex to a brand system, generate a Codex banner or page background, repair defects in an injected theme, or roll back a custom theme. Do not use for general Codex health/config debugging, ordinary website theming, Windows/Linux, or direct app.asar modification.",
+    "should_trigger": [
+      "Redesign or repair an injected Codex Desktop theme.",
+      "Adapt Codex to a brand system and preserve rollback.",
+      "Generate a Codex Banner or task-page background as part of a theme.",
+      "Pause or restore a custom Codex theme."
+    ],
+    "should_not_trigger": [
+      "General Codex health or configuration debugging.",
+      "Ordinary website or application theming.",
+      "Standalone illustration generation.",
+      "Windows or Linux theming.",
+      "Any direct app.asar or signed app-bundle modification."
+    ],
+    "edge_cases": [
+      "Native codex-theme-v1 palette export without CSS injection.",
+      "Read-only architecture analysis of a theme repository.",
+      "A visual mockup with no live theme installation."
+    ]
+  },
+  "workflow": {
+    "steps": [
+      "Collect the brand source, native theme export, screenshots, target viewport, optional artwork, and placement intent.",
+      "Separate native-product behavior from theme-owned visual decisions.",
+      "Use built-in ImageGen only when a new raster asset is needed; copy accepted project-bound output into the prepared theme directory.",
+      "Build a self-contained theme and run payload plus deterministic contract checks before any live change.",
+      "Install without launching, preserve immutable recovery state, and obtain explicit authorization before restarting a running Codex app.",
+      "Verify home, task, and New Task transition states; iterate one defect class at a time.",
+      "Hand off theme source, evidence, backup location, and exact pause and restore commands."
+    ],
+    "decision_points": [
+      "Use artPlacement=hero by default; use all only when task-page readability is intentionally designed and verified.",
+      "Keep logos and existing vector systems code-native; use ImageGen for raster creation or editing.",
+      "Do not infer restart authorization from a request to design or install a theme.",
+      "Stop before mutation when app identity, loopback ownership, input safety, payload checks, or backups fail."
+    ],
+    "failure_modes": [
+      "Theme selectors hide native tabs, cards, controls, or focus states.",
+      "Banner artwork duplicates live UI text or crops poorly at another width.",
+      "A task-page background reduces long-form reading contrast.",
+      "A generated image remains referenced from an ephemeral generator directory.",
+      "A running app is restarted without explicit authorization.",
+      "Recovery evidence is overwritten, incomplete, or confused with the active theme.",
+      "A foreign or remote DevTools target receives injected code.",
+      "Unavailable live, ImageGen, viewport, or human evidence is reported as passed."
+    ]
+  },
+  "resources": {
+    "references": [
+      "references/design-workflow.md",
+      "references/imagegen-assets.md",
+      "references/safety-and-rollback.md",
+      "references/verification-contract.md",
+      "references/troubleshooting.md",
+      "references/provenance.md",
+      "references/operator-runbook.md",
+      "references/output-eval-baseline.md",
+      "security/trust-baseline.md"
+    ],
+    "scripts": [
+      "scripts/write-theme.mjs",
+      "scripts/theme-config.mjs",
+      "scripts/injector.mjs",
+      "scripts/install-dream-skin-macos.sh",
+      "scripts/start-dream-skin-macos.sh",
+      "scripts/verify-dream-skin-macos.sh",
+      "scripts/pause-dream-skin-macos.sh",
+      "scripts/restore-dream-skin-macos.sh",
+      "scripts/restore-version-macos.sh"
+    ],
+    "assets": [
+      "assets/theme.json",
+      "assets/dream-skin.css",
+      "assets/renderer-inject.js",
+      "assets/default-banner.png",
+      "assets/default-banner.svg"
+    ]
+  },
+  "eval_plan": {
+    "trigger": ["evals/trigger_cases.json"],
+    "output": ["evals/output/cases.jsonl", "references/output-eval-baseline.md"],
+    "adversarial": ["reject-app-bundle-patch", "intentional-full-page-art"],
+    "baseline": "without_skill"
+  },
+  "risk": {
+    "output_risk": "high",
+    "execution_risk": "medium",
+    "trust_boundary": "external"
+  },
+  "governance": {
+    "owner": "Zhijian AI",
+    "maturity": "governed",
+    "review_cadence": "monthly",
+    "review_due": "2026-08-17"
+  },
+  "targets": ["openai", "claude", "generic", "agent-skills-compatible"],
+  "source_files": [
+    "SKILL.md",
+    "manifest.json",
+    "agents/interface.yaml",
+    "agents/openai.yaml",
+    "evals/trigger_cases.json",
+    "evals/output/cases.jsonl",
+    "security/network_policy.json",
+    "security/permission_policy.json"
+  ]
+}

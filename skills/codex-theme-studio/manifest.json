@@ -1,0 +1,27 @@
+{
+  "name": "codex-theme-studio",
+  "version": "1.0.0",
+  "owner": "Zhijian AI",
+  "updated_at": "2026-07-17",
+  "status": "active",
+  "maturity_tier": "governed",
+  "lifecycle_stage": "governed",
+  "context_budget_tier": "governed",
+  "review_cadence": "monthly",
+  "review_due": "2026-08-17",
+  "skill_archetype": "governed",
+  "target_platforms": [
+    "openai",
+    "claude",
+    "generic",
+    "agent-skills-compatible"
+  ],
+  "factory_components": [
+    "references",
+    "scripts",
+    "assets",
+    "evals",
+    "security",
+    "skill-ir"
+  ]
+}

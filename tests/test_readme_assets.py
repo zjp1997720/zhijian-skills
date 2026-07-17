@@ -13,6 +13,7 @@ SKILLS = (
     "codex-doctor",
     "codex-model-routing-team",
     "codex-skill-admin",
+    "codex-theme-studio",
     "enterprise-clone-builder",
     "html-express",
     "skill-open-sourcer",
@@ -41,7 +42,7 @@ class ReadmeAssetTests(unittest.TestCase):
 
     def test_assets_are_safe_accessible_and_brand_aligned(self) -> None:
         assets = self.expected_assets()
-        self.assertEqual(len(assets), 9)
+        self.assertEqual(len(assets), 10)
         for asset in assets:
             content = asset.read_text(encoding="utf-8")
             self.assertLess(len(content.encode("utf-8")), 60_000, asset)

@@ -1,0 +1,24 @@
+interface:
+  display_name: "Codex Theme Studio"
+  short_description: "Design and safely apply reversible Codex themes"
+  default_prompt: "Use $codex-theme-studio to turn my brand guide and visual references into a reversible, verified theme for Codex Desktop on macOS."
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets:
+    - "openai"
+    - "claude"
+    - "generic"
+  activation:
+    mode: "manual"
+    paths: []
+  execution:
+    context: "inline"
+    shell: "bash"
+  trust:
+    source_tier: "remote"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "allow-metadata-only"
+  degradation:
+    openai: "full when built-in ImageGen is available; user assets otherwise"
+    claude: "theme engine and user assets; image generation depends on host capability"
+    generic: "theme engine and user assets; image generation depends on host capability"

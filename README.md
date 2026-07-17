@@ -1,7 +1,7 @@
 # Zhijian Skills
 
 <p align="center">
-  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="Zhijian Skills: one canonical portfolio of eight focused Agent Skills">
+  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="Zhijian Skills: one canonical portfolio of nine focused Agent Skills">
 </p>
 
 <p align="center"><strong>Install focused Agent Skills from one trusted source, with complete payloads and independently verified releases.</strong></p>
@@ -12,11 +12,11 @@
   <a href="./CONTRIBUTING.md">Contribute</a>
 </p>
 
-Zhijian Skills is the canonical source for eight focused Agent Skills spanning Codex operations, knowledge systems, research, information design, and publishing.
+Zhijian Skills is the canonical source for nine focused Agent Skills spanning Codex operations and experience, knowledge systems, research, information design, and publishing.
 
 ## Start in 30 seconds
 
-List all eight Skills:
+List all nine Skills:
 
 ```bash
 npx skills add zjp1997720/zhijian-skills --list
@@ -44,6 +44,7 @@ npx skills add zjp1997720/zhijian-skills \
 | Codex control | [`codex-doctor`](docs/skills/codex-doctor/README.md) | Diagnose context, configuration, and workspace drift without changing files | [Docs](docs/skills/codex-doctor/README.md) |
 | Codex control | [`codex-model-routing-team`](docs/skills/codex-model-routing-team/README.md) | Route bounded background tasks to explicit models and reasoning levels | [Docs](docs/skills/codex-model-routing-team/README.md) |
 | Codex control | [`codex-skill-admin`](docs/skills/codex-skill-admin/README.md) | Audit, disable, restore, and verify local Codex Skills | [Docs](docs/skills/codex-skill-admin/README.md) |
+| Codex experience | [`codex-theme-studio`](docs/skills/codex-theme-studio/README.md) | Design, apply, verify, and restore reversible Codex Desktop themes | [Docs](docs/skills/codex-theme-studio/README.md) |
 | Knowledge systems | [`enterprise-clone-builder`](docs/skills/enterprise-clone-builder/README.md) | Build a structured enterprise digital-twin repository from evidence | [Docs](docs/skills/enterprise-clone-builder/README.md) |
 | Information design | [`html-express`](docs/skills/html-express/README.md) | Turn dense material into a clear, self-contained HTML report | [Docs](docs/skills/html-express/README.md) |
 | Release governance | [`skill-open-sourcer`](docs/skills/skill-open-sourcer/README.md) | Audit, package, document, verify, and publish Agent Skills | [Docs](docs/skills/skill-open-sourcer/README.md) |

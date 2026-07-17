@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="800" viewBox="0 0 2000 800" role="img" aria-labelledby="title desc">
+  <title id="title">Warm Paper Studio starter banner</title>
+  <desc id="desc">A quiet warm-paper field with a small terminal workflow motif on the right.</desc>
+  <rect width="2000" height="800" fill="#FAF9F6"/>
+  <path d="M1120 0h880v800h-880z" fill="#F2EFE7"/>
+  <path d="M1120 0v800" stroke="#E4E1DA" stroke-width="2"/>
+  <g opacity=".42" fill="#D8D3C8">
+    <circle cx="1190" cy="92" r="2"/><circle cx="1270" cy="92" r="2"/><circle cx="1350" cy="92" r="2"/><circle cx="1430" cy="92" r="2"/><circle cx="1510" cy="92" r="2"/><circle cx="1590" cy="92" r="2"/><circle cx="1670" cy="92" r="2"/><circle cx="1750" cy="92" r="2"/><circle cx="1830" cy="92" r="2"/><circle cx="1910" cy="92" r="2"/>
+    <circle cx="1190" cy="172" r="2"/><circle cx="1270" cy="172" r="2"/><circle cx="1350" cy="172" r="2"/><circle cx="1430" cy="172" r="2"/><circle cx="1510" cy="172" r="2"/><circle cx="1590" cy="172" r="2"/><circle cx="1670" cy="172" r="2"/><circle cx="1750" cy="172" r="2"/><circle cx="1830" cy="172" r="2"/><circle cx="1910" cy="172" r="2"/>
+    <circle cx="1190" cy="252" r="2"/><circle cx="1270" cy="252" r="2"/><circle cx="1350" cy="252" r="2"/><circle cx="1430" cy="252" r="2"/><circle cx="1510" cy="252" r="2"/><circle cx="1590" cy="252" r="2"/><circle cx="1670" cy="252" r="2"/><circle cx="1750" cy="252" r="2"/><circle cx="1830" cy="252" r="2"/><circle cx="1910" cy="252" r="2"/>
+    <circle cx="1190" cy="332" r="2"/><circle cx="1270" cy="332" r="2"/><circle cx="1350" cy="332" r="2"/><circle cx="1430" cy="332" r="2"/><circle cx="1510" cy="332" r="2"/><circle cx="1590" cy="332" r="2"/><circle cx="1670" cy="332" r="2"/><circle cx="1750" cy="332" r="2"/><circle cx="1830" cy="332" r="2"/><circle cx="1910" cy="332" r="2"/>
+    <circle cx="1190" cy="412" r="2"/><circle cx="1270" cy="412" r="2"/><circle cx="1350" cy="412" r="2"/><circle cx="1430" cy="412" r="2"/><circle cx="1510" cy="412" r="2"/><circle cx="1590" cy="412" r="2"/><circle cx="1670" cy="412" r="2"/><circle cx="1750" cy="412" r="2"/><circle cx="1830" cy="412" r="2"/><circle cx="1910" cy="412" r="2"/>
+    <circle cx="1190" cy="492" r="2"/><circle cx="1270" cy="492" r="2"/><circle cx="1350" cy="492" r="2"/><circle cx="1430" cy="492" r="2"/><circle cx="1510" cy="492" r="2"/><circle cx="1590" cy="492" r="2"/><circle cx="1670" cy="492" r="2"/><circle cx="1750" cy="492" r="2"/><circle cx="1830" cy="492" r="2"/><circle cx="1910" cy="492" r="2"/>
+    <circle cx="1190" cy="572" r="2"/><circle cx="1270" cy="572" r="2"/><circle cx="1350" cy="572" r="2"/><circle cx="1430" cy="572" r="2"/><circle cx="1510" cy="572" r="2"/><circle cx="1590" cy="572" r="2"/><circle cx="1670" cy="572" r="2"/><circle cx="1750" cy="572" r="2"/><circle cx="1830" cy="572" r="2"/><circle cx="1910" cy="572" r="2"/>
+    <circle cx="1190" cy="652" r="2"/><circle cx="1270" cy="652" r="2"/><circle cx="1350" cy="652" r="2"/><circle cx="1430" cy="652" r="2"/><circle cx="1510" cy="652" r="2"/><circle cx="1590" cy="652" r="2"/><circle cx="1670" cy="652" r="2"/><circle cx="1750" cy="652" r="2"/><circle cx="1830" cy="652" r="2"/><circle cx="1910" cy="652" r="2"/>
+  </g>
+  <g transform="translate(1325 232)" fill="none" stroke="#1B365D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <rect width="250" height="220" rx="30" fill="#E7EDF2"/>
+    <path d="M42 58h166M42 94h96" opacity=".5"/>
+    <path d="m70 148 32 27-32 27M124 202h58"/>
+    <path d="M250 110h92"/>
+    <circle cx="372" cy="110" r="30" fill="#DA7756" stroke="#1D1B16"/>
+    <path d="M402 110h74"/>
+    <rect x="476" y="65" width="90" height="90" rx="16" fill="#FAF9F6"/>
+    <path d="m501 110 17 17 28-35"/>
+  </g>
+  <g transform="translate(1368 494)" fill="#69675F" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24" letter-spacing="3">
+    <text>DESIGN · APPLY · VERIFY · RESTORE</text>
+  </g>
+</svg>
