@@ -1,0 +1,51 @@
+name: Validate public Skills
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portfolio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CI: "1"
+      NO_COLOR: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned governance toolchain
+        run: npm ci --ignore-scripts
+      - name: Install deterministic Skill test dependencies
+        run: |
+          npm ci --prefix skills/wechat-article-search --ignore-scripts
+          npm ci --prefix skills/wechat-styler --ignore-scripts
+      - name: Run Portfolio contracts and isolated install matrix
+        run: python3 -m unittest discover -s tests -v
+      - name: Run Python Skill suites
+        run: |
+          python3 -m unittest discover -s skills/codex-doctor/tests -v
+          python3 -m unittest discover -s skills/skill-open-sourcer/tests -v
+      - name: Run Node Skill suites
+        run: |
+          npm test --prefix skills/wechat-article-search
+          npm test --prefix skills/wechat-styler
+      - name: Audit the complete Portfolio
+        run: python3 skills/skill-open-sourcer/scripts/portfolio.py audit --repo . --strict
+      - name: Confirm pinned catalog discovery
+        run: npx --no-install skills add . --list
