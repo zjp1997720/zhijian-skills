@@ -1,7 +1,7 @@
 # Notices
 
-Codex Theme Studio includes software derived from the MIT-licensed
-`Fei-Away/Codex-Dream-Skin` project, pinned during development to commit
+Codex Theme Studio was inspired by and includes software derived from the
+MIT-licensed `Fei-Away/Codex-Dream-Skin` project, pinned during development to commit
 `26c6c410e0e0bfc053356474620e17f934f483fc`.
 
 The neutral `assets/default-banner.svg` and its PNG rendering were created for

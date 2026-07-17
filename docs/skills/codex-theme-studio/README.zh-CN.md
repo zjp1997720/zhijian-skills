@@ -10,6 +10,8 @@
 
 当需求已经超出原生配色导出，涉及品牌化皮肤、响应式首页 Banner、任务页背景、注入后视觉修复或完整回退链路时，使用这个 Skill。
 
+这个项目的灵感来源于 [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin)。它在上游思路之上，把真实换肤过程沉淀成了可复用的设计、ImageGen、注入、验证与回滚工作流。
+
 ## 安装
 
 ```bash
@@ -67,6 +69,6 @@ node skills/codex-theme-studio/scripts/injector.mjs --check-payload
 
 ## 来源与协议
 
-注入架构源自 MIT 协议的 [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin)。本 Skill 增加了通用主题契约、可选 ImageGen 资产、签名与回环校验、不可变备份、响应式路由修复和公开打包。详情见随包提供的 `NOTICE.md`、`UPSTREAM_COMMIT` 和 `LICENSE`。
+本项目的灵感来源于 MIT 协议的 [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin)，注入架构也基于该项目演进而来。本 Skill 增加了通用主题契约、可选 ImageGen 资产、签名与回环校验、不可变备份、响应式路由修复和公开打包。详情见随包提供的 `NOTICE.md`、`UPSTREAM_COMMIT` 和 `LICENSE`。
 
 Codex 与 OpenAI 是其各自权利人的商标。本项目是非官方社区项目，未获得 OpenAI 或上游项目背书。

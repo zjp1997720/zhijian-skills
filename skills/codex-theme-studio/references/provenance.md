@@ -1,6 +1,6 @@
 # Provenance
 
-The injection architecture was derived from the MIT-licensed [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin) project and pinned during development to commit `26c6c410e0e0bfc053356474620e17f934f483fc`.
+This project was inspired by the MIT-licensed [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin). Its injection architecture was derived from that project and pinned during development to commit `26c6c410e0e0bfc053356474620e17f934f483fc`.
 
 This Skill adds a generalized theme schema, optional brand assets, hero/full-page artwork modes, non-destructive native-theme preservation, signature and loopback validation, first-frame prepaint, responsive home contracts, immutable backups, strict verification, and public packaging.
 

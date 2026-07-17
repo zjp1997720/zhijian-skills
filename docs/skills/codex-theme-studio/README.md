@@ -10,6 +10,8 @@
 
 Use it when you want more than a palette export: a branded Codex skin, a responsive homepage Banner, an intentional task-page background, repairs to an injected theme, or a reliable path back to the original appearance.
 
+This project is inspired by [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin). It turns that upstream idea into a reusable workflow for design, ImageGen artwork, injection, verification, and rollback.
+
 ## Install
 
 ```bash
@@ -67,6 +69,6 @@ Live doctor checks are intentionally separate because they depend on a local Cod
 
 ## Provenance and License
 
-The injection architecture is derived from the MIT-licensed [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin) project. The Skill adds generalized theme contracts, optional ImageGen assets, signature and loopback validation, immutable backups, responsive route repair, and public packaging. See the bundled `NOTICE.md`, `UPSTREAM_COMMIT`, and `LICENSE`.
+The project is inspired by the MIT-licensed [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin), and its injection architecture evolved from that project. The Skill adds generalized theme contracts, optional ImageGen assets, signature and loopback validation, immutable backups, responsive route repair, and public packaging. See the bundled `NOTICE.md`, `UPSTREAM_COMMIT`, and `LICENSE`.
 
 Codex and OpenAI are trademarks of their respective owners. This community project is unofficial and is not endorsed by OpenAI or the upstream project.
