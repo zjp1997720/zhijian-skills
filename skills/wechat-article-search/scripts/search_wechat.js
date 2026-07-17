@@ -721,7 +721,12 @@ async function main() {
 
 // 导出模块供其他脚本使用
 module.exports = {
-  searchWechatArticles
+  searchWechatArticles,
+  parseArticlesFromSearchHtml,
+  extractRedirectUrlFromHtml,
+  parseCliArgs,
+  parseRelativeTime,
+  formatChinaDateTime,
 };
 
 // 如果直接运行此脚本

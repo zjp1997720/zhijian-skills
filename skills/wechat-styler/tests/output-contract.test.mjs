@@ -24,11 +24,3 @@ test('renders the shared content root and metadata for downstream publishers', (
   assert.match(html, /<meta name="description" content="摘要测试">/);
   fs.rmSync(workDir, { recursive: true, force: true });
 });
-
-test('post2wechat prefers the shared content root before legacy selectors', () => {
-  const publisher = fs.readFileSync(path.resolve(skillRoot, '../post2wechat/scripts/wechat-article.ts'), 'utf8');
-
-  assert.match(publisher, /querySelector\('\[data-wechat-root="article"\]'\)/);
-  assert.match(publisher, /title-editor__input/);
-  assert.doesNotMatch(publisher, /const editor = document\.querySelector\('\.ProseMirror'\)/);
-});

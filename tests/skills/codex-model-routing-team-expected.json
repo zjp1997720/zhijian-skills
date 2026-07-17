@@ -1,0 +1,31 @@
+{
+  "skill": "codex-model-routing-team",
+  "required_tools": [
+    "codex_app__list_projects",
+    "codex_app__create_thread",
+    "codex_app__read_thread",
+    "codex_app__send_message_to_thread",
+    "codex_app__set_thread_archived"
+  ],
+  "forbidden_fallback": "spawn_agent",
+  "max_concurrent_workers": 6,
+  "max_total_workers": 8,
+  "max_new_threads_per_wave_after_probe": 3,
+  "default_models": ["gpt-5.6-luna", "gpt-5.6-sol"],
+  "forbidden_worker_thinking": ["ultra"],
+  "required_thread_audit_fields": [
+    "thread_id",
+    "role",
+    "model",
+    "thinking",
+    "status",
+    "output",
+    "archived"
+  ],
+  "deep_research_budget": {
+    "max_default_researchers": 4,
+    "verifiers": 1,
+    "reviewers": 1,
+    "retry_reserve": 2
+  }
+}
