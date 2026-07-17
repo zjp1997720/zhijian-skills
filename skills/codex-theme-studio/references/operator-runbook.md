@@ -59,6 +59,22 @@ bash ~/.codex/codex-theme-studio/scripts/start-dream-skin-macos.sh \
   --port 9341 --restart-existing
 ```
 
+## Enable restart persistence
+
+This is opt-in because a normal Codex launch must be restarted once to add the loopback endpoint. Run it only after the user explicitly authorizes that recurring behavior:
+
+```bash
+bash ~/.codex/codex-theme-studio/scripts/install-resident-manager-macos.sh --port 9341
+```
+
+The resident manager waits while Codex is closed. When the user opens Codex normally, it validates the official signed runtime, waits for launch stabilization, performs one managed restart, and restores the injector. Disable it independently with:
+
+```bash
+bash ~/.codex/codex-theme-studio/scripts/install-resident-manager-macos.sh --disable
+```
+
+Pause and restore also disable it before touching the live injector.
+
 ## Verify
 
 Run both routes and sample the transient New Task state:

@@ -28,6 +28,7 @@ Then invoke `$codex-theme-studio` and provide the best available brand guide, cu
 - Optional Banner or background creation through Codex's built-in `$imagegen` Skill.
 - Loopback-only CSS and renderer injection without changing the signed app bundle or `app.asar`.
 - Immutable base-theme and pre-upgrade backups, plus pause, restore, and version-rollback commands.
+- Optional restart persistence through an explicitly authorized, user-level resident manager that stays idle while Codex is closed.
 - Strict checks for home, task, New Task transition, native tabs, suggestion cards, controls, overflow, and expected artwork.
 
 The bundled neutral warm-paper Banner keeps the workflow usable when ImageGen is unavailable. Image generation is an optional host capability, not an installation dependency and never an excuse to switch silently to an API-key-based fallback.
@@ -37,7 +38,7 @@ The bundled neutral warm-paper Banner keeps the workflow usable when ImageGen is
 1. Read the brand source and separate native Codex behavior from theme-owned styling.
 2. Generate or prepare artwork only when the design needs it; keep accepted images inside the theme package.
 3. Build and dry-check the theme outside the installed Skill.
-4. Install without launching. Restart an already-running Codex app only after explicit authorization.
+4. Install without launching. Restart an already-running Codex app only after explicit authorization. Enable the resident manager only when the user also authorizes recurring managed restarts after normal launches.
 5. Verify the homepage, task route, and transient New Task state; repair one defect class at a time.
 6. Hand off source assets, evidence, backup location, and exact recovery commands.
 

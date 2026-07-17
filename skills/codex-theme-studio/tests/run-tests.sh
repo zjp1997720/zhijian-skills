@@ -40,6 +40,7 @@ fi
 "$NODE" "$ROOT/tests/version-backup-state.test.mjs"
 "$NODE" "$ROOT/tests/release-privacy.test.mjs"
 "$NODE" "$ROOT/tests/verifier-contract.test.mjs"
+"$NODE" "$ROOT/tests/resident-manager.test.mjs"
 "$NODE" "$ROOT/tests/skill-contract.test.mjs"
 
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/codex-theme-studio-tests.XXXXXX")"
@@ -51,7 +52,7 @@ RUNTIME_STATE="$RUNTIME_STATE_ROOT/state.json"
 STATE_EVAL_MARKER="$TMP/state-eval-marker"
 EXPECTED_BUNDLE="$TMP/Codex \$(touch \"$STATE_EVAL_MARKER\").app"
 EXPECTED_EXE="$EXPECTED_BUNDLE/Contents/MacOS/ChatGPT; touch \"$STATE_EVAL_MARKER\""
-EXPECTED_VERSION='1.0.2 "nightly"'
+EXPECTED_VERSION='1.0.3 "nightly"'
 EXPECTED_TEAM_ID="TEAM'ID"
 /bin/mkdir -p "$RUNTIME_STATE_ROOT"
 "$NODE" -e '

@@ -9,7 +9,8 @@
       "Redesign or repair an injected Codex Desktop theme.",
       "Adapt Codex to a brand system and preserve rollback.",
       "Generate a Codex Banner or task-page background as part of a theme.",
-      "Pause or restore a custom Codex theme."
+      "Pause or restore a custom Codex theme.",
+      "Make an injected Codex theme survive normal app restarts without modifying the app bundle."
     ],
     "should_not_trigger": [
       "General Codex health or configuration debugging.",
@@ -31,6 +32,7 @@
       "Use built-in ImageGen only when a new raster asset is needed; copy accepted project-bound output into the prepared theme directory.",
       "Build a self-contained theme and run payload plus deterministic contract checks before any live change.",
       "Install without launching, preserve immutable recovery state, and obtain explicit authorization before restarting a running Codex app.",
+      "When restart persistence is explicitly authorized, install the user-level resident manager and hand off its disable path.",
       "Verify home, task, and New Task transition states; iterate one defect class at a time.",
       "Hand off theme source, evidence, backup location, and exact pause and restore commands."
     ],
@@ -38,6 +40,7 @@
       "Use artPlacement=hero by default; use all only when task-page readability is intentionally designed and verified.",
       "Keep logos and existing vector systems code-native; use ImageGen for raster creation or editing.",
       "Do not infer restart authorization from a request to design or install a theme.",
+      "Do not infer recurring resident-manager authorization from one-time restart authorization.",
       "Stop before mutation when app identity, loopback ownership, input safety, payload checks, or backups fail."
     ],
     "failure_modes": [
@@ -46,6 +49,7 @@
       "A task-page background reduces long-form reading contrast.",
       "A generated image remains referenced from an ephemeral generator directory.",
       "A running app is restarted without explicit authorization.",
+      "A resident manager is installed without recurring restart authorization or relaunches an app the user quit.",
       "Recovery evidence is overwritten, incomplete, or confused with the active theme.",
       "A foreign or remote DevTools target receives injected code.",
       "Unavailable live, ImageGen, viewport, or human evidence is reported as passed."
@@ -72,7 +76,9 @@
       "scripts/verify-dream-skin-macos.sh",
       "scripts/pause-dream-skin-macos.sh",
       "scripts/restore-dream-skin-macos.sh",
-      "scripts/restore-version-macos.sh"
+      "scripts/restore-version-macos.sh",
+      "scripts/resident-manager-macos.sh",
+      "scripts/install-resident-manager-macos.sh"
     ],
     "assets": [
       "assets/theme.json",

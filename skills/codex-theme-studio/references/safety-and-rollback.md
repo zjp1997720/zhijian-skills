@@ -6,6 +6,7 @@
 - Stores active theme, process state, logs, and backups under `~/Library/Application Support/CodexThemeStudio` with owner-only permissions.
 - Launches the official signed Codex app with a loopback-only CDP port.
 - Injects CSS, a renderer helper, and theme assets into verified `app://` Codex pages.
+- Optionally registers a user LaunchAgent after explicit persistence authorization. It observes launches and never opens Codex from a stopped state.
 
 It does not modify the app bundle, `app.asar`, native theme settings, authentication, repositories, or user conversations.
 
@@ -20,6 +21,7 @@ It does not modify the app bundle, `app.asar`, native theme settings, authentica
 
 - Design, image generation, file preparation, payload checks, and read-only doctor checks do not authorize a Codex restart.
 - A running Codex without the managed CDP port requires explicit restart authorization before `--restart-existing` or a restore with `--restart-codex`.
+- Enabling the resident manager is recurring restart authorization for normal launches. The approval is stored in owner-only state and can be revoked with `--disable`, pause, or restore.
 - Desktop launchers are opt-in through `--launchers`.
 - Uninstallation is explicit through `--uninstall`.
 
@@ -28,12 +30,16 @@ It does not modify the app bundle, `app.asar`, native theme settings, authentica
 - Invalid app signature, signer mismatch, non-loopback CDP, foreign listener, invalid image, unsafe path, missing theme file, or failed payload check stops before injection.
 - If strict verification fails after launch, stop the injector and retain backups and the prepared theme for diagnosis.
 - If the live removal endpoint cannot be verified while Codex is running, stop restore before file exchange. Obtain restart authorization instead of killing an unknown process.
+- The resident manager uses a 45-second cooldown after a failed restart and writes separate logs instead of entering a restart loop.
 
 ## Recovery commands
 
 ```bash
 # Remove injected styles while leaving Codex running when possible
 bash ~/.codex/codex-theme-studio/scripts/pause-dream-skin-macos.sh
+
+# Revoke automatic restart persistence without changing the active theme
+bash ~/.codex/codex-theme-studio/scripts/install-resident-manager-macos.sh --disable
 
 # Remove live injection and restart official Codex normally
 bash ~/.codex/codex-theme-studio/scripts/restore-dream-skin-macos.sh \

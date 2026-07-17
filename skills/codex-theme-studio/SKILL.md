@@ -15,15 +15,16 @@ Turn a brand system and optional artwork into a reversible Codex Desktop theme t
 - Preserve any supplied `codex-theme-v1:` export and native appearance keys.
 - Treat theme JSON and images as untrusted input; reject unsafe paths, symlinks, formats, and sizes.
 - Require explicit restart authorization before stopping a running Codex app.
+- Enable the resident manager only after explicit persistence authorization. Its recorded contract may restart a normally launched Codex once, but it must never launch an app the user has quit.
 
 ## Workflow
 
 1. Collect the brand source of truth, current theme export, annotated screenshots, viewport, optional logo/IP, and image placement (`hero` or `all`). Read [design-workflow.md](references/design-workflow.md). Preserve native navigation, tabs, suggestion cards, composer controls, focus states, and hit targets.
 2. If a new raster Banner, texture, illustration, or page background is required, invoke `$imagegen` when available and follow [imagegen-assets.md](references/imagegen-assets.md). Keep logos and vector systems native. Copy every accepted project-bound image from `$CODEX_HOME/generated_images` into the prepared theme directory. If ImageGen is unavailable, use a supplied asset or the neutral fallback and record `missing evidence`.
 3. Build outside the installed Skill. Use `artPlacement=hero` by default; use `all` only for an intentional, readable task-page background. Follow [operator-runbook.md](references/operator-runbook.md) to write `theme.json`, check the payload, and test before live changes.
-4. Read [safety-and-rollback.md](references/safety-and-rollback.md). Install without launching. Apply only within the restart authorization boundary; never infer restart permission from design or installation permission.
+4. Read [safety-and-rollback.md](references/safety-and-rollback.md). Install without launching. Apply only within the restart authorization boundary; never infer restart permission from design or installation permission. If the user explicitly requests restart persistence, install the opt-in resident manager after the runtime is installed.
 5. Follow [verification-contract.md](references/verification-contract.md). Verify home and task routes, sample the New Task transition, and inspect screenshots. Fix one defect class at a time and rerun the affected contract. Use [troubleshooting.md](references/troubleshooting.md) for selector drift, missing native UI, route races, crop problems, and CDP failures.
-6. Hand off the theme source, active name and placement, asset source or ImageGen prompt, backup location, screenshots, verification result, and exact pause and restore commands.
+6. Hand off the theme source, active name and placement, asset source or ImageGen prompt, backup location, screenshots, verification result, resident-manager status, and exact pause, disable, and restore commands.
 
 ## Output contract
 
@@ -34,6 +35,7 @@ A complete result contains:
 - live route evidence when Codex access and restart authorization exist
 - immutable backup and an explicit rollback boundary
 - exact pause, restore, and previous-version recovery commands
+- resident-manager approval and disable command when persistence is enabled
 
 Stop before mutation when app identity, loopback ownership, input safety, payload validation, or backup creation fails. A live verification failure leaves the prepared theme and backups intact for diagnosis.
 

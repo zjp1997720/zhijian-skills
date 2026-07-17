@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "mode": "task",
   "installed": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "stylePresent": true,
   "chromePresent": true,
   "chromePointerEvents": "none",

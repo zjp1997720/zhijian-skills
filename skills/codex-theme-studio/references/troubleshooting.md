@@ -28,6 +28,10 @@ Use `selected` as a quiet paper tone, keep a small radius, and use a subtle inse
 
 Check that Codex was launched through the managed start script and that the saved port is loopback-only. Do not attach to a foreign listener. If Codex was already open normally, obtain restart authorization and use `--restart-existing`.
 
+## Theme disappears after Codex restarts
+
+A normal app launch does not include the managed loopback endpoint, so runtime injection cannot reconnect. Enable the resident manager after explicit recurring-restart authorization. Check `resident-manager.log`, `resident-manager-error.log`, the owner-only approval file, and the LaunchAgent before changing the app or theme.
+
 ## Restore stops while Codex is running
 
 The saved CDP endpoint could not be verified. This is a safety stop. Ask for restart authorization, then use `--restart-codex`; do not kill a process based only on a stale PID.

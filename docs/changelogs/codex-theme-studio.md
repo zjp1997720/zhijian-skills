@@ -1,5 +1,12 @@
 # codex-theme-studio Changelog
 
+## 1.0.3 — 2026-07-17
+
+- Add an explicitly authorized macOS resident manager that restores the loopback endpoint and injector after a normal Codex launch.
+- Keep Codex stopped when the user quits it; the manager waits for the next user launch instead of relaunching the app.
+- Disable the resident manager before pause and restore, with a 45-second restart cooldown and official-runtime validation.
+- Add deterministic resident-manager safety and lifecycle tests.
+
 ## 1.0.2 — 2026-07-17
 
 - Keep the branded homepage Banner active after the user types and Codex unmounts its native suggestion cards.

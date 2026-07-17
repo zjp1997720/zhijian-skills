@@ -19,10 +19,12 @@
     {"text": "Make a restrained full-page background for Codex without reducing task-page readability.", "family": "full_page_art"},
     {"text": "The selected session rail, top tabs, and suggestion cards look wrong after theme injection. Fix the skin and re-verify native interactions.", "family": "injected_theme_repair"},
     {"text": "Restore my previous Codex appearance and preserve the custom theme so I can reapply it later.", "family": "theme_restore"},
+    {"text": "My Codex skin disappears whenever the app restarts. Make it restore automatically without patching app.asar.", "family": "restart_persistence"},
     {"text": "按我的品牌 DESIGN.md 给 Codex 重新设计一套皮肤，生成 Banner，安全注入，并保留一键还原能力。", "family": "cn_brand_to_theme"},
     {"text": "帮我修复 Codex 换肤后消失的顶部标签、首页功能卡和生硬的会话选中态。", "family": "cn_theme_repair"},
     {"text": "把这张 IP 形象做成适配 Codex 首页宽屏裁切的 Banner，再装进主题里。", "family": "cn_image_asset"},
-    {"text": "暂停当前 Codex 自定义皮肤，检查备份，然后恢复原来的主题配置。", "family": "cn_restore"}
+    {"text": "暂停当前 Codex 自定义皮肤，检查备份，然后恢复原来的主题配置。", "family": "cn_restore"},
+    {"text": "Codex 一重启皮肤就没了，帮我安全实现自动续载。", "family": "cn_restart_persistence"}
   ],
   "should_not_trigger": [
     {"text": "Run a general Codex health check and explain why the app is slow.", "family": "general_diagnostics"},

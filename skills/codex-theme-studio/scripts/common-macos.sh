@@ -26,10 +26,15 @@ INJECTOR_ERROR_LOG="$STATE_ROOT/injector-error.log"
 APP_LOG="$STATE_ROOT/codex-launch.log"
 APP_ERROR_LOG="$STATE_ROOT/codex-launch-error.log"
 START_ERROR_LOG="$STATE_ROOT/start-error.log"
+RESIDENT_MANAGER_LOG="$STATE_ROOT/resident-manager.log"
+RESIDENT_MANAGER_ERROR_LOG="$STATE_ROOT/resident-manager-error.log"
+RESIDENT_MANAGER_CONFIG="$STATE_ROOT/resident-manager.json"
+RESIDENT_MANAGER_PLIST="$HOME/Library/LaunchAgents/com.zhijian.codex-theme-studio.resident.plist"
+RESIDENT_MANAGER_JOB_LABEL="com.zhijian.codex-theme-studio.resident"
 CODEX_APP_JOB_LABEL="com.openai.codex-theme-studio.app"
 INJECTOR_JOB_LABEL="com.openai.codex-theme-studio.injector"
 EXPECTED_CODEX_TEAM_ID="${CODEX_EXPECTED_TEAM_ID:-2DC432GLL2}"
-SKIN_VERSION="1.0.2"
+SKIN_VERSION="1.0.3"
 
 fail() {
   local message="$*"
@@ -386,6 +391,50 @@ stop_recorded_injector() {
   while /bin/kill -0 "$pid" 2>/dev/null && [ "$SECONDS" -lt "$deadline" ]; do /bin/sleep 0.2; done
   /bin/kill -KILL "$pid" 2>/dev/null || true
   return 0
+}
+
+recorded_injector_is_running() {
+  [ -f "$STATE_PATH" ] || return 1
+  local pid
+  local command_line
+  pid="$(state_field injectorPid 2>/dev/null || true)"
+  case "$pid" in ''|0|*[!0-9]*) return 1 ;; esac
+  /bin/kill -0 "$pid" 2>/dev/null || return 1
+  command_line="$(/bin/ps -p "$pid" -o command= 2>/dev/null || true)"
+  case "$command_line" in
+    *"$INJECTOR"*--watch*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+resident_manager_enabled() {
+  [ -f "$RESIDENT_MANAGER_CONFIG" ] || return 1
+  ensure_node_runtime >/dev/null 2>&1 || return 1
+  "$NODE" -e '
+    const fs = require("node:fs");
+    try {
+      const value = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+      process.exit(value.schemaVersion === 1 && value.enabled === true && value.autoRestartNormalLaunch === true ? 0 : 1);
+    } catch { process.exit(1); }
+  ' "$RESIDENT_MANAGER_CONFIG"
+}
+
+resident_manager_port() {
+  ensure_node_runtime >/dev/null 2>&1 || return 1
+  "$NODE" -e '
+    const fs = require("node:fs");
+    const value = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+    const port = Number(value.port);
+    if (!Number.isInteger(port) || port < 1024 || port > 65535) process.exit(1);
+    process.stdout.write(String(port));
+  ' "$RESIDENT_MANAGER_CONFIG"
+}
+
+disable_resident_manager() {
+  local domain="gui/$(/usr/bin/id -u)"
+  /bin/launchctl bootout "$domain/$RESIDENT_MANAGER_JOB_LABEL" >/dev/null 2>&1 || true
+  /bin/launchctl remove "$RESIDENT_MANAGER_JOB_LABEL" >/dev/null 2>&1 || true
+  /bin/rm -f "$RESIDENT_MANAGER_CONFIG" "$RESIDENT_MANAGER_PLIST"
 }
 
 launch_injector_daemon() {
