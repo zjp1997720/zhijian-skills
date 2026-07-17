@@ -79,6 +79,21 @@ class SymlinkMigrationTests(unittest.TestCase):
             plan = plan_links(repo, [("codex", root)])
             self.assertEqual(plan["actions"][0]["status"], "healthy")
 
+    def test_unsupported_harness_copy_is_backed_up_and_removed(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            root = base / "claude"
+            self.make_repo(repo)
+            (root / "demo").mkdir(parents=True)
+            (root / "demo/SKILL.md").write_text("demo\n", encoding="utf-8")
+            with patch.dict(os.environ, {"XDG_STATE_HOME": str(base / "state")}):
+                plan = plan_links(repo, [("claude-code", root)])
+                self.assertEqual(plan["actions"][0]["status"], "remove-unsupported")
+                result = apply_links(plan, accept_differences=False)
+                self.assertFalse((root / "demo").exists())
+                self.assertTrue(Path(result["completed"][0]["backup"]).is_dir())
+
 
 if __name__ == "__main__":
     unittest.main()

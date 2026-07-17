@@ -60,10 +60,11 @@ def plan_links(repo: Path, roots: list[tuple[str, Path]]) -> dict[str, Any]:
     for harness, root in roots:
         root = Path(os.path.realpath(root))
         for record in records:
-            if harness not in record["harnesses"]:
-                continue
             canonical = (repo / record["path"]).resolve()
             entry = root / record["name"]
+            supported = harness in record["harnesses"]
+            if not supported and not entry.exists() and not entry.is_symlink():
+                continue
             action: dict[str, Any] = {
                 "harness": harness,
                 "root": str(root),
@@ -71,7 +72,9 @@ def plan_links(repo: Path, roots: list[tuple[str, Path]]) -> dict[str, Any]:
                 "entry": str(entry),
                 "canonical": str(canonical),
             }
-            if entry.is_symlink() and entry.resolve() == canonical:
+            if not supported:
+                action.update(status="remove-unsupported", different=True)
+            elif entry.is_symlink() and entry.resolve() == canonical:
                 action.update(status="healthy", different=False)
             elif not entry.exists() and not entry.is_symlink():
                 action.update(status="create", different=False)
@@ -124,6 +127,9 @@ def apply_links(plan: dict[str, Any], *, accept_differences: bool) -> dict[str, 
                 backup.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(str(entry), str(backup))
                 completed_action["backup"] = str(backup)
+            if action["status"] == "remove-unsupported":
+                completed.append(completed_action)
+                continue
             relative = os.path.relpath(canonical, entry.parent)
             entry.symlink_to(relative, target_is_directory=True)
             if not entry.is_symlink() or entry.resolve() != canonical:
