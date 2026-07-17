@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0.0",
+  "generated": true,
+  "canonical_repository": "zjp1997720/zhijian-skills",
+  "skill": "<skill-name>",
+  "version": "<version>",
+  "source_commit": "<commit>",
+  "payload_digest": "<sha256>",
+  "export_digest": "<sha256>",
+  "files": {}
+}
