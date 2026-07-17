@@ -9,7 +9,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { exec } from 'child_process';
+import { execFile } from 'child_process';
 import { marked } from 'marked';
 import yaml from 'js-yaml';
 import { glob } from 'glob';
@@ -1130,7 +1130,7 @@ async function main() {
       console.log(`4. Paste into WeChat Official Account editor`);
 
       // Auto-open in default browser (single file only)
-      exec(`open "${outputPath}"`, (err) => {
+      execFile('open', [outputPath], (err) => {
         if (err) console.error(`Warning: Could not auto-open browser: ${err.message}`);
       });
     }

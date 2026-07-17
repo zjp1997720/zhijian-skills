@@ -37,6 +37,7 @@ npx skills add zjp1997720/skill-open-sourcer --list
 - 发布前校验 skill 结构和 `npx skills` 发现能力。
 - 在安全通道可用时发布到 GitHub。
 - 输出安装命令、GitHub 元信息建议和发布文案。
+- 通过 Registry、独立版本、不可变发布候选、自动生成兼容镜像和可回滚的本地 Harness 链接，统一治理多 Skill 仓库。
 
 ## 原理
 
@@ -54,19 +55,19 @@ Use $skill-open-sourcer to package this local SKILL.md for npx skills installati
 Use $skill-open-sourcer to audit this skill before I share it publicly.
 ```
 
-## 仓库结构
+## 独立镜像结构
 
 ```text
 .
 ├── README.md
 ├── README.zh-CN.md
 ├── LICENSE
-├── SKILL.md
-├── agents/openai.yaml
-├── references/release-package.md
-└── scripts/
-    ├── check_release_env.py
-    └── scan_skill_release.py
+├── SOURCE.json
+└── skills/skill-open-sourcer/
+    ├── SKILL.md
+    ├── agents/openai.yaml
+    ├── references/
+    └── scripts/
 ```
 
 ## 许可证

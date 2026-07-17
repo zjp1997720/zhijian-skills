@@ -124,14 +124,14 @@
     {
       "name": "skill-open-sourcer",
       "lifecycle": "active",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "path": "skills/skill-open-sourcer",
       "mirror": "zjp1997720/skill-open-sourcer",
       "documentation": "docs/skills/skill-open-sourcer/README.md",
       "documentation_zh": "docs/skills/skill-open-sourcer/README.zh-CN.md",
       "changelog": "docs/changelogs/skill-open-sourcer.md",
-      "canonical_tag": "skill-open-sourcer/v1.1.0",
-      "mirror_tag": "v1.1.0",
+      "canonical_tag": "skill-open-sourcer/v1.1.1",
+      "mirror_tag": "v1.1.1",
       "validation": {
         "commands": [
           "python3 -m unittest discover -s skills/skill-open-sourcer/tests -v"
@@ -174,14 +174,14 @@
     {
       "name": "wechat-styler",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/wechat-styler",
       "mirror": "zjp1997720/wechat-styler",
       "documentation": "docs/skills/wechat-styler/README.md",
       "documentation_zh": "docs/skills/wechat-styler/README.zh-CN.md",
       "changelog": "docs/changelogs/wechat-styler.md",
-      "canonical_tag": "wechat-styler/v1.0.0",
-      "mirror_tag": "v1.0.0",
+      "canonical_tag": "wechat-styler/v1.0.1",
+      "mirror_tag": "v1.0.1",
       "validation": {
         "commands": [
           "npm test --prefix skills/wechat-styler"

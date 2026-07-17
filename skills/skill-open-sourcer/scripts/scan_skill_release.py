@@ -46,8 +46,8 @@ SUSPICIOUS_SUFFIXES = {
     ".log",
 }
 
-SUSPICIOUS_DIRS = {"__pycache__"}
-SKIP_DIRS = {".git", "node_modules", ".venv", "venv"}
+SUSPICIOUS_DIRS: set[str] = set()
+SKIP_DIRS = {".git", "node_modules", "__pycache__", ".venv", "venv"}
 MAX_TEXT_BYTES = 512_000
 MAX_FILE_BYTES = 2_000_000
 

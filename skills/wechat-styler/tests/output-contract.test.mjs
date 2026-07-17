@@ -24,3 +24,19 @@ test('renders the shared content root and metadata for downstream publishers', (
   assert.match(html, /<meta name="description" content="摘要测试">/);
   fs.rmSync(workDir, { recursive: true, force: true });
 });
+
+test('passes the generated path to the opener without shell interpretation', () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-output-safety-'));
+  const input = path.join(workDir, 'article.md');
+  const output = path.join(workDir, 'article.html"; touch INJECTED; #');
+  fs.writeFileSync(input, '# 正文\n');
+
+  const result = spawnSync(process.execPath, [
+    path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', output,
+  ], { cwd: workDir, encoding: 'utf8' });
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.equal(fs.existsSync(path.join(workDir, 'INJECTED')), false);
+  assert.equal(fs.existsSync(output), true);
+  fs.rmSync(workDir, { recursive: true, force: true });
+});

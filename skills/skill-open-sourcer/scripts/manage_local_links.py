@@ -113,7 +113,17 @@ def apply_links(plan: dict[str, Any], *, accept_differences: bool) -> dict[str, 
 
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     root = backup_root() / run_id
+    manifest_path = root / "manifest.json"
     completed: list[dict[str, Any]] = []
+    result: dict[str, Any] = {
+        "schema_version": "1.0.0",
+        "repo": plan["repo"],
+        "state": "running",
+        "completed": completed,
+        "in_progress": None,
+        "manifest": str(manifest_path),
+    }
+    write_json_atomic(manifest_path, result)
     try:
         for index, action in enumerate(plan["actions"]):
             if action["status"] == "healthy":
@@ -124,42 +134,98 @@ def apply_links(plan: dict[str, Any], *, accept_differences: bool) -> dict[str, 
             completed_action = dict(action)
             if entry.exists() or entry.is_symlink():
                 backup = root / f"{index:03d}-{action['harness']}-{action['skill']}"
+                completed_action["backup"] = str(backup)
+            result["in_progress"] = completed_action
+            write_json_atomic(manifest_path, result)
+            if entry.exists() or entry.is_symlink():
+                backup = Path(completed_action["backup"])
                 backup.parent.mkdir(parents=True, exist_ok=True)
                 shutil.move(str(entry), str(backup))
-                completed_action["backup"] = str(backup)
             if action["status"] == "remove-unsupported":
                 completed.append(completed_action)
+                result["in_progress"] = None
+                write_json_atomic(manifest_path, result)
                 continue
             relative = os.path.relpath(canonical, entry.parent)
             entry.symlink_to(relative, target_is_directory=True)
             if not entry.is_symlink() or entry.resolve() != canonical:
                 raise LinkError(f"link.verification: failed to link {entry}")
             completed.append(completed_action)
-    except Exception:
-        rollback_actions(completed)
+            result["in_progress"] = None
+            write_json_atomic(manifest_path, result)
+    except Exception as exc:
+        rollback_actions(completed, in_progress=result["in_progress"])
+        result["state"] = "rolled-back"
+        result["in_progress"] = None
+        result["error"] = str(exc)
+        write_json_atomic(manifest_path, result)
         raise
-    result = {"schema_version": "1.0.0", "repo": plan["repo"], "completed": completed}
-    result["manifest"] = str(root / "manifest.json")
-    write_json_atomic(Path(result["manifest"]), result)
+    result["state"] = "complete"
+    write_json_atomic(manifest_path, result)
     return result
 
 
-def rollback_actions(actions: list[dict[str, Any]]) -> None:
-    for action in reversed(actions):
+def canonical_link_is_intact(action: dict[str, Any]) -> bool:
+    entry = Path(action["entry"])
+    return entry.is_symlink() and entry.resolve() == Path(action["canonical"])
+
+
+def validate_rollback_state(action: dict[str, Any], *, in_progress: bool) -> None:
+    entry = Path(action["entry"])
+    backup = action.get("backup")
+    backup_exists = bool(backup and Path(backup).exists())
+    status = action["status"]
+
+    if in_progress and not backup_exists and status != "create":
+        return
+    if status == "remove-unsupported":
+        if entry.exists() or entry.is_symlink():
+            raise LinkError(f"link.rollback_conflict: {entry} was recreated after migration")
+        return
+    if entry.exists() or entry.is_symlink():
+        if not canonical_link_is_intact(action):
+            raise LinkError(f"link.rollback_conflict: {entry} changed after migration")
+    elif not in_progress:
+        raise LinkError(f"link.rollback_conflict: expected canonical link is missing: {entry}")
+
+
+def rollback_actions(
+    actions: list[dict[str, Any]], *, in_progress: dict[str, Any] | None = None
+) -> None:
+    journal = [(action, False) for action in actions]
+    if in_progress:
+        journal.append((in_progress, True))
+    for action, is_in_progress in journal:
+        validate_rollback_state(action, in_progress=is_in_progress)
+    for action, _ in reversed(journal):
         entry = Path(action["entry"])
-        if entry.is_symlink() or entry.is_file():
-            entry.unlink()
-        elif entry.is_dir():
-            shutil.rmtree(entry)
         backup = action.get("backup")
-        if backup and Path(backup).exists():
+        backup_exists = bool(backup and Path(backup).exists())
+        if canonical_link_is_intact(action):
+            entry.unlink()
+        if backup_exists:
             entry.parent.mkdir(parents=True, exist_ok=True)
             shutil.move(backup, entry)
 
 
 def rollback_manifest(path: Path) -> dict[str, Any]:
+    path = path.expanduser().resolve()
+    try:
+        relative = path.relative_to(backup_root().resolve())
+    except ValueError as exc:
+        raise LinkError(f"link.rollback_manifest_unsafe: {path}") from exc
+    if len(relative.parts) != 2 or relative.name != "manifest.json":
+        raise LinkError(f"link.rollback_manifest_unsafe: {path}")
     payload = json.loads(path.read_text(encoding="utf-8"))
-    rollback_actions(payload.get("completed", []))
+    if Path(payload.get("manifest", "")).expanduser().resolve() != path:
+        raise LinkError(f"link.rollback_manifest_mismatch: {path}")
+    if payload.get("state") == "rolled-back":
+        return payload
+    rollback_actions(
+        list(payload.get("completed", [])), in_progress=payload.get("in_progress")
+    )
+    payload["state"] = "rolled-back"
+    payload["in_progress"] = None
     payload["rolled_back"] = True
     write_json_atomic(path, payload)
     return payload

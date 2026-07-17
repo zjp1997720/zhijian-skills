@@ -106,6 +106,17 @@ class ReleasePlanTests(unittest.TestCase):
             self.assertEqual(first_data, second_data)
             self.assertEqual(first_data["releases"][0]["semver_reason"], "initial_baseline")
             self.assertTrue(first_data["releases"][0]["candidate_ref"].startswith("refs/zhijian-candidates/"))
+            release = first_data["releases"][0]
+            self.assertNotEqual(release["candidate_commit"], first_data["base_commit"])
+            self.assertEqual(
+                self.git(repo, "rev-parse", f"{release['candidate_commit']}^1"),
+                first_data["base_commit"],
+            )
+            self.assertEqual(
+                self.git(repo, "rev-parse", f"{release['candidate_commit']}^{{tree}}"),
+                self.git(repo, "rev-parse", f"{first_data['base_commit']}^{{tree}}"),
+            )
+            self.assertRegex(release["mirror_export_digest"], r"^[0-9a-f]{64}$")
 
             (repo / "skills/demo/SKILL.md").write_text("changed\n", encoding="utf-8")
             verify = subprocess.run(
@@ -116,6 +127,43 @@ class ReleasePlanTests(unittest.TestCase):
             )
             self.assertEqual(verify.returncode, 2)
             self.assertIn("plan.stale", verify.stderr)
+
+    def test_each_skill_gets_a_distinct_detached_candidate_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            self.make_repo(repo)
+            registry_path = repo / "registry/skills.json"
+            registry = json.loads(registry_path.read_text(encoding="utf-8"))
+            second = json.loads(json.dumps(registry["skills"][0]))
+            replacements = {
+                "name": "demo-two",
+                "path": "skills/demo-two",
+                "mirror": "owner/demo-two",
+                "documentation": "docs/skills/demo-two/README.md",
+                "documentation_zh": "docs/skills/demo-two/README.zh-CN.md",
+                "changelog": "docs/changelogs/demo-two.md",
+                "canonical_tag": "demo-two/v1.0.0",
+            }
+            second.update(replacements)
+            registry["skills"].append(second)
+            registry_path.write_text(json.dumps(registry), encoding="utf-8")
+            (repo / "skills/demo-two").mkdir()
+            (repo / "skills/demo-two/SKILL.md").write_text(
+                "---\nname: demo-two\ndescription: Demo two\n---\n", encoding="utf-8"
+            )
+            (repo / "docs/skills/demo-two").mkdir()
+            (repo / "docs/skills/demo-two/README.md").write_text("# Demo two\n", encoding="utf-8")
+            (repo / "docs/skills/demo-two/README.zh-CN.md").write_text("# 演示二\n", encoding="utf-8")
+            (repo / "docs/changelogs/demo-two.md").write_text("# Changelog\n", encoding="utf-8")
+            self.git(repo, "add", ".")
+            self.git(repo, "commit", "-m", "add second skill")
+            plan_path = Path(tmp) / "plan.json"
+            self.assertEqual(self.plan(repo, plan_path).returncode, 0)
+            plan = json.loads(plan_path.read_text(encoding="utf-8"))
+            candidates = {release["candidate_commit"] for release in plan["releases"]}
+            self.assertEqual(len(candidates), 2)
+            self.assertNotIn(plan["base_commit"], candidates)
 
     def test_ledger_updates_are_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -141,6 +189,53 @@ class ReleasePlanTests(unittest.TestCase):
             self.assertEqual(first.returncode, 0, first.stderr)
             self.assertEqual(second.returncode, 0, second.stderr)
             self.assertEqual(json.loads(first.stdout), json.loads(second.stdout))
+
+    def test_cleanup_deletes_only_the_planned_candidate_ref(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            self.make_repo(repo)
+            plan_path = Path(tmp) / "plan.json"
+            self.assertEqual(self.plan(repo, plan_path).returncode, 0)
+            plan = json.loads(plan_path.read_text(encoding="utf-8"))
+            reference = plan["releases"][0]["candidate_ref"]
+            cleanup = subprocess.run(
+                [sys.executable, str(SCRIPT), "cleanup", "--plan", str(plan_path)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(cleanup.returncode, 0, cleanup.stderr)
+            self.assertIn(reference, json.loads(cleanup.stdout)["removed"])
+            self.assertNotEqual(
+                subprocess.run(
+                    ["git", "rev-parse", "--verify", reference],
+                    cwd=repo,
+                    capture_output=True,
+                    check=False,
+                ).returncode,
+                0,
+            )
+
+    def test_cleanup_rejects_refs_outside_candidate_namespace(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            self.make_repo(repo)
+            plan_path = Path(tmp) / "plan.json"
+            self.assertEqual(self.plan(repo, plan_path).returncode, 0)
+            plan = json.loads(plan_path.read_text(encoding="utf-8"))
+            plan["releases"][0]["candidate_ref"] = "refs/heads/main"
+            plan_path.write_text(json.dumps(plan), encoding="utf-8")
+            cleanup = subprocess.run(
+                [sys.executable, str(SCRIPT), "cleanup", "--plan", str(plan_path)],
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+            self.assertEqual(cleanup.returncode, 2)
+            self.assertIn("cleanup.ref_unsafe", cleanup.stderr)
+            self.assertEqual(self.git(repo, "rev-parse", "refs/heads/main"), self.git(repo, "rev-parse", "HEAD"))
 
 
 if __name__ == "__main__":

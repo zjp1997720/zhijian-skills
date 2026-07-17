@@ -47,6 +47,9 @@ class SymlinkMigrationTests(unittest.TestCase):
                 plan = plan_links(repo, [("codex", root)])
                 self.assertFalse(plan["actions"][0]["different"])
                 result = apply_links(plan, accept_differences=False)
+                persisted = json.loads(Path(result["manifest"]).read_text(encoding="utf-8"))
+                self.assertEqual(persisted["state"], "complete")
+                self.assertIsNone(persisted["in_progress"])
                 entry = root / "demo"
                 self.assertTrue(entry.is_symlink())
                 self.assertEqual(entry.resolve(), (repo / "skills/demo").resolve())
@@ -93,6 +96,61 @@ class SymlinkMigrationTests(unittest.TestCase):
                 result = apply_links(plan, accept_differences=False)
                 self.assertFalse((root / "demo").exists())
                 self.assertTrue(Path(result["completed"][0]["backup"]).is_dir())
+
+    def test_failed_link_is_rolled_back_and_journaled(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            root = base / "codex"
+            self.make_repo(repo)
+            (root / "demo").mkdir(parents=True)
+            (root / "demo/SKILL.md").write_text("demo\n", encoding="utf-8")
+            with patch.dict(os.environ, {"XDG_STATE_HOME": str(base / "state")}):
+                plan = plan_links(repo, [("codex", root)])
+                with patch.object(Path, "symlink_to", side_effect=OSError("simulated crash")):
+                    with self.assertRaisesRegex(OSError, "simulated crash"):
+                        apply_links(plan, accept_differences=False)
+                self.assertFalse((root / "demo").is_symlink())
+                self.assertEqual(
+                    (root / "demo/SKILL.md").read_text(encoding="utf-8"), "demo\n"
+                )
+                manifests = list((base / "state/zhijian-skills/link-backups").glob("*/manifest.json"))
+                self.assertEqual(len(manifests), 1)
+                payload = json.loads(manifests[0].read_text(encoding="utf-8"))
+                self.assertEqual(payload["state"], "rolled-back")
+                self.assertIsNone(payload["in_progress"])
+
+    def test_rollback_refuses_to_delete_user_content_created_after_migration(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            repo = base / "repo"
+            root = base / "codex"
+            self.make_repo(repo)
+            with patch.dict(os.environ, {"XDG_STATE_HOME": str(base / "state")}):
+                result = apply_links(
+                    plan_links(repo, [("codex", root)]), accept_differences=False
+                )
+                entry = root / "demo"
+                entry.unlink()
+                entry.mkdir()
+                (entry / "user-file.md").write_text("keep me\n", encoding="utf-8")
+                with self.assertRaisesRegex(RuntimeError, "link.rollback_conflict"):
+                    rollback_manifest(Path(result["manifest"]))
+                self.assertEqual(
+                    (entry / "user-file.md").read_text(encoding="utf-8"), "keep me\n"
+                )
+
+    def test_rollback_rejects_manifest_outside_managed_backup_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            manifest = base / "untrusted.json"
+            manifest.write_text(
+                json.dumps({"manifest": str(manifest), "completed": []}),
+                encoding="utf-8",
+            )
+            with patch.dict(os.environ, {"XDG_STATE_HOME": str(base / "state")}):
+                with self.assertRaisesRegex(RuntimeError, "link.rollback_manifest_unsafe"):
+                    rollback_manifest(manifest)
 
 
 if __name__ == "__main__":

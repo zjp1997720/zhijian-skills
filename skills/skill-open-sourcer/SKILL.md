@@ -82,7 +82,7 @@ Hard stop when any of these appear in the source package:
 - API keys, tokens, private keys, cookies, credentials, `.env` files, or auth config.
 - Absolute personal paths such as `/Users/...`, `/home/...`, local vault paths, or machine-only cache paths that would confuse public users.
 - Customer names, private company data, internal docs, private URLs, unpublished prompts, or paid/proprietary assets without a clear license.
-- Symlinks that escape the package, large binaries, databases, logs, browser profiles, `.DS_Store`, `__pycache__`, or generated cache files.
+- Symlinks that escape the package, large binaries, databases, logs, browser profiles, `.DS_Store`, or generated artifacts outside ignored cache directories. Exclude `__pycache__` and dependency caches from every release package; their local presence alone is not a release blocker.
 - Unclear license or ownership for bundled code/assets.
 
 Low-risk auto publish is allowed only when the scanner and manual review find no blockers. If the target GitHub repo already exists with unrelated content, stop and ask before overwriting or force pushing.

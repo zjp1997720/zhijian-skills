@@ -18,7 +18,7 @@ from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
-from export_mirror import file_manifest, manifest_digest  # noqa: E402
+from export_mirror import export_mirror, file_manifest, manifest_digest  # noqa: E402
 
 
 SENSITIVE_ENV_FRAGMENTS = (
@@ -86,6 +86,52 @@ def executor_identity(repo: Path) -> dict[str, Any]:
         "release_engine_digest": file_digest(Path(__file__).resolve()),
         "mirror_exporter_digest": file_digest(SCRIPT_DIR / "export_mirror.py"),
         "portfolio_validator_digest": file_digest(SCRIPT_DIR / "portfolio.py"),
+    }
+
+
+def create_candidate_commit(
+    repo: Path, *, head: str, plan_id: str, skill: str, version: str
+) -> str:
+    """Create one deterministic detached commit for a Skill release candidate."""
+    tree = git(repo, "rev-parse", f"{head}^{{tree}}").stdout.strip()
+    source_date = git(repo, "show", "-s", "--format=%aI", head).stdout.strip()
+    environment = sanitized_environment()
+    environment.update(
+        {
+            "GIT_AUTHOR_NAME": "Zhijian Skills Release Planner",
+            "GIT_AUTHOR_EMAIL": "releases@zhijian-skills.local",
+            "GIT_AUTHOR_DATE": source_date,
+            "GIT_COMMITTER_NAME": "Zhijian Skills Release Planner",
+            "GIT_COMMITTER_EMAIL": "releases@zhijian-skills.local",
+            "GIT_COMMITTER_DATE": source_date,
+        }
+    )
+    message = f"release candidate: {skill} v{version}\n\nPlan: {plan_id}\n"
+    result = subprocess.run(
+        ["git", "commit-tree", tree, "-p", head],
+        cwd=repo,
+        input=message,
+        text=True,
+        capture_output=True,
+        check=True,
+        env=environment,
+    )
+    return result.stdout.strip()
+
+
+def mirror_preview(repo: Path, record: dict[str, Any], head: str) -> dict[str, str]:
+    """Render the mirror in isolation and freeze its payload digests in the plan."""
+    with tempfile.TemporaryDirectory() as temporary:
+        metadata = export_mirror(
+            repo,
+            record["name"],
+            Path(temporary) / record["name"],
+            source_commit=head,
+            version=record["version"],
+        )
+    return {
+        "mirror_export_digest": metadata["export_digest"],
+        "mirror_payload_digest": metadata["payload_digest"],
     }
 
 
@@ -170,6 +216,7 @@ def build_release_plan(repo: Path, *, excluded: set[str] | None = None) -> dict[
             "validation_commands": record.get("validation", {}).get("commands", []),
             "status": "prepared",
         }
+        payload.update(mirror_preview(repo, record, head))
         releases.append(payload)
 
     seed = {
@@ -181,11 +228,17 @@ def build_release_plan(repo: Path, *, excluded: set[str] | None = None) -> dict[
     }
     plan_id = digest_json(seed)[:20]
     for release in releases:
-        release["candidate_commit"] = head
         release["candidate_ref"] = f"refs/zhijian-candidates/{plan_id}/{release['skill']}"
+        release["candidate_commit"] = create_candidate_commit(
+            repo,
+            head=head,
+            plan_id=plan_id,
+            skill=release["skill"],
+            version=release["version"],
+        )
     plan = dict(seed, plan_id=plan_id, releases=releases)
     for release in releases:
-        git(repo, "update-ref", release["candidate_ref"], head)
+        git(repo, "update-ref", release["candidate_ref"], release["candidate_commit"])
     return plan
 
 
@@ -209,6 +262,40 @@ def verify_plan(plan: dict[str, Any]) -> None:
         )
         if current_docs != release["documentation_digest"]:
             raise ReleaseError(f"plan.stale: documentation changed for {release['skill']}")
+        preview = mirror_preview(repo, record, plan["base_commit"])
+        if preview["mirror_export_digest"] != release["mirror_export_digest"]:
+            raise ReleaseError(f"plan.stale: mirror export changed for {release['skill']}")
+        if preview["mirror_payload_digest"] != release["mirror_payload_digest"]:
+            raise ReleaseError(f"plan.stale: mirror payload changed for {release['skill']}")
+        candidate = git(
+            repo, "rev-parse", "--verify", "--quiet", release["candidate_ref"], check=False
+        ).stdout.strip()
+        if candidate != release["candidate_commit"]:
+            raise ReleaseError(f"plan.stale: candidate ref changed for {release['skill']}")
+        parent = git(repo, "rev-parse", f"{candidate}^1").stdout.strip()
+        candidate_tree = git(repo, "rev-parse", f"{candidate}^{{tree}}").stdout.strip()
+        base_tree = git(repo, "rev-parse", f"{plan['base_commit']}^{{tree}}").stdout.strip()
+        if parent != plan["base_commit"] or candidate_tree != base_tree:
+            raise ReleaseError(f"plan.stale: candidate commit changed for {release['skill']}")
+
+
+def cleanup_candidates(plan: dict[str, Any]) -> list[str]:
+    """Delete only candidate refs that still point to the plan's frozen commits."""
+    repo = Path(plan["repository"]).resolve()
+    expected_prefix = f"refs/zhijian-candidates/{plan['plan_id']}/"
+    removed: list[str] = []
+    for release in plan["releases"]:
+        reference = release["candidate_ref"]
+        if not reference.startswith(expected_prefix):
+            raise ReleaseError(f"cleanup.ref_unsafe: refusing to delete {reference}")
+        current = git(repo, "rev-parse", "--verify", "--quiet", reference, check=False)
+        if current.returncode != 0:
+            continue
+        if current.stdout.strip() != release["candidate_commit"]:
+            raise ReleaseError(f"cleanup.ref_changed: refusing to delete {reference}")
+        git(repo, "update-ref", "-d", reference, release["candidate_commit"])
+        removed.append(reference)
+    return removed
 
 
 def state_root() -> Path:
@@ -256,6 +343,8 @@ def build_parser() -> argparse.ArgumentParser:
     record.add_argument("--plan", required=True)
     record.add_argument("--skill", required=True)
     record.add_argument("--step", required=True)
+    cleanup = subparsers.add_parser("cleanup")
+    cleanup.add_argument("--plan", required=True)
     return parser
 
 
@@ -276,10 +365,13 @@ def main() -> int:
         elif args.command == "verify":
             verify_plan(read_plan(args.plan))
             print("Release plan is current and executable.")
-        else:
+        elif args.command == "record-step":
             plan = read_plan(args.plan)
             verify_plan(plan)
             print(json.dumps(update_ledger(plan, args.skill, args.step), ensure_ascii=False, sort_keys=True))
+        else:
+            removed = cleanup_candidates(read_plan(args.plan))
+            print(json.dumps({"removed": removed}, ensure_ascii=False, sort_keys=True))
     except (ReleaseError, OSError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
         print(str(exc), file=sys.stderr)
         return 2

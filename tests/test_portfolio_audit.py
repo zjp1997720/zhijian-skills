@@ -129,6 +129,17 @@ class PortfolioAuditTest(unittest.TestCase):
             self.assertEqual(2, result.returncode)
             self.assertIn("private_path", result.stdout)
 
+    def test_generated_python_cache_does_not_block_local_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            skill = self.write_repo(root)
+            cache = skill / "scripts" / "__pycache__"
+            cache.mkdir(parents=True)
+            (cache / "worker.cpython-314.pyc").write_bytes(b"generated")
+            result = self.run_tool("audit", "--repo", str(root), "--strict", "--json")
+            self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+            self.assertNotIn("suspicious_directory", result.stdout)
+
     def test_undeclared_executable_capability_blocks_portfolio(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

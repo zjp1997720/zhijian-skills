@@ -36,6 +36,7 @@ After installing, ask Codex to use `$skill-open-sourcer` with a local `SKILL.md`
 - Validates the packaged skill before publishing.
 - Publishes through GitHub when a safe publishing surface is available.
 - Produces install instructions, GitHub metadata recommendations, and launch copy.
+- Governs multi-Skill portfolios through a Registry, independent versions, immutable release candidates, generated compatibility mirrors, and reversible local Harness links.
 
 ## How It Works
 
@@ -53,19 +54,19 @@ Use $skill-open-sourcer to package this local SKILL.md for npx skills installati
 Use $skill-open-sourcer to audit this skill before I share it publicly.
 ```
 
-## Repository Layout
+## Standalone Mirror Layout
 
 ```text
 .
 ├── README.md
 ├── README.zh-CN.md
 ├── LICENSE
-├── SKILL.md
-├── agents/openai.yaml
-├── references/release-package.md
-└── scripts/
-    ├── check_release_env.py
-    └── scan_skill_release.py
+├── SOURCE.json
+└── skills/skill-open-sourcer/
+    ├── SKILL.md
+    ├── agents/openai.yaml
+    ├── references/
+    └── scripts/
 ```
 
 ## License
