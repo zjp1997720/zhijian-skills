@@ -1,6 +1,20 @@
 # Enterprise Clone Builder
 
-> Build a structured enterprise digital twin knowledge base from company materials + public information.
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Enterprise Clone Builder turns company evidence into a structured digital twin">
+</p>
+
+<p align="center"><strong>Build a structured enterprise digital twin from local company materials and carefully scoped public evidence.</strong></p>
+
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/enterprise-clone-builder">Canonical source</a> · <a href="https://github.com/zjp1997720/enterprise-clone-builder">Standalone mirror</a></p>
+
+Use it when a delivery team needs to turn scattered company materials into a reusable, source-traceable knowledge repository.
+
+## Agent Install
+
+```bash
+npx skills add zjp1997720/enterprise-clone-builder -g -a codex --skill enterprise-clone-builder -y
+```
 
 ## What it does
 
@@ -26,7 +40,7 @@ The quality ceiling of an enterprise AI avatar depends on the quality of materia
 
 This skill is for **service providers** who build enterprise avatars for clients. It standardizes the build process from a half-day manual operation to 1-2 hours, with consistent quality.
 
-## How it works (4 steps)
+## How it works (5 stages)
 
 | Step | What happens |
 |---|---|
@@ -54,7 +68,7 @@ Categories: company intro / product materials / customer cases / published conte
 
 | File | Purpose |
 |---|---|
-| `SKILL.md` | Main entry: 4-step workflow, inputs, outputs, completion criteria |
+| `SKILL.md` | Main entry: 5-stage workflow, inputs, outputs, completion criteria |
 | `references/directory-spec.md` | Standard directory structure specification |
 | `references/local-intake-guide.md` | Local material classification rules + client intake checklist |
 | `references/extraction-guide.md` | Structured extraction specification |

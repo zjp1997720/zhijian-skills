@@ -1,5 +1,10 @@
 # wechat-styler Changelog
 
+## 1.0.2 — 2026-07-17
+
+- Add a brand-aligned light README hero and polish the bilingual feature explanation.
+- Correct workflow numbering and the documented standalone mirror layout.
+
 ## 1.0.1 — 2026-07-17
 
 - Open generated HTML with an argument-safe subprocess call so crafted output paths cannot be interpreted by a shell.

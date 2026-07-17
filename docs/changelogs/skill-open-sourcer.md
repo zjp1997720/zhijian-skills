@@ -1,5 +1,11 @@
 # skill-open-sourcer Changelog
 
+## 1.1.2 — 2026-07-17
+
+- Export documentation SVG assets into standalone mirrors and record them in `SOURCE.json`.
+- Add deterministic, brand-aligned README visuals and asset safety tests.
+- Keep README links valid in both the canonical Portfolio and generated mirror.
+
 ## 1.1.1 — 2026-07-17
 
 - Create one deterministic detached candidate commit per Skill and freeze mirror export digests in every release plan.

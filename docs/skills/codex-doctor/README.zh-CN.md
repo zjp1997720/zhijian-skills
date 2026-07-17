@@ -1,8 +1,14 @@
 # Codex Doctor
 
-[English](README.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Codex Doctor 诊断上下文、配置和工作区漂移">
+</p>
 
-一套面向 Codex 的只读健康检查 Skill，用来发现安装、配置和工作区上下文中的真实问题。
+<p align="center"><strong>一套面向 Codex 的只读健康检查 Skill，用来发现安装、配置和工作区上下文中的真实问题。</strong></p>
+
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-doctor">统一源码</a> · <a href="https://github.com/zjp1997720/codex-doctor">独立镜像</a></p>
+
+当 Codex 的行为不稳定、配置来源不清或工作区疑似漂移时，先用它采集证据，再决定是否修改。
 
 ## 安装
 
@@ -70,7 +76,7 @@ python3 scripts/scan_workspace.py --cwd /path/to/project --compact-json
 
 删除或改写规则、修改配置、启停组件、移动文件，都需要逐 finding 明确授权。扫描器只报告疑似密钥所在位置和键名，不输出真实值。
 
-完整的证据门、授权门、并发校验和复测规则见[检查与修复政策](references/checks-and-repair-policy.md)。
+完整的证据门、授权门、并发校验和复测规则见统一源码中的[检查与修复政策](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-doctor/references/checks-and-repair-policy.md)。
 
 ## 仓库结构
 

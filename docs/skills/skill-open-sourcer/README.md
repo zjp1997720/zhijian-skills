@@ -1,8 +1,14 @@
 # Skill Open Sourcer
 
-[中文文档](README.zh-CN.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Skill Open Sourcer verifies a complete Skill before canonical and mirror release">
+</p>
 
-Turn a local agent skill into a clean, installable open-source GitHub repository.
+<p align="center"><strong>Turn a local Agent Skill into a complete, verified, installable open-source release.</strong></p>
+
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/skill-open-sourcer">Canonical source</a> · <a href="https://github.com/zjp1997720/skill-open-sourcer">Standalone mirror</a></p>
+
+Use it when a local Skill is ready to become a complete, independently installable, and verifiably released open-source package.
 
 ## Agent Install
 
@@ -44,7 +50,7 @@ The skill treats open-sourcing as a gated release workflow, not a file copy.
 
 It first checks the local environment, then scans the source skill for release blockers such as secrets, personal absolute paths, cache files, large generated artifacts, and unclear assets. When the package is safe, it builds a small release repository with the agent-facing skill and human-facing docs in the right place for the release shape.
 
-The detailed agent workflow lives in [`SKILL.md`](SKILL.md). Humans usually do not need to run the helper scripts directly.
+The detailed agent workflow lives in the canonical [`SKILL.md`](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/skill-open-sourcer/SKILL.md). Humans usually do not need to run the helper scripts directly.
 
 ## Example Requests
 

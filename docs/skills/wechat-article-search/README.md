@@ -1,8 +1,14 @@
 # WeChat Article Search
 
-[中文文档](README.zh-CN.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="WeChat Article Search turns a keyword into structured public-account article results">
+</p>
 
-Search WeChat public account (公众号) articles by keyword. Returns structured JSON with title, summary, publish time, source account, and link — no API key required.
+<p align="center"><strong>Search WeChat public-account articles by keyword and return structured evidence without an API key.</strong></p>
+
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-article-search">Canonical source</a> · <a href="https://github.com/zjp1997720/wechat-article-search">Standalone mirror</a></p>
+
+Use it for topic discovery when you know the keyword but not which WeChat public account published the useful article.
 
 ## Agent Install
 
@@ -63,12 +69,13 @@ First run: `npm install` in the skill folder to pull `cheerio`.
 .
 ├── README.md
 ├── README.zh-CN.md
+├── assets/readme/hero.svg
 ├── LICENSE
-├── SKILL.md
-├── agents/openai.yaml
-├── package.json
-└── scripts/
-    └── search_wechat.js
+└── skills/wechat-article-search/
+    ├── SKILL.md
+    ├── agents/openai.yaml
+    ├── package.json
+    └── scripts/search_wechat.js
 ```
 
 ## License

@@ -1,8 +1,14 @@
 # Codex Model Routing Team
 
-[中文说明](README.zh-CN.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="A lead Codex task routes bounded background work to explicit models">
+</p>
 
-Give Codex a bounded team of background tasks, each with an explicit model and reasoning level, while one lead agent keeps control of planning, integration, and verification.
+<p align="center"><strong>Give Codex a bounded team of model-routed background tasks while one lead keeps control of planning, integration, and verification.</strong></p>
+
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-model-routing-team">Canonical source</a> · <a href="https://github.com/zjp1997720/codex-model-routing-team">Standalone mirror</a></p>
+
+Use it for complex parallel work when one lead Agent should plan and integrate while bounded background tasks run on explicitly chosen models.
 
 ## Install
 

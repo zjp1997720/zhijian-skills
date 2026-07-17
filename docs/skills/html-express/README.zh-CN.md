@@ -1,8 +1,14 @@
-# html-express
+# HTML Express
 
-`html-express` 是一个 Agent Skill，用来把信息密集的内容整理成一个干净、自包含、可双击打开的 HTML 文件。
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="HTML Express 把高密度素材转换成结构化单文件报告">
+</p>
 
-适合调研报告、对比矩阵、清单、时间线、数据看板、决策页和视觉化总结。它解决的问题很简单：当 Markdown 变成一堵文字墙时，用 HTML 让信息重新变得可读。
+<p align="center"><strong>把高密度信息整理成清晰、自包含、双击即可打开的 HTML 报告。</strong></p>
+
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/html-express">统一源码</a> · <a href="https://github.com/zjp1997720/html-express">独立镜像</a></p>
+
+适合调研报告、对比矩阵、清单、时间线、数据看板、决策页和视觉化总结。当 Markdown 变成一堵文字墙时，用 HTML 让信息重新变得可读。
 
 ## 它做什么
 

@@ -15,7 +15,7 @@ SCRIPT = ROOT / "skills/skill-open-sourcer/scripts/export_mirror.py"
 class MirrorExportTests(unittest.TestCase):
     def make_repo(self, root: Path) -> None:
         (root / "skills/demo/references").mkdir(parents=True)
-        (root / "docs/skills/demo").mkdir(parents=True)
+        (root / "docs/skills/demo/assets/readme").mkdir(parents=True)
         (root / "docs/changelogs").mkdir(parents=True)
         (root / "skills/demo/SKILL.md").write_text(
             "---\nname: demo\ndescription: Demo Skill\n---\n\n"
@@ -27,8 +27,17 @@ class MirrorExportTests(unittest.TestCase):
         (root / "skills/demo/node_modules/dependency/index.js").write_text(
             "generated dependency\n", encoding="utf-8"
         )
-        (root / "docs/skills/demo/README.md").write_text("# Demo\n", encoding="utf-8")
-        (root / "docs/skills/demo/README.zh-CN.md").write_text("# 演示\n", encoding="utf-8")
+        (root / "docs/skills/demo/README.md").write_text(
+            '<img src="./assets/readme/hero.svg" alt="Demo">\n\n# Demo\n', encoding="utf-8"
+        )
+        (root / "docs/skills/demo/README.zh-CN.md").write_text(
+            '<img src="./assets/readme/hero.svg" alt="演示">\n\n# 演示\n', encoding="utf-8"
+        )
+        (root / "docs/skills/demo/assets/readme/hero.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360">'
+            "<title>Demo</title><desc>Demo hero</desc></svg>\n",
+            encoding="utf-8",
+        )
         (root / "docs/changelogs/demo.md").write_text("# Changelog\n", encoding="utf-8")
         (root / "LICENSE").write_text("MIT\n", encoding="utf-8")
         (root / "CONTRIBUTING.md").write_text("Contribute upstream.\n", encoding="utf-8")
@@ -66,6 +75,7 @@ class MirrorExportTests(unittest.TestCase):
             metadata = json.loads((destination / "SOURCE.json").read_text(encoding="utf-8"))
             self.assertEqual(metadata["skill"], "demo")
             self.assertTrue((destination / "skills/demo/references/policy.md").is_file())
+            self.assertTrue((destination / "assets/readme/hero.svg").is_file())
             self.assertFalse((destination / "skills/demo/node_modules").exists())
             self.assertTrue((destination / ".github/workflows/redirect-contributions.yml").is_file())
             first_digest = metadata["export_digest"]

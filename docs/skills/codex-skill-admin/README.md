@@ -1,12 +1,14 @@
 # Codex Skill Admin
 
-[![skills.sh](https://skills.sh/b/zjp1997720/codex-skill-admin)](https://skills.sh/zjp1997720/codex-skill-admin)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Codex Skill Admin controls which local Skills are active and prompt-visible">
+</p>
 
-[中文文档](README.zh-CN.md)
+<p align="center"><strong>Audit, disable, restore, and verify local Codex Skills without uninstalling them.</strong></p>
 
-Codex Skill Admin is a Codex-only agent skill for auditing, disabling, restoring, and verifying local Codex skills through Codex's local app-server API.
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-skill-admin">Canonical source</a> · <a href="https://github.com/zjp1997720/codex-skill-admin">Standalone mirror</a></p>
 
-Use it when you want to reduce prompt token load by disabling unused skills without uninstalling them.
+Use it when you want to reduce prompt token load by disabling unused Skills through Codex's local `app-server` API.
 
 ## Agent Install
 

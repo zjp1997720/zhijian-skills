@@ -1,10 +1,14 @@
 # Codex Skill Admin
 
-[English](README.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Codex Skill Admin 管理本地 Skill 的启用和提示词可见状态">
+</p>
 
-Codex Skill Admin 是一个 Codex 专用的 agent skill，用来通过 Codex 本地 `app-server` API 审计、关闭、恢复和验证本机 Codex skills。
+<p align="center"><strong>审计、关闭、恢复并验证本地 Codex Skill，不用卸载，也不丢失恢复能力。</strong></p>
 
-适合在你想节省 prompt token 时使用：它会帮你找出近期没有使用证据的 skill，并把它们关闭，而不是卸载。
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-skill-admin">统一源码</a> · <a href="https://github.com/zjp1997720/codex-skill-admin">独立镜像</a></p>
+
+适合在你想节省 prompt token 时使用：它会通过 Codex 本地 `app-server` API 找出近期没有使用证据的 Skill，并把它们关闭，而不是卸载。
 
 ## Agent 安装
 

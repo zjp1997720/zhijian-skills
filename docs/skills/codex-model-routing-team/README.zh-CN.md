@@ -1,8 +1,14 @@
 # Codex 模型路由团队
 
-[English](README.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Codex 主任务把受控的后台工作分配给明确模型">
+</p>
 
-让 Codex 主 Agent 继续负责规划、集成和验收，同时把复杂任务交给可以分别指定模型与推理强度的独立后台任务。
+<p align="center"><strong>主 Agent 负责规划、集成和验收；复杂工作交给分别指定模型与推理强度的独立后台任务。</strong></p>
+
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-model-routing-team">统一源码</a> · <a href="https://github.com/zjp1997720/codex-model-routing-team">独立镜像</a></p>
+
+适合复杂并行任务：主 Agent 负责规划、文件所有权和集成，独立后台任务按明确模型与推理强度执行。
 
 ## 安装
 

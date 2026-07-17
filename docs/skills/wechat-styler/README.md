@@ -1,8 +1,14 @@
 # WeChat Styler
 
-[中文文档](README.zh-CN.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="WeChat Styler transforms Markdown blocks into a polished WeChat article page">
+</p>
 
-Turn Markdown into paste-ready, inline-styled HTML for the WeChat Official Account editor. 8 crafted themes, deterministic compatibility validation, optional component layer, zero external CSS.
+<p align="center"><strong>Turn Markdown into paste-ready WeChat HTML with crafted themes, deterministic validation, and zero external CSS.</strong></p>
+
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-styler">Canonical source</a> · <a href="https://github.com/zjp1997720/wechat-styler">Standalone mirror</a></p>
+
+Use it when an article is finished in Markdown and needs a stable, branded, paste-ready WeChat layout.
 
 ## Agent Install
 
@@ -23,7 +29,7 @@ Works with any agent runtime that loads SKILL.md (Codex, Claude Code, OpenCode, 
 - **8 themes with real typographic personality.** Not color swaps. `magazine-ink` is a classic editorial layout; `magazine-indigo` is a research column with uppercase headings; `magazine-forest` is a field note with centered kaishu titles. Each theme has its own heading structure, quote style, list marker, and code block.
 - **Optional component layer (`--components`).** 6 structured components (keyquote, callout, warning, steps, flow cards, compare cards) for visualizing comparisons, flows, and key points. Off by default — pure markdown rendering for 90% of cases; opt in when you need structured presentation. All components use section + flex, no tables (WeChat editor adds grey borders to tables).
 - **Deterministic compatibility gate.** `validate.mjs` scans the output for everything WeChat strips (`<style>`, `class`, `rgba()`, `position:fixed`, `@media`…) and prints a line-numbered report. The rules are enforced by script, not by the model remembering them.
-- **Placeholder mechanism.** Write `【插入:screenshot】` on its own line while images aren't ready; it renders as a dashed placeholder box. Swap it for `![alt](url)` when the asset lands.
+- **Placeholder mechanism.** Write `【插入:screenshot】` on its own line while images aren't ready; it renders as a dashed placeholder box. Replace it with a normal Markdown image link when the asset lands.
 
 ## How It Works
 
@@ -32,7 +38,7 @@ Three pieces, each with one job:
 1. **`scripts/convert.mjs`** — parses Markdown via `marked`, applies a theme-specific renderer (6 renderer presets backing 8 themes), emits fully inlined HTML.
 2. **`scripts/components.mjs`** — optional component layer (6 structured components, enabled with `--components`).
 3. **`scripts/validate.mjs`** — scans the output against WeChat compatibility rules (5 ERROR classes, 3 WARN classes). Runs as a soft gate inside convert, or standalone with exit codes for CI.
-3. **`themes/*.yaml`** — one file per theme. Colors, fonts, type scale, rhythm, block style. Add a theme by dropping in a new YAML; no code change needed.
+4. **`themes/*.yaml`** — one file per theme. Colors, fonts, type scale, rhythm, block style. Add a theme by dropping in a new YAML; no code change needed.
 
 The design choice that matters: **themes are YAML parameters, not heavy component libraries.** This keeps the skill light, stable across models, and easy to extend. When a theme needs structural difference (like the 5 magazine variants), the renderer branches on `magazine_variant` — same script, different layout personality.
 
@@ -57,26 +63,17 @@ To make it yours: copy `themes/zhijian.yaml`, change the colors, fonts, and `top
 
 ## Repository Layout
 
-```
+```text
 .
-├── README.md                # This file
-├── README.zh-CN.md          # Chinese README
-├── LICENSE                  # MIT
-├── SKILL.md                 # Agent-facing workflow
-├── agents/openai.yaml       # Agent UI metadata
-├── scripts/
-│   ├── convert.mjs          # Markdown → WeChat HTML
-│   ├── validate.mjs         # WeChat compatibility gate
-│   └── generate-preview.mjs # Theme preview page generator
-└── themes/
-    ├── zhijian.yaml         # Example brand theme (warm parchment)
-    ├── kami.yaml            # Paper document
-    ├── magazine-ink.yaml    # Editorial classic
-    ├── magazine-indigo.yaml # Research column
-    ├── magazine-forest.yaml # Field note
-    ├── elegant.yaml         # Vintage essay
-    ├── modern.yaml          # Technical tutorial
-    └── minimal.yaml         # Minimal notes
+├── README.md
+├── README.zh-CN.md
+├── assets/readme/hero.svg
+├── LICENSE
+└── skills/wechat-styler/
+    ├── SKILL.md                 # Agent-facing workflow
+    ├── agents/openai.yaml       # Agent UI metadata
+    ├── scripts/                 # Conversion, components, validation
+    └── themes/                  # Eight YAML themes
 ```
 
 ## Design Notes

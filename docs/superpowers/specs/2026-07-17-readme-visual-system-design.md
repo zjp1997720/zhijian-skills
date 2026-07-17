@@ -14,29 +14,32 @@ Give the canonical Portfolio and all eight public Skills a coherent, recognizabl
 
 ## Visual Direction
 
-Use a warm technical editorial system derived from the existing Zhijian identity:
+Use the light-theme `ZhiJian AI Warm Paper OS` defined in the brand `DESIGN.md`:
 
-- Background: warm charcoal and paper ivory.
-- Core accents: terracotta orange and structural ink blue.
-- Skill accents: one restrained domain color per Skill.
-- Typography: GitHub-safe system fonts, including `PingFang SC` for Chinese fallback.
-- Shapes: 22-unit corner radius, one-pixel structural strokes, generous margins.
-- Composition: a sparse identity block paired with one real domain diagram.
+- Background: parchment `#F5F4ED`; never full-canvas pure white or charcoal.
+- Cards: ivory `#FAF9F5` with cream borders `#E5E3D8` and no heavy shadow.
+- Core accents: structural ink blue `#1B365D` and restrained action clay `#B85235`, each below five percent of the canvas.
+- Typography: Source Han Serif / Songti / Georgia serif stack; SF Mono for commands and identifiers.
+- Shapes: 8–12 unit working radii, one-pixel structural strokes, generous margins.
+- Composition: a quiet editorial identity block paired with one factual domain diagram.
+- Dark surfaces: allowed only inside a small code or terminal block when the domain requires it.
 
 Each hero uses a 1200 by 360 viewBox, includes `<title>` and `<desc>`, carries a complete background, keeps essential text at least 16 units, and contains no scripts, remote assets, external fonts, animation, or fragile filters.
 
 ## Skill Motifs
 
-| Skill | Accent | Domain motif |
-| --- | --- | --- |
-| `codex-doctor` | mint | diagnostic pulse and verified checks |
-| `codex-model-routing-team` | violet | lead node routing bounded worker threads |
-| `codex-skill-admin` | amber | visible/disabled Skill registry controls |
-| `enterprise-clone-builder` | green | source materials becoming a structured knowledge tree |
-| `html-express` | cyan | dense notes becoming a composed HTML information board |
-| `skill-open-sourcer` | coral | local Skill passing gates into canonical and mirror releases |
-| `wechat-article-search` | jade | query flowing through article results and source labels |
-| `wechat-styler` | rose | Markdown blocks becoming a polished WeChat article page |
+| Skill | Domain motif |
+| --- | --- |
+| `codex-doctor` | diagnostic pulse and verified checks |
+| `codex-model-routing-team` | lead node routing bounded worker threads |
+| `codex-skill-admin` | visible/disabled Skill registry controls |
+| `enterprise-clone-builder` | source materials becoming a structured knowledge tree |
+| `html-express` | dense notes becoming a composed HTML information board |
+| `skill-open-sourcer` | local Skill passing gates into canonical and mirror releases |
+| `wechat-article-search` | query flowing through article results and source labels |
+| `wechat-styler` | Markdown blocks becoming a polished WeChat article page |
+
+Skill identity comes from the information diagram, not from adding new decorative colours outside the brand palette.
 
 ## Asset Layout
 

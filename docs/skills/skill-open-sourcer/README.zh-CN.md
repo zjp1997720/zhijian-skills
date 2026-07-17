@@ -1,8 +1,14 @@
 # Skill Open Sourcer
 
-[English](README.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Skill Open Sourcer 在统一源码和镜像发布前验证完整 Skill">
+</p>
 
-把本地 agent skill 打包成可安装、可发布、可开源的 GitHub 仓库。
+<p align="center"><strong>把本地 Agent Skill 做成完整、经过验证、可以可靠安装的开源发布包。</strong></p>
+
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/skill-open-sourcer">统一源码</a> · <a href="https://github.com/zjp1997720/skill-open-sourcer">独立镜像</a></p>
+
+当一个本地 Skill 已经成熟，需要变成载荷完整、可独立安装、发布可验证的开源包时使用它。
 
 ## Agent 安装
 
@@ -45,7 +51,7 @@ npx skills add zjp1997720/skill-open-sourcer --list
 
 它会先检查环境，再扫描源 skill 的公开风险。风险通过后，才创建一个干净的发布仓库，并按发布形态把 agent 要读的内容和人要看的说明放在合适位置。
 
-具体执行流程写在 [`SKILL.md`](SKILL.md)。人通常不需要手动跑里面的辅助脚本。
+具体执行流程写在统一源码的 [`SKILL.md`](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/skill-open-sourcer/SKILL.md)。人通常不需要手动运行其中的辅助脚本。
 
 ## 示例请求
 

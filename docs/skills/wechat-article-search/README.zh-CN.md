@@ -1,8 +1,14 @@
 # 微信公众号文章搜索
 
-[English](README.md)
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="微信公众号文章搜索把关键词转换成结构化文章结果">
+</p>
 
-按关键词搜索微信公众号文章，返回结构化 JSON：标题、摘要、发布时间、来源公众号、链接。无需 API Key。
+<p align="center"><strong>按关键词发现公众号文章，输出标题、摘要、时间、来源和链接；无需 API Key。</strong></p>
+
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-article-search">统一源码</a> · <a href="https://github.com/zjp1997720/wechat-article-search">独立镜像</a></p>
+
+适合只知道主题关键词、还不知道哪一个公众号发布过相关内容的发现式调研。
 
 ## 安装
 
@@ -69,12 +75,13 @@ node scripts/search_wechat.js "<关键词>" [-n <数量>] [-o <输出文件>] [-
 .
 ├── README.md
 ├── README.zh-CN.md
+├── assets/readme/hero.svg
 ├── LICENSE
-├── SKILL.md
-├── agents/openai.yaml
-├── package.json
-└── scripts/
-    └── search_wechat.js
+└── skills/wechat-article-search/
+    ├── SKILL.md
+    ├── agents/openai.yaml
+    ├── package.json
+    └── scripts/search_wechat.js
 ```
 
 ## 许可证

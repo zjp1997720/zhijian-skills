@@ -1,6 +1,12 @@
-# html-express
+# HTML Express
 
-`html-express` is an agent skill for turning dense information into one clean, self-contained HTML file.
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="HTML Express transforms dense source material into a structured standalone report">
+</p>
+
+<p align="center"><strong>Turn dense information into one clear, self-contained HTML report that opens anywhere.</strong></p>
+
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/html-express">Canonical source</a> · <a href="https://github.com/zjp1997720/html-express">Standalone mirror</a></p>
 
 Use it when Markdown would become a wall of text: research reports, comparison matrices, checklists, timelines, data dashboards, decision pages, and visual summaries.
 

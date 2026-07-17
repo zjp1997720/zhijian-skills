@@ -5,14 +5,14 @@
     {
       "name": "codex-doctor",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/codex-doctor",
       "mirror": "zjp1997720/codex-doctor",
       "documentation": "docs/skills/codex-doctor/README.md",
       "documentation_zh": "docs/skills/codex-doctor/README.zh-CN.md",
       "changelog": "docs/changelogs/codex-doctor.md",
-      "canonical_tag": "codex-doctor/v1.0.0",
-      "mirror_tag": "v1.0.0",
+      "canonical_tag": "codex-doctor/v1.0.1",
+      "mirror_tag": "v1.0.1",
       "validation": {
         "commands": [
           "python3 -m unittest discover -s skills/codex-doctor/tests -v"
@@ -30,14 +30,14 @@
     {
       "name": "codex-model-routing-team",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/codex-model-routing-team",
       "mirror": "zjp1997720/codex-model-routing-team",
       "documentation": "docs/skills/codex-model-routing-team/README.md",
       "documentation_zh": "docs/skills/codex-model-routing-team/README.zh-CN.md",
       "changelog": "docs/changelogs/codex-model-routing-team.md",
-      "canonical_tag": "codex-model-routing-team/v1.0.0",
-      "mirror_tag": "v1.0.0",
+      "canonical_tag": "codex-model-routing-team/v1.0.1",
+      "mirror_tag": "v1.0.1",
       "validation": {
         "commands": [
           "python3 -m unittest tests.skills.test_codex_model_routing_team -v"
@@ -55,14 +55,14 @@
     {
       "name": "codex-skill-admin",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/codex-skill-admin",
       "mirror": "zjp1997720/codex-skill-admin",
       "documentation": "docs/skills/codex-skill-admin/README.md",
       "documentation_zh": "docs/skills/codex-skill-admin/README.zh-CN.md",
       "changelog": "docs/changelogs/codex-skill-admin.md",
-      "canonical_tag": "codex-skill-admin/v1.0.0",
-      "mirror_tag": "v1.0.0",
+      "canonical_tag": "codex-skill-admin/v1.0.1",
+      "mirror_tag": "v1.0.1",
       "validation": {
         "commands": [],
         "live_smoke": "python3 skills/codex-skill-admin/scripts/codex_skill_admin.py verify --cwd ."
@@ -78,14 +78,14 @@
     {
       "name": "enterprise-clone-builder",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/enterprise-clone-builder",
       "mirror": "zjp1997720/enterprise-clone-builder",
       "documentation": "docs/skills/enterprise-clone-builder/README.md",
       "documentation_zh": "docs/skills/enterprise-clone-builder/README.zh-CN.md",
       "changelog": "docs/changelogs/enterprise-clone-builder.md",
-      "canonical_tag": "enterprise-clone-builder/v1.0.0",
-      "mirror_tag": "v1.0.0",
+      "canonical_tag": "enterprise-clone-builder/v1.0.1",
+      "mirror_tag": "v1.0.1",
       "validation": {
         "commands": [],
         "live_smoke": null
@@ -101,14 +101,14 @@
     {
       "name": "html-express",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/html-express",
       "mirror": "zjp1997720/html-express",
       "documentation": "docs/skills/html-express/README.md",
       "documentation_zh": "docs/skills/html-express/README.zh-CN.md",
       "changelog": "docs/changelogs/html-express.md",
-      "canonical_tag": "html-express/v1.0.0",
-      "mirror_tag": "v1.0.0",
+      "canonical_tag": "html-express/v1.0.1",
+      "mirror_tag": "v1.0.1",
       "validation": {
         "commands": [],
         "live_smoke": null
@@ -124,14 +124,14 @@
     {
       "name": "skill-open-sourcer",
       "lifecycle": "active",
-      "version": "1.1.1",
+      "version": "1.1.2",
       "path": "skills/skill-open-sourcer",
       "mirror": "zjp1997720/skill-open-sourcer",
       "documentation": "docs/skills/skill-open-sourcer/README.md",
       "documentation_zh": "docs/skills/skill-open-sourcer/README.zh-CN.md",
       "changelog": "docs/changelogs/skill-open-sourcer.md",
-      "canonical_tag": "skill-open-sourcer/v1.1.1",
-      "mirror_tag": "v1.1.1",
+      "canonical_tag": "skill-open-sourcer/v1.1.2",
+      "mirror_tag": "v1.1.2",
       "validation": {
         "commands": [
           "python3 -m unittest discover -s skills/skill-open-sourcer/tests -v"
@@ -149,14 +149,14 @@
     {
       "name": "wechat-article-search",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/wechat-article-search",
       "mirror": "zjp1997720/wechat-article-search",
       "documentation": "docs/skills/wechat-article-search/README.md",
       "documentation_zh": "docs/skills/wechat-article-search/README.zh-CN.md",
       "changelog": "docs/changelogs/wechat-article-search.md",
-      "canonical_tag": "wechat-article-search/v1.0.0",
-      "mirror_tag": "v1.0.0",
+      "canonical_tag": "wechat-article-search/v1.0.1",
+      "mirror_tag": "v1.0.1",
       "validation": {
         "commands": [
           "npm test --prefix skills/wechat-article-search"
@@ -174,14 +174,14 @@
     {
       "name": "wechat-styler",
       "lifecycle": "active",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "path": "skills/wechat-styler",
       "mirror": "zjp1997720/wechat-styler",
       "documentation": "docs/skills/wechat-styler/README.md",
       "documentation_zh": "docs/skills/wechat-styler/README.zh-CN.md",
       "changelog": "docs/changelogs/wechat-styler.md",
-      "canonical_tag": "wechat-styler/v1.0.1",
-      "mirror_tag": "v1.0.1",
+      "canonical_tag": "wechat-styler/v1.0.2",
+      "mirror_tag": "v1.0.2",
       "validation": {
         "commands": [
           "npm test --prefix skills/wechat-styler"

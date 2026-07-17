@@ -193,6 +193,14 @@ def export_mirror(
         copy_function=shutil.copy2,
         ignore=EXPORT_IGNORES,
     )
+    readme_assets = repo / f"docs/skills/{skill}/assets/readme"
+    if readme_assets.is_dir():
+        shutil.copytree(
+            readme_assets,
+            destination / "assets/readme",
+            copy_function=shutil.copy2,
+            ignore=EXPORT_IGNORES,
+        )
     workflow = destination / ".github/workflows/redirect-contributions.yml"
     workflow.parent.mkdir(parents=True, exist_ok=True)
     workflow.write_text(WORKFLOW, encoding="utf-8")
