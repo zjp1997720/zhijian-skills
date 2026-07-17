@@ -1,5 +1,5 @@
 const EXPECTED = {
-  version: "1.0.3",
+  version: "1.0.4",
   background: "#F5F3EE",
   sidebar: "#F1F0EC",
   selected: "#E8E6DC",

@@ -89,6 +89,8 @@ assert.match(verification, /export function colorsMatch/);
 assert.match(renderer, /const syncHomeRoute = \(\) =>/);
 assert.match(renderer, /classList\.toggle\("dream-skin-home", candidate === home\)/);
 assert.match(renderer, /suggestions\?\.parentElement\?\.parentElement/);
+assert.match(renderer, /Math\.min\(960,\s*homeRect\.width \* 0\.6\)/);
+assert.doesNotMatch(renderer, /rect\.width >= homeRect\.width \* 0\.6/);
 assert.match(renderer, /syncHomeRoute\(\)/);
 assert.doesNotMatch(renderer, /attributes:\s*true/);
 assert.match(renderer, /requestAnimationFrame/);

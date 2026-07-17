@@ -34,7 +34,7 @@ RESIDENT_MANAGER_JOB_LABEL="com.zhijian.codex-theme-studio.resident"
 CODEX_APP_JOB_LABEL="com.openai.codex-theme-studio.app"
 INJECTOR_JOB_LABEL="com.openai.codex-theme-studio.injector"
 EXPECTED_CODEX_TEAM_ID="${CODEX_EXPECTED_TEAM_ID:-2DC432GLL2}"
-SKIN_VERSION="1.0.3"
+SKIN_VERSION="1.0.4"
 
 fail() {
   local message="$*"

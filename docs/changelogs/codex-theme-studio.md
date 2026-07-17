@@ -1,5 +1,10 @@
 # codex-theme-studio Changelog
 
+## 1.0.4 — 2026-07-17
+
+- 修复超宽 Codex 窗口从任务页进入 New Chat 后，首页内容轨道因比例门槛高于其固定宽度上限而无法识别、Banner 只能在缩放窗口后出现的问题。
+- 新增超宽首页轨道识别回归断言，同时保留窄窗口的比例判断。
+
 ## 1.0.3 — 2026-07-17
 
 - Add an explicitly authorized macOS resident manager that restores the loopback endpoint and injector after a normal Codex launch.

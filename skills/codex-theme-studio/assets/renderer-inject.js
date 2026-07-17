@@ -165,9 +165,10 @@
     if (!shell && home && feature) {
       const homeRect = home.getBoundingClientRect();
       const maxHeight = Math.min(560, Math.max(192, homeRect.height * 0.75));
+      const minRailWidth = Math.min(960, homeRect.width * 0.6);
       for (let node = feature.parentElement; node && node !== home; node = node.parentElement) {
         const rect = node.getBoundingClientRect();
-        if (rect.width >= homeRect.width * 0.6 && rect.height >= 40 && rect.height <= maxHeight) shell = node;
+        if (rect.width >= minRailWidth && rect.height >= 40 && rect.height <= maxHeight) shell = node;
       }
     }
 
