@@ -6,14 +6,14 @@
 
 <p align="center"><strong>Turn Markdown into paste-ready WeChat HTML with crafted themes, deterministic validation, and zero external CSS.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-styler">Canonical source</a> · <a href="https://github.com/zjp1997720/wechat-styler">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-styler">Canonical source</a></p>
 
 Use it when an article is finished in Markdown and needs a stable, branded, paste-ready WeChat layout.
 
 ## Agent Install
 
 ```bash
-npx skills add zjp1997720/wechat-styler -g -a codex --skill wechat-styler -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill wechat-styler -y
 ```
 
 Works with any agent runtime that loads SKILL.md (Codex, Claude Code, OpenCode, etc.).

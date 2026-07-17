@@ -6,14 +6,14 @@
 
 <p align="center"><strong>Audit Codex installation health and workspace context quality without changing local files.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-doctor">Canonical source</a> · <a href="https://github.com/zjp1997720/codex-doctor">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-doctor">Canonical source</a></p>
 
 Run it when Codex behaves inconsistently and you need evidence before changing configuration or workspace files.
 
 ## Agent Install
 
 ```bash
-npx skills add zjp1997720/codex-doctor -g -a codex --skill codex-doctor -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill codex-doctor -y
 ```
 
 Then invoke `$codex-doctor`, or ask Codex to run a workspace health check.

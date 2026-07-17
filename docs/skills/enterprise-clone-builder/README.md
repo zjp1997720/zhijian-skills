@@ -6,14 +6,14 @@
 
 <p align="center"><strong>Build a structured enterprise digital twin from local company materials and carefully scoped public evidence.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/enterprise-clone-builder">Canonical source</a> · <a href="https://github.com/zjp1997720/enterprise-clone-builder">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/enterprise-clone-builder">Canonical source</a></p>
 
 Use it when a delivery team needs to turn scattered company materials into a reusable, source-traceable knowledge repository.
 
 ## Agent Install
 
 ```bash
-npx skills add zjp1997720/enterprise-clone-builder -g -a codex --skill enterprise-clone-builder -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill enterprise-clone-builder -y
 ```
 
 ## What it does

@@ -6,14 +6,14 @@
 
 <p align="center"><strong>按关键词发现公众号文章，输出标题、摘要、时间、来源和链接；无需 API Key。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-article-search">统一源码</a> · <a href="https://github.com/zjp1997720/wechat-article-search">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-article-search">统一源码</a></p>
 
 适合只知道主题关键词、还不知道哪一个公众号发布过相关内容的发现式调研。
 
 ## 安装
 
 ```bash
-npx skills add zjp1997720/wechat-article-search -g -a codex --skill wechat-article-search -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill wechat-article-search -y
 ```
 
 ## 环境要求

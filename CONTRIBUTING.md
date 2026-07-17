@@ -1,6 +1,6 @@
 # Contributing
 
-Open Issues and pull requests in this repository. Standalone Skill repositories are compatibility mirrors and do not accept source changes.
+Open Issues and pull requests in this repository. All public Skills are developed, released, and installed from this canonical Portfolio; do not create standalone Skill repositories.
 
 ## Pull requests
 

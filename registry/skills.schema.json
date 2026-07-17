@@ -7,7 +7,7 @@
   "required": ["schema_version", "skills"],
   "properties": {
     "schema_version": {
-      "const": "1.0.0"
+      "const": "2.0.0"
     },
     "skills": {
       "type": "array",
@@ -20,12 +20,10 @@
           "lifecycle",
           "version",
           "path",
-          "mirror",
           "documentation",
           "documentation_zh",
           "changelog",
           "canonical_tag",
-          "mirror_tag",
           "validation",
           "capabilities",
           "harnesses"
@@ -46,10 +44,6 @@
             "type": "string",
             "pattern": "^skills/[a-z0-9-]+$"
           },
-          "mirror": {
-            "type": "string",
-            "pattern": "^zjp1997720/[a-z0-9-]+$"
-          },
           "documentation": {
             "type": "string",
             "pattern": "^docs/skills/[a-z0-9-]+/README\\.md$"
@@ -63,9 +57,6 @@
             "pattern": "^docs/changelogs/[a-z0-9-]+\\.md$"
           },
           "canonical_tag": {
-            "type": "string"
-          },
-          "mirror_tag": {
             "type": "string"
           },
           "validation": {

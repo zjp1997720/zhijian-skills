@@ -1,4 +1,4 @@
 interface:
   display_name: "Skill Open Sourcer"
   short_description: "Open-source a local skill"
-  default_prompt: "Use $skill-open-sourcer to publish this local skill as an open-source GitHub repo."
+  default_prompt: "Use $skill-open-sourcer to add and publish this local Skill through the canonical zjp1997720/zhijian-skills portfolio."

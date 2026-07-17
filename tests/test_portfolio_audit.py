@@ -59,12 +59,10 @@ class PortfolioAuditTest(unittest.TestCase):
             "lifecycle": "retired" if retired else "active",
             "version": "1.0.0",
             "path": "skills/demo-skill",
-            "mirror": "owner/demo-skill",
             "documentation": "docs/skills/demo-skill/README.md",
             "documentation_zh": "docs/skills/demo-skill/README.zh-CN.md",
             "changelog": "docs/changelogs/demo-skill.md",
             "canonical_tag": "demo-skill/v1.0.0",
-            "mirror_tag": "v1.0.0",
             "validation": {"commands": [], "live_smoke": None},
             "capabilities": capabilities
             or {
@@ -81,7 +79,7 @@ class PortfolioAuditTest(unittest.TestCase):
         )
         return skill
 
-    def test_validate_skill_preserves_single_skill_mode(self) -> None:
+    def test_validate_skill_accepts_an_import_candidate(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             skill = self.write_skill(Path(tmp))
             result = self.run_tool("validate-skill", str(skill), "--json")

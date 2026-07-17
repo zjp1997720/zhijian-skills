@@ -22,12 +22,10 @@ REQUIRED_RECORD_FIELDS = {
     "lifecycle",
     "version",
     "path",
-    "mirror",
     "documentation",
     "documentation_zh",
     "changelog",
     "canonical_tag",
-    "mirror_tag",
     "validation",
     "capabilities",
     "harnesses",
@@ -272,7 +270,7 @@ def load_registry(repo: Path) -> tuple[list[dict[str, Any]], list[dict[str, Any]
     issues: list[dict[str, Any]] = []
     for index, record in enumerate(records):
         issues.extend(validate_record_shape(record, index))
-    for key in ("name", "path", "mirror"):
+    for key in ("name", "path"):
         values = [
             record.get(key)
             for record in records

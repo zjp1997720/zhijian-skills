@@ -41,12 +41,10 @@ class ReleasePlanTests(unittest.TestCase):
                     "lifecycle": "active",
                     "version": "1.0.0",
                     "path": "skills/demo",
-                    "mirror": "owner/demo",
                     "documentation": "docs/skills/demo/README.md",
                     "documentation_zh": "docs/skills/demo/README.zh-CN.md",
                     "changelog": "docs/changelogs/demo.md",
                     "canonical_tag": "demo/v1.0.0",
-                    "mirror_tag": "v1.0.0",
                     "validation": {"commands": [], "live_smoke": None},
                     "capabilities": {
                         "network": "none",
@@ -116,7 +114,9 @@ class ReleasePlanTests(unittest.TestCase):
                 self.git(repo, "rev-parse", f"{release['candidate_commit']}^{{tree}}"),
                 self.git(repo, "rev-parse", f"{first_data['base_commit']}^{{tree}}"),
             )
-            self.assertRegex(release["mirror_export_digest"], r"^[0-9a-f]{64}$")
+            self.assertNotIn("mirror", release)
+            self.assertNotIn("mirror_tag", release)
+            self.assertNotIn("mirror_export_digest", release)
 
             (repo / "skills/demo/SKILL.md").write_text("changed\n", encoding="utf-8")
             verify = subprocess.run(
@@ -139,7 +139,6 @@ class ReleasePlanTests(unittest.TestCase):
             replacements = {
                 "name": "demo-two",
                 "path": "skills/demo-two",
-                "mirror": "owner/demo-two",
                 "documentation": "docs/skills/demo-two/README.md",
                 "documentation_zh": "docs/skills/demo-two/README.zh-CN.md",
                 "changelog": "docs/changelogs/demo-two.md",
@@ -182,7 +181,7 @@ class ReleasePlanTests(unittest.TestCase):
                 "--skill",
                 "demo",
                 "--step",
-                "mirror-pushed",
+                "canonical-pushed",
             ]
             first = subprocess.run(command, text=True, capture_output=True, env=env, check=False)
             second = subprocess.run(command, text=True, capture_output=True, env=env, check=False)

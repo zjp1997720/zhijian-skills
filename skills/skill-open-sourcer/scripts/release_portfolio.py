@@ -18,9 +18,6 @@ from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
-from export_mirror import export_mirror, file_manifest, manifest_digest  # noqa: E402
-
-
 SENSITIVE_ENV_FRAGMENTS = (
     "TOKEN",
     "PASSWORD",
@@ -36,6 +33,34 @@ SENSITIVE_ENV_FRAGMENTS = (
 
 class ReleaseError(RuntimeError):
     pass
+
+
+IGNORED_PARTS = {
+    ".git",
+    "__pycache__",
+    "node_modules",
+    "coverage",
+    "dist",
+    "reports",
+}
+
+
+def file_manifest(root: Path) -> dict[str, str]:
+    result: dict[str, str] = {}
+    if not root.exists():
+        return result
+    for path in sorted(root.rglob("*")):
+        if not path.is_file() or any(part in IGNORED_PARTS for part in path.parts):
+            continue
+        relative = path.relative_to(root).as_posix()
+        if path.name == ".DS_Store" or path.suffix == ".pyc":
+            continue
+        result[relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return result
+
+
+def manifest_digest(manifest: dict[str, str]) -> str:
+    return hashlib.sha256(canonical_json(manifest).encode("utf-8")).hexdigest()
 
 
 def canonical_json(payload: Any) -> str:
@@ -61,7 +86,7 @@ def worktree_is_clean(repo: Path) -> bool:
 
 
 def path_digest(path: Path) -> str:
-    return manifest_digest(file_manifest(path, exclude_source=False))
+    return manifest_digest(file_manifest(path))
 
 
 def file_digest(path: Path) -> str:
@@ -84,7 +109,6 @@ def executor_identity(repo: Path) -> dict[str, Any]:
         "registry_schema_digest": file_digest(repo / "registry/skills.schema.json"),
         "registry_digest": file_digest(repo / "registry/skills.json"),
         "release_engine_digest": file_digest(Path(__file__).resolve()),
-        "mirror_exporter_digest": file_digest(SCRIPT_DIR / "export_mirror.py"),
         "portfolio_validator_digest": file_digest(SCRIPT_DIR / "portfolio.py"),
     }
 
@@ -117,22 +141,6 @@ def create_candidate_commit(
         env=environment,
     )
     return result.stdout.strip()
-
-
-def mirror_preview(repo: Path, record: dict[str, Any], head: str) -> dict[str, str]:
-    """Render the mirror in isolation and freeze its payload digests in the plan."""
-    with tempfile.TemporaryDirectory() as temporary:
-        metadata = export_mirror(
-            repo,
-            record["name"],
-            Path(temporary) / record["name"],
-            source_commit=head,
-            version=record["version"],
-        )
-    return {
-        "mirror_export_digest": metadata["export_digest"],
-        "mirror_payload_digest": metadata["payload_digest"],
-    }
 
 
 def sanitized_environment(environment: dict[str, str] | None = None) -> dict[str, str]:
@@ -201,8 +209,6 @@ def build_release_plan(repo: Path, *, excluded: set[str] | None = None) -> dict[
             "skill": record["name"],
             "version": record["version"],
             "canonical_tag": record["canonical_tag"],
-            "mirror_tag": record["mirror_tag"],
-            "mirror": record["mirror"],
             "source_commit": head,
             "content_digest": path_digest(repo / record["path"]),
             "documentation_digest": digest_json(
@@ -216,7 +222,6 @@ def build_release_plan(repo: Path, *, excluded: set[str] | None = None) -> dict[
             "validation_commands": record.get("validation", {}).get("commands", []),
             "status": "prepared",
         }
-        payload.update(mirror_preview(repo, record, head))
         releases.append(payload)
 
     seed = {
@@ -262,11 +267,6 @@ def verify_plan(plan: dict[str, Any]) -> None:
         )
         if current_docs != release["documentation_digest"]:
             raise ReleaseError(f"plan.stale: documentation changed for {release['skill']}")
-        preview = mirror_preview(repo, record, plan["base_commit"])
-        if preview["mirror_export_digest"] != release["mirror_export_digest"]:
-            raise ReleaseError(f"plan.stale: mirror export changed for {release['skill']}")
-        if preview["mirror_payload_digest"] != release["mirror_payload_digest"]:
-            raise ReleaseError(f"plan.stale: mirror payload changed for {release['skill']}")
         candidate = git(
             repo, "rev-parse", "--verify", "--quiet", release["candidate_ref"], check=False
         ).stdout.strip()

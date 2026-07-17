@@ -6,7 +6,7 @@
 
 <p align="center"><strong>Give Codex a bounded team of model-routed background tasks while one lead keeps control of planning, integration, and verification.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-model-routing-team">Canonical source</a> · <a href="https://github.com/zjp1997720/codex-model-routing-team">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-model-routing-team">Canonical source</a></p>
 
 Use it for complex parallel work when one lead Agent should plan and integrate while bounded background tasks run on explicitly chosen models.
 
@@ -15,20 +15,21 @@ Use it for complex parallel work when one lead Agent should plan and integrate w
 The standard `skills` CLI shorthand is valid:
 
 ```bash
-npx skills add zjp1997720/codex-model-routing-team
+npx skills add zjp1997720/zhijian-skills
 ```
 
 For a global Codex installation without symlinks:
 
 ```bash
-npx skills add zjp1997720/codex-model-routing-team \
+npx skills add zjp1997720/zhijian-skills \
   -g -a codex --skill codex-model-routing-team --copy -y
 ```
 
-The full GitHub URL works too:
+The full canonical GitHub URL works too:
 
 ```bash
-npx skills add https://github.com/zjp1997720/codex-model-routing-team
+npx skills add https://github.com/zjp1997720/zhijian-skills \
+  -g -a codex --skill codex-model-routing-team --copy -y
 ```
 
 Verify that the installed package contains both the entrypoint and its supporting policies:

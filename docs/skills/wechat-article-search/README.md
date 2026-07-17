@@ -6,14 +6,14 @@
 
 <p align="center"><strong>Search WeChat public-account articles by keyword and return structured evidence without an API key.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-article-search">Canonical source</a> · <a href="https://github.com/zjp1997720/wechat-article-search">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-article-search">Canonical source</a></p>
 
 Use it for topic discovery when you know the keyword but not which WeChat public account published the useful article.
 
 ## Agent Install
 
 ```bash
-npx skills add zjp1997720/wechat-article-search -g -a codex --skill wechat-article-search -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill wechat-article-search -y
 ```
 
 ## Requirements

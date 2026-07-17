@@ -6,7 +6,7 @@
 
 <p align="center"><strong>把品牌系统和可选的 ImageGen 视觉资产，变成一套可还原、可验证的 macOS Codex Desktop 主题。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-theme-studio">统一源码</a> · <a href="https://github.com/zjp1997720/codex-theme-studio">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-theme-studio">统一源码</a></p>
 
 当需求已经超出原生配色导出，涉及品牌化皮肤、响应式首页 Banner、任务页背景、注入后视觉修复或完整回退链路时，使用这个 Skill。
 
@@ -15,8 +15,8 @@
 ## 安装
 
 ```bash
-npx skills add zjp1997720/codex-theme-studio \
-  -g -a codex --skill codex-theme-studio -y
+npx skills add zjp1997720/zhijian-skills \
+  -g -a codex --skill codex-theme-studio --copy -y
 ```
 
 安装后调用 `$codex-theme-studio`，并提供现有的品牌规范、`codex-theme-v1:` 导出、标注截图和视觉资产。

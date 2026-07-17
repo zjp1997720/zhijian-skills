@@ -6,7 +6,7 @@
 
 <p align="center"><strong>把高密度信息整理成清晰、自包含、双击即可打开的 HTML 报告。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/html-express">统一源码</a> · <a href="https://github.com/zjp1997720/html-express">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/html-express">统一源码</a></p>
 
 适合调研报告、对比矩阵、清单、时间线、数据看板、决策页和视觉化总结。当 Markdown 变成一堵文字墙时，用 HTML 让信息重新变得可读。
 
@@ -37,7 +37,7 @@
 ## 安装
 
 ```bash
-npx skills add zjp1997720/html-express -g -a codex --skill html-express -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill html-express -y
 ```
 
 ## 示例请求

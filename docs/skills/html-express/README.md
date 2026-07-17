@@ -6,7 +6,7 @@
 
 <p align="center"><strong>Turn dense information into one clear, self-contained HTML report that opens anywhere.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/html-express">Canonical source</a> · <a href="https://github.com/zjp1997720/html-express">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/html-express">Canonical source</a></p>
 
 Use it when Markdown would become a wall of text: research reports, comparison matrices, checklists, timelines, data dashboards, decision pages, and visual summaries.
 
@@ -37,7 +37,7 @@ The component snippets live in `assets/components/`:
 ## Install
 
 ```bash
-npx skills add zjp1997720/html-express -g -a codex --skill html-express -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill html-express -y
 ```
 
 ## Example Requests
@@ -81,7 +81,7 @@ Recommended checks:
 
 ```bash
 python3 ~/.codex/skills/.system/skill-creator/scripts/quick_validate.py .
-npx skills add zjp1997720/html-express --list
+npx skills add zjp1997720/zhijian-skills --list
 ```
 
 ## License

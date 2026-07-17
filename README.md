@@ -35,7 +35,7 @@ npx skills add zjp1997720/zhijian-skills \
   --skill codex-model-routing-team --agent codex --global --copy --yes
 ```
 
-> Existing standalone repositories remain available as generated compatibility mirrors. New Issues and contributions belong in this canonical repository.
+> This is the only publishing repository. New Skills, releases, Issues, and contributions all belong here.
 
 ## Choose a Skill
 
@@ -55,7 +55,7 @@ npx skills add zjp1997720/zhijian-skills \
 
 - **One editable source.** Every public Skill is maintained on `main` in this repository.
 - **Complete installation units.** Supporting scripts, references, themes, and assets travel with each Skill.
-- **Independent releases.** Every Skill owns its version, Changelog, Tag, tests, and standalone compatibility mirror.
+- **Independent versions, one repository.** Every Skill owns its version, Changelog, canonical Tag, and tests while sharing this publishing source.
 
 `codex-model-routing-team` can be invoked explicitly. Its documentation also includes an optional `AGENTS.md` authorization block for automatic activation on complex parallel work.
 
@@ -64,11 +64,11 @@ npx skills add zjp1997720/zhijian-skills \
 ```text
 skills/<name>/          complete agent-facing install payload
 docs/skills/<name>/     human-facing English and Chinese documentation
-registry/skills.json    versions, mirrors, validation, and Harness support
+registry/skills.json    versions, validation, capabilities, and Harness support
 assets/readme/          Portfolio identity assets
 ```
 
-Standalone repositories are generated from this source through normal commits. Their history and old install URLs remain available, while source changes and community work stay centralized here.
+Every install and release resolves through this repository. The Portfolio does not create or synchronize standalone Skill repositories.
 
 ## Contribution and license
 

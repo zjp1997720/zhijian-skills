@@ -35,7 +35,7 @@ npx skills add zjp1997720/zhijian-skills \
   --skill codex-model-routing-team --agent codex --global --copy --yes
 ```
 
-> 原有独立仓库继续作为自动生成的兼容镜像保留。新的 Issue、功能建议和代码贡献统一进入本仓库。
+> 这是唯一发布仓库。新增 Skill、版本发布、Issue 和代码贡献全部进入这里。
 
 ## 选择一个 Skill
 
@@ -55,7 +55,7 @@ npx skills add zjp1997720/zhijian-skills \
 
 - **只有一个可编辑源。** 所有公开 Skill 都在本仓库 `main` 分支维护。
 - **安装包保持完整。** 每个 Skill 依赖的脚本、参考资料、主题和资源都会一起安装。
-- **每个 Skill 独立发版。** 版本、Changelog、Tag、测试和独立兼容镜像互不捆绑。
+- **版本独立，仓库统一。** 每个 Skill 保留独立版本、Changelog、统一仓库 Tag 和测试。
 
 `codex-model-routing-team` 可以手动点名，也可以通过文档提供的 `AGENTS.md` 授权块，在复杂并行任务中自动触发。
 
@@ -64,11 +64,11 @@ npx skills add zjp1997720/zhijian-skills \
 ```text
 skills/<name>/          Agent 实际安装的完整载荷
 docs/skills/<name>/     面向人的中英文文档
-registry/skills.json    版本、镜像、验证和 Harness 支持声明
+registry/skills.json    版本、验证、权限和 Harness 支持声明
 assets/readme/          Portfolio 视觉资产
 ```
 
-独立仓库由本仓库通过正常 Commit 自动生成。旧链接和历史继续保留，源码修改与社区协作统一回到这里。
+所有安装和发布都通过本仓库完成，不再创建或同步独立 Skill 仓库。
 
 ## 贡献与协议
 

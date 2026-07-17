@@ -1,81 +1,63 @@
 # Skill Open Sourcer
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Skill Open Sourcer 在统一源码和镜像发布前验证完整 Skill">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Skill Open Sourcer 通过一个统一 Portfolio 验证并发布完整 Skill">
 </p>
 
-<p align="center"><strong>把本地 Agent Skill 做成完整、经过验证、可以可靠安装的开源发布包。</strong></p>
+<p align="center"><strong>把本地 Agent Skill 做成完整、经过验证、进入智见 Skills 的公开版本。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/skill-open-sourcer">统一源码</a> · <a href="https://github.com/zjp1997720/skill-open-sourcer">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/skill-open-sourcer">统一源码</a></p>
 
-当一个本地 Skill 已经成熟，需要变成载荷完整、可独立安装、发布可验证的开源包时使用它。
+当一个本地 Skill 已经成熟，需要公开并支持可靠安装时使用它。所有发布统一进入 `zjp1997720/zhijian-skills`，整个流程不会创建独立 Skill 仓库。
 
-## Agent 安装
-
-```bash
-npx skills add zjp1997720/skill-open-sourcer -g -a codex --skill skill-open-sourcer -y
-```
-
-安装前查看仓库里的 skill：
+## 安装
 
 ```bash
-npx skills add zjp1997720/skill-open-sourcer --list
+npx skills add zjp1997720/zhijian-skills \
+  -g -a codex --skill skill-open-sourcer --copy -y
 ```
 
-安装后，直接让 Codex 使用 `$skill-open-sourcer`，并给它一个本地 `SKILL.md` 路径或 skill 目录。
+安装后调用 `$skill-open-sourcer`，并提供本地 `SKILL.md` 或 Skill 目录。
 
 ## 环境要求
 
-- Python 3
-- Git
-- Node.js 与 `npx`
-- GitHub 发布通道，满足其一即可：
-  - 已认证的 `gh` CLI
-  - Agent 运行时里的 GitHub MCP/app
-  - 已配置并可推送的 `origin` remote
+- Python 3、Git、Node.js 与 `npx`
+- 已验证的 `zjp1997720/zhijian-skills` 本地工作区
+- 用户要求正式发布时，需要该统一仓库的推送权限
 
 ## 功能
 
-- 审计本地 skill 是否适合公开发布。
-- 检查明显风险：密钥、个人绝对路径、缓存文件、大型生成物、授权不明资产。
-- 打包成 `npx skills` 可识别的结构。
-- 生成根目录 README、中文 README 和 LICENSE。
-- 发布前校验 skill 结构和 `npx skills` 发现能力。
-- 在安全通道可用时发布到 GitHub。
-- 输出安装命令、GitHub 元信息建议和发布文案。
-- 通过 Registry、独立版本、不可变发布候选、自动生成兼容镜像和可回滚的本地 Harness 链接，统一治理多 Skill 仓库。
+- 扫描密钥、个人路径、缓存、私有数据、越界链接和授权不清的资产。
+- 把完整载荷导入 `skills/<name>/`，同步建立中英文文档、Changelog、Registry 和总目录入口。
+- 验证 Skill、整个 Portfolio、声明测试、README、本地发现和隔离复制安装。
+- 只推送统一仓库，只创建 `<skill>/v<version>` Tag。
+- 输出统一安装命令和发布文案。
 
 ## 原理
 
-这个 skill 把“开源一个本地 skill”当成发布流程处理，而不是简单复制文件。
-
-它会先检查环境，再扫描源 skill 的公开风险。风险通过后，才创建一个干净的发布仓库，并按发布形态把 agent 要读的内容和人要看的说明放在合适位置。
-
-具体执行流程写在统一源码的 [`SKILL.md`](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/skill-open-sourcer/SKILL.md)。人通常不需要手动运行其中的辅助脚本。
+这个 Skill 把“开源一个 Skill”定义为向统一 Portfolio 导入。直接提供 `SKILL.md` 只用于识别导入对象，不再触发新建仓库模式。统一远端、代码归属、安全扫描、载荷完整性或安装证据任何一项失败，发布都会停止。
 
 ## 示例请求
 
 ```text
-Use $skill-open-sourcer to publish ~/.codex/skills/my-skill as an open-source repo.
-Use $skill-open-sourcer to package this local SKILL.md for npx skills installation.
-Use $skill-open-sourcer to audit this skill before I share it publicly.
+使用 $skill-open-sourcer 把这个本地 Skill 加入智见 Skills 并发布。
+使用 $skill-open-sourcer 在导入 Portfolio 前审计这个 SKILL.md。
+使用 $skill-open-sourcer 发布这个 Skill 的下一个统一仓库版本。
 ```
 
-## 独立镜像结构
+## 统一仓库结构
 
 ```text
-.
-├── README.md
-├── README.zh-CN.md
-├── LICENSE
-├── SOURCE.json
-└── skills/skill-open-sourcer/
-    ├── SKILL.md
-    ├── agents/openai.yaml
-    ├── references/
-    └── scripts/
+skills/<name>/          Agent 安装的完整载荷
+docs/skills/<name>/     面向人的中英文文档
+docs/changelogs/        各 Skill 独立发布记录
+registry/skills.json    版本、验证、权限和 Harness 声明
 ```
+
+## 安全边界
+
+流程不会创建独立 GitHub 仓库、写入镜像元数据、强制推送或改写已发布 Tag。缺失证据会继续标记为缺失。
 
 ## 许可证
 
-[MIT](LICENSE)
+[MIT](../../../LICENSE)

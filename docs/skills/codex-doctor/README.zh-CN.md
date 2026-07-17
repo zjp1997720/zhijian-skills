@@ -6,14 +6,14 @@
 
 <p align="center"><strong>一套面向 Codex 的只读健康检查 Skill，用来发现安装、配置和工作区上下文中的真实问题。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-doctor">统一源码</a> · <a href="https://github.com/zjp1997720/codex-doctor">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-doctor">统一源码</a></p>
 
 当 Codex 的行为不稳定、配置来源不清或工作区疑似漂移时，先用它采集证据，再决定是否修改。
 
 ## 安装
 
 ```bash
-npx skills add zjp1997720/codex-doctor -g -a codex --skill codex-doctor -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill codex-doctor -y
 ```
 
 安装后显式调用 `$codex-doctor`，或直接告诉 Codex“运行一次工作区健康检查”。

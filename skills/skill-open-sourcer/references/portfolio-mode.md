@@ -1,39 +1,32 @@
-# Portfolio mode
+# Canonical Portfolio mode
 
-Portfolio mode manages multiple independently versioned Skills from one canonical repository.
+Zhijian Skills publishes every public Skill from `zjp1997720/zhijian-skills`. A local `SKILL.md` is always imported into this Portfolio; it never becomes a standalone repository.
 
 ## Entry contract
 
-The target directory must contain:
+The canonical checkout contains:
 
 - `registry/skills.json`
 - `skills/<name>/SKILL.md` for every active record
-- Human documentation and Changelogs referenced by the Registry
-- A lockfile-pinned `skills` CLI
+- bilingual documentation and a Changelog referenced by the Registry
+- a lockfile-pinned `skills` CLI
+- an `origin` that resolves to `zjp1997720/zhijian-skills`
 
 Run:
 
 ```bash
-python3 <skill-open-sourcer-dir>/scripts/portfolio.py audit --repo <repo> --strict
+python3 <skill-open-sourcer-dir>/scripts/portfolio.py audit \
+  --repo <zhijian-skills> --strict
 ```
 
-The audit is deterministic and produces stable finding IDs. It checks Registry shape, unique ownership, package paths, frontmatter, referenced files, public-release safety, declared executable capabilities, documentation, and lifecycle state.
+## Release flow
 
-## Portfolio release flow
+1. Audit the canonical repository and the incoming Skill.
+2. Sanitize and copy the complete payload into `skills/<name>/`.
+3. Add bilingual docs, Changelog, Registry metadata, catalog entry, and visual assets.
+4. Run declared tests, Portfolio contracts, local discovery, and isolated copy installation.
+5. Build one immutable candidate per changed Skill and produce one dry-run summary.
+6. Verify the frozen plan, push canonical `main`, verify the remote Portfolio, then create only the canonical Tag `<skill>/v<version>`.
+7. Record each remote transition in the release ledger and resume from verified state after interruption.
 
-1. Audit the canonical repository and local Harness links.
-2. Detect changed active Skills by content digest.
-3. Run declared deterministic tests and isolated install checks.
-4. Classify each change with the version contract.
-5. Build one immutable candidate and one mirror export per passing Skill.
-6. Produce one Dry Run summary. Do not acquire release credentials yet.
-7. After one confirmation, verify temporary remote candidates, update canonical and mirror `main`, verify both, then create Tags and Releases.
-8. Persist every remote transition in the release ledger. Resume from verified state instead of repeating mutations.
-9. Isolate a Skill-specific failure. Stop the entire wave when Registry, governance, or shared CI fails.
-
-Portfolio mode never edits a standalone mirror as a source and never force-pushes.
-
-## Single-Skill compatibility
-
-The existing Single-Skill workflow remains valid. `validate-skill` accepts any self-contained Skill directory and does not require a Portfolio Registry.
-
+No step creates, updates, redirects, or releases a standalone Skill repository.

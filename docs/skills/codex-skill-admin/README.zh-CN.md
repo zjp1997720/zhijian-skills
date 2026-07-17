@@ -6,20 +6,20 @@
 
 <p align="center"><strong>审计、关闭、恢复并验证本地 Codex Skill，不用卸载，也不丢失恢复能力。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-skill-admin">统一源码</a> · <a href="https://github.com/zjp1997720/codex-skill-admin">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-skill-admin">统一源码</a></p>
 
 适合在你想节省 prompt token 时使用：它会通过 Codex 本地 `app-server` API 找出近期没有使用证据的 Skill，并把它们关闭，而不是卸载。
 
 ## Agent 安装
 
 ```bash
-npx skills add zjp1997720/codex-skill-admin -g -a codex --skill codex-skill-admin -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill codex-skill-admin -y
 ```
 
 安装前查看仓库里有哪些 skill：
 
 ```bash
-npx skills add zjp1997720/codex-skill-admin --list
+npx skills add zjp1997720/zhijian-skills --list
 ```
 
 安装后，直接让 Codex 使用 `$codex-skill-admin` 处理 skill 清理任务。Agent 需要执行的流程写在 `skills/codex-skill-admin/SKILL.md`，人不需要手动跑里面的辅助脚本。

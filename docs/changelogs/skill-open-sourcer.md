@@ -1,5 +1,12 @@
 # skill-open-sourcer Changelog
 
+## 2.0.0 — 2026-07-17
+
+- Make `zjp1997720/zhijian-skills` the only publishing repository for every imported Skill.
+- Remove Single-Skill repository creation, mirror export, mirror metadata, mirror Tags, and redirect workflows.
+- Require canonical Portfolio discovery, validation, isolated installation, commit, push, and per-Skill canonical Tags.
+- Pin the `skills` CLI explicitly for cold isolated-HOME installation checks.
+
 ## 1.1.2 — 2026-07-17
 
 - Export documentation SVG assets into standalone mirrors and record them in `SOURCE.json`.

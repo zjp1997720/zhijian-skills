@@ -6,7 +6,7 @@
 
 <p align="center"><strong>主 Agent 负责规划、集成和验收；复杂工作交给分别指定模型与推理强度的独立后台任务。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-model-routing-team">统一源码</a> · <a href="https://github.com/zjp1997720/codex-model-routing-team">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-model-routing-team">统一源码</a></p>
 
 适合复杂并行任务：主 Agent 负责规划、文件所有权和集成，独立后台任务按明确模型与推理强度执行。
 
@@ -15,20 +15,21 @@
 这条常用简写是 `skills` CLI 的正确语法：
 
 ```bash
-npx skills add zjp1997720/codex-model-routing-team
+npx skills add zjp1997720/zhijian-skills
 ```
 
 推荐用下面的命令全局安装到 Codex，并复制真实文件而不是创建软链接：
 
 ```bash
-npx skills add zjp1997720/codex-model-routing-team \
+npx skills add zjp1997720/zhijian-skills \
   -g -a codex --skill codex-model-routing-team --copy -y
 ```
 
-完整 GitHub 链接同样有效：
+完整的组合仓库 GitHub 链接同样有效：
 
 ```bash
-npx skills add https://github.com/zjp1997720/codex-model-routing-team
+npx skills add https://github.com/zjp1997720/zhijian-skills \
+  -g -a codex --skill codex-model-routing-team --copy -y
 ```
 
 安装后检查入口文件和配套策略是否齐全：

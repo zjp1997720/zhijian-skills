@@ -1,80 +1,63 @@
 # Skill Open Sourcer
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Skill Open Sourcer verifies a complete Skill before canonical and mirror release">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Skill Open Sourcer verifies and publishes complete Skills through one canonical Portfolio">
 </p>
 
-<p align="center"><strong>Turn a local Agent Skill into a complete, verified, installable open-source release.</strong></p>
+<p align="center"><strong>Turn a local Agent Skill into a complete, verified release inside Zhijian Skills.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/skill-open-sourcer">Canonical source</a> · <a href="https://github.com/zjp1997720/skill-open-sourcer">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/skill-open-sourcer">Canonical source</a></p>
 
-Use it when a local Skill is ready to become a complete, independently installable, and verifiably released open-source package.
+Use it when a local Skill is ready to become public and installable. Every release is imported into `zjp1997720/zhijian-skills`; the workflow never creates a standalone Skill repository.
 
-## Agent Install
-
-```bash
-npx skills add zjp1997720/skill-open-sourcer -g -a codex --skill skill-open-sourcer -y
-```
-
-List the skill before installing:
+## Install
 
 ```bash
-npx skills add zjp1997720/skill-open-sourcer --list
+npx skills add zjp1997720/zhijian-skills \
+  -g -a codex --skill skill-open-sourcer --copy -y
 ```
 
-After installing, ask Codex to use `$skill-open-sourcer` with a local `SKILL.md` path or skill directory.
+Then invoke `$skill-open-sourcer` with a local `SKILL.md` or Skill directory.
 
 ## Requirements
 
-- Python 3
-- Git
-- Node.js with `npx`
-- GitHub publishing access through one of:
-  - authenticated `gh` CLI
-  - GitHub MCP/app in the agent runtime
-  - an existing authenticated `origin` remote
+- Python 3, Git, Node.js, and `npx`
+- A verified local checkout of `zjp1997720/zhijian-skills`
+- Authenticated push access to that canonical repository when publication is requested
 
 ## What It Does
 
-- Audits a local skill for obvious public-release blockers.
-- Packages the skill into the layout expected by `npx skills`.
-- Generates human-facing release files such as README, Chinese README, and LICENSE. For multi-skill collections, it can also generate `skills.sh.json`.
-- Validates the packaged skill before publishing.
-- Publishes through GitHub when a safe publishing surface is available.
-- Produces install instructions, GitHub metadata recommendations, and launch copy.
-- Governs multi-Skill portfolios through a Registry, independent versions, immutable release candidates, generated compatibility mirrors, and reversible local Harness links.
+- Scans the incoming Skill for secrets, personal paths, caches, private data, unsafe links, and unclear assets.
+- Imports the complete payload into `skills/<name>/` and creates bilingual docs, Changelog, Registry metadata, and catalog entries.
+- Validates the Skill, full Portfolio, declared tests, README package, local discovery, and isolated copy installation.
+- Pushes only the canonical Portfolio and creates only `<skill>/v<version>` Tags.
+- Produces the canonical install command and launch copy.
 
 ## How It Works
 
-The skill treats open-sourcing as a gated release workflow, not a file copy.
-
-It first checks the local environment, then scans the source skill for release blockers such as secrets, personal absolute paths, cache files, large generated artifacts, and unclear assets. When the package is safe, it builds a small release repository with the agent-facing skill and human-facing docs in the right place for the release shape.
-
-The detailed agent workflow lives in the canonical [`SKILL.md`](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/skill-open-sourcer/SKILL.md). Humans usually do not need to run the helper scripts directly.
+The Skill treats open-sourcing as a governed import into one Portfolio. A direct `SKILL.md` input identifies what to import; it never selects a new-repository mode. Publishing fails closed when the canonical remote, source ownership, security scan, package completeness, or installation proof is missing.
 
 ## Example Requests
 
 ```text
-Use $skill-open-sourcer to publish ~/.codex/skills/my-skill as an open-source repo.
-Use $skill-open-sourcer to package this local SKILL.md for npx skills installation.
-Use $skill-open-sourcer to audit this skill before I share it publicly.
+Use $skill-open-sourcer to add this local Skill to Zhijian Skills and publish it.
+Use $skill-open-sourcer to audit this SKILL.md before importing it into the Portfolio.
+Use $skill-open-sourcer to release the next canonical version of this Skill.
 ```
 
-## Standalone Mirror Layout
+## Canonical Layout
 
 ```text
-.
-├── README.md
-├── README.zh-CN.md
-├── LICENSE
-├── SOURCE.json
-└── skills/skill-open-sourcer/
-    ├── SKILL.md
-    ├── agents/openai.yaml
-    ├── references/
-    └── scripts/
+skills/<name>/          complete agent-facing payload
+docs/skills/<name>/     bilingual human documentation
+docs/changelogs/        independent release notes
+registry/skills.json    version, validation, capabilities, and Harnesses
 ```
+
+## Safety
+
+The workflow never creates an independent GitHub repository, writes mirror metadata, force-pushes, or rewrites published Tags. Missing evidence remains explicit.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](../../../LICENSE)

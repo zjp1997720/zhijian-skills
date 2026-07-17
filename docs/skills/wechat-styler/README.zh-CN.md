@@ -6,14 +6,14 @@
 
 <p align="center"><strong>把 Markdown 一键排成可直接粘进公众号编辑器的内联 HTML：8 套主题、确定性校验、零外部 CSS。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-styler">统一源码</a> · <a href="https://github.com/zjp1997720/wechat-styler">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/wechat-styler">统一源码</a></p>
 
 适合已经完成 Markdown 初稿、需要稳定品牌排版并直接粘贴到公众号编辑器的文章。
 
 ## Agent 安装
 
 ```bash
-npx skills add zjp1997720/wechat-styler -g -a codex --skill wechat-styler -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill wechat-styler -y
 ```
 
 任何能加载 `SKILL.md` 的 Agent 运行时都能用（Codex、Claude Code、OpenCode 等）。

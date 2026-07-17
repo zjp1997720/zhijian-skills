@@ -6,14 +6,14 @@
 
 <p align="center"><strong>以企业本地资料为主、公开信息为补充，构建结构清晰、来源可追溯的企业数字分身仓库。</strong></p>
 
-<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/enterprise-clone-builder">统一源码</a> · <a href="https://github.com/zjp1997720/enterprise-clone-builder">独立镜像</a></p>
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/enterprise-clone-builder">统一源码</a></p>
 
 适合需要把企业散落资料整理为可复用、可追溯知识仓库的专业交付团队。
 
 ## Agent 安装
 
 ```bash
-npx skills add zjp1997720/enterprise-clone-builder -g -a codex --skill enterprise-clone-builder -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill enterprise-clone-builder -y
 ```
 
 ## 它做什么

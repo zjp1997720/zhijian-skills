@@ -1,5 +1,10 @@
 # codex-theme-studio Changelog
 
+## 1.0.1 — 2026-07-17
+
+- Publish and install exclusively through `zjp1997720/zhijian-skills`.
+- Remove standalone repository and mirror metadata while preserving the canonical release history.
+
 ## 1.0.0 — 2026-07-17
 
 - Establish a governed, self-contained workflow for designing, preparing, installing, verifying, repairing, pausing, and restoring Codex Desktop themes on macOS.

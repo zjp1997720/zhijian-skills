@@ -80,7 +80,8 @@ class ReadmeAssetTests(unittest.TestCase):
             for filename in ("README.md", "README.zh-CN.md"):
                 readme = ROOT / f"docs/skills/{skill}/{filename}"
                 content = readme.read_text(encoding="utf-8")
-                self.assertIn(f"npx skills add zjp1997720/{skill}", content, readme)
+                self.assertIn("npx skills add zjp1997720/zhijian-skills", content, readme)
+                self.assertIn(f"--skill {skill}", content, readme)
 
 
 if __name__ == "__main__":

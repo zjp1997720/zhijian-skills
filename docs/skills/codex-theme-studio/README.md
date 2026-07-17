@@ -6,7 +6,7 @@
 
 <p align="center"><strong>Turn a brand system and optional ImageGen artwork into a reversible, verified theme for Codex Desktop on macOS.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-theme-studio">Canonical source</a> · <a href="https://github.com/zjp1997720/codex-theme-studio">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-theme-studio">Canonical source</a></p>
 
 Use it when you want more than a palette export: a branded Codex skin, a responsive homepage Banner, an intentional task-page background, repairs to an injected theme, or a reliable path back to the original appearance.
 
@@ -15,8 +15,8 @@ This project is inspired by [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-A
 ## Install
 
 ```bash
-npx skills add zjp1997720/codex-theme-studio \
-  -g -a codex --skill codex-theme-studio -y
+npx skills add zjp1997720/zhijian-skills \
+  -g -a codex --skill codex-theme-studio --copy -y
 ```
 
 Then invoke `$codex-theme-studio` and provide the best available brand guide, current `codex-theme-v1:` export, annotated screenshots, and visual assets.

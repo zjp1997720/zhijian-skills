@@ -6,20 +6,20 @@
 
 <p align="center"><strong>Audit, disable, restore, and verify local Codex Skills without uninstalling them.</strong></p>
 
-<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-skill-admin">Canonical source</a> · <a href="https://github.com/zjp1997720/codex-skill-admin">Standalone mirror</a></p>
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-skill-admin">Canonical source</a></p>
 
 Use it when you want to reduce prompt token load by disabling unused Skills through Codex's local `app-server` API.
 
 ## Agent Install
 
 ```bash
-npx skills add zjp1997720/codex-skill-admin -g -a codex --skill codex-skill-admin -y
+npx skills add zjp1997720/zhijian-skills -g -a codex --skill codex-skill-admin -y
 ```
 
 List the skill before installing:
 
 ```bash
-npx skills add zjp1997720/codex-skill-admin --list
+npx skills add zjp1997720/zhijian-skills --list
 ```
 
 After installing, ask Codex to use `$codex-skill-admin` for skill cleanup tasks. The agent-facing workflow lives in `skills/codex-skill-admin/SKILL.md`; humans do not need to run the helper script directly.

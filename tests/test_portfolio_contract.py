@@ -33,9 +33,12 @@ class PortfolioContractTest(unittest.TestCase):
         self.assertEqual(EXPECTED_SKILLS, {record["name"] for record in self.records})
 
     def test_identity_and_paths_are_unique(self) -> None:
-        for key in ("name", "path", "mirror"):
+        for key in ("name", "path"):
             values = [record[key] for record in self.records]
             self.assertEqual(len(values), len(set(values)), key)
+        for record in self.records:
+            self.assertNotIn("mirror", record)
+            self.assertNotIn("mirror_tag", record)
 
     def test_every_record_resolves_to_complete_repository_paths(self) -> None:
         for record in self.records:
@@ -53,7 +56,6 @@ class PortfolioContractTest(unittest.TestCase):
                 version = record["version"]
                 self.assertRegex(version, r"^\d+\.\d+\.\d+$")
                 self.assertEqual(f"{record['name']}/v{version}", record["canonical_tag"])
-                self.assertEqual(f"v{version}", record["mirror_tag"])
 
     def test_capability_and_harness_contract(self) -> None:
         for record in self.records:
@@ -73,6 +75,8 @@ class PortfolioContractTest(unittest.TestCase):
         schema = json.loads(
             (ROOT / "registry" / "skills.schema.json").read_text(encoding="utf-8")
         )
+        self.assertEqual("2.0.0", self.registry["schema_version"])
+        self.assertEqual("2.0.0", schema["properties"]["schema_version"]["const"])
         required = set(
             schema["properties"]["skills"]["items"]["required"]
         )
@@ -81,7 +85,6 @@ class PortfolioContractTest(unittest.TestCase):
                 "name",
                 "version",
                 "path",
-                "mirror",
                 "documentation",
                 "changelog",
                 "validation",
@@ -90,6 +93,9 @@ class PortfolioContractTest(unittest.TestCase):
             }
             <= required
         )
+        properties = schema["properties"]["skills"]["items"]["properties"]
+        self.assertNotIn("mirror", properties)
+        self.assertNotIn("mirror_tag", properties)
 
 
 if __name__ == "__main__":

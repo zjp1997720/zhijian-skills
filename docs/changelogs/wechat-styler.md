@@ -1,5 +1,9 @@
 # wechat-styler Changelog
 
+## 1.0.3 — 2026-07-17
+
+- Publish and install exclusively through `zjp1997720/zhijian-skills`.
+
 ## 1.0.2 — 2026-07-17
 
 - Add a brand-aligned light README hero and polish the bilingual feature explanation.

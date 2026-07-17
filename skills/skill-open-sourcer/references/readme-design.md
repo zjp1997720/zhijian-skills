@@ -102,7 +102,7 @@ Use one strong composition: annotated specimen, before/after, system map, sequen
 
 ## 5. Build GitHub-safe assets
 
-Store release-specific assets under `assets/readme/` with lowercase hyphenated names.
+Store release-specific assets under `docs/skills/<skill-name>/assets/readme/` with lowercase hyphenated names.
 
 For full-width SVG:
 
@@ -133,7 +133,7 @@ Essential install or usage information must remain outside the image.
 
 ## 6. Preview and verify
 
-Run the deterministic audit from the release repository:
+Run the deterministic audit from the canonical Portfolio repository:
 
 ```bash
 python3 "${CODEX_HOME:-$HOME/.codex}/skills/skill-open-sourcer/scripts/audit_release_readme.py" . --strict
