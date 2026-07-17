@@ -5,6 +5,7 @@
   const CHROME_ID = "codex-dream-skin-chrome";
   const SHELL_ATTR = "data-dream-shell";
   const ART_PLACEMENT_ATTR = "data-dream-art-placement";
+  const HOME_MARKERS = ["dream-skin-home", "dream-skin-home-shell", "dream-skin-home-hero"];
   const VERSION = __DREAM_SKIN_VERSION_JSON__;
   const THEME = themeConfig && typeof themeConfig === "object" ? themeConfig : {};
   const THEME_VARIABLES = [
@@ -26,8 +27,8 @@
   };
 
   disposeRuntime(window[STATE_KEY]);
-  document.querySelectorAll(".dream-skin-home, .dream-skin-home-shell").forEach((node) => {
-    node.classList.remove("dream-skin-home", "dream-skin-home-shell");
+  document.querySelectorAll(`.${HOME_MARKERS.join(", .")}`).forEach((node) => {
+    node.classList.remove(...HOME_MARKERS);
   });
   window[DISABLED_KEY] = false;
 
@@ -150,6 +151,41 @@
     }
   };
 
+  const syncHomeRoute = () => {
+    const roleMains = [...document.querySelectorAll('[role="main"]')];
+    const home = roleMains.find((candidate) => candidate.querySelector('[data-feature="game-source"]')) || null;
+    for (const candidate of roleMains) candidate.classList.toggle("dream-skin-home", candidate === home);
+
+    const feature = home?.querySelector('[data-feature="game-source"]') || null;
+    const suggestions = home?.querySelector('.group\\/home-suggestions') || null;
+    const markedShell = home?.querySelector('.dream-skin-home-shell') || null;
+    let shell = suggestions?.parentElement?.parentElement || null;
+    if (!shell?.contains(feature)) shell = markedShell?.contains(feature) ? markedShell : null;
+
+    if (!shell && home && feature) {
+      const homeRect = home.getBoundingClientRect();
+      const maxHeight = Math.min(560, Math.max(192, homeRect.height * 0.75));
+      for (let node = feature.parentElement; node && node !== home; node = node.parentElement) {
+        const rect = node.getBoundingClientRect();
+        if (rect.width >= homeRect.width * 0.6 && rect.height >= 40 && rect.height <= maxHeight) shell = node;
+      }
+    }
+
+    const markedHero = home?.querySelector('.dream-skin-home-hero') || null;
+    let hero = shell ? [...shell.children].find((node) => node.contains(feature)) || null : null;
+    if (!hero && markedHero?.contains(feature)) hero = markedHero;
+
+    document.querySelectorAll('.dream-skin-home-shell').forEach((node) => {
+      if (node !== shell) node.classList.remove("dream-skin-home-shell");
+    });
+    document.querySelectorAll('.dream-skin-home-hero').forEach((node) => {
+      if (node !== hero) node.classList.remove("dream-skin-home-hero");
+    });
+    shell?.classList.add("dream-skin-home-shell");
+    hero?.classList.add("dream-skin-home-hero");
+    return { home, feature, suggestions, shell, hero };
+  };
+
   const ensureChrome = (shell) => {
     const shellMain = document.querySelector("main.main-surface") || document.querySelector("main");
     if (!shellMain || !document.body) return;
@@ -199,6 +235,7 @@
     applyTheme(root);
     ensureStyle(root);
     ensureTabTitles();
+    syncHomeRoute();
     ensureChrome(shell);
     return shell;
   };
@@ -246,13 +283,13 @@
     const state = window[STATE_KEY];
     disposeRuntime(state);
     const root = document.documentElement;
-    root?.classList.remove("codex-dream-skin", "dream-skin-home", "dream-skin-home-shell");
+    root?.classList.remove("codex-dream-skin", ...HOME_MARKERS);
     root?.removeAttribute(SHELL_ATTR);
     root?.removeAttribute(ART_PLACEMENT_ATTR);
     root?.style.removeProperty("--dream-skin-art");
     for (const name of THEME_VARIABLES) root?.style.removeProperty(name);
-    document.querySelectorAll(".dream-skin-home, .dream-skin-home-shell").forEach((node) => {
-      node.classList.remove("dream-skin-home", "dream-skin-home-shell");
+    document.querySelectorAll(`.${HOME_MARKERS.join(", .")}`).forEach((node) => {
+      node.classList.remove(...HOME_MARKERS);
     });
     document.querySelectorAll("[data-dream-tab-title]").forEach((node) => node.removeAttribute("data-dream-tab-title"));
     document.getElementById(STYLE_ID)?.remove();

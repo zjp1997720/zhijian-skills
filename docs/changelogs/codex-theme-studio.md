@@ -1,5 +1,11 @@
 # codex-theme-studio Changelog
 
+## 1.0.2 — 2026-07-17
+
+- Keep the branded homepage Banner active after the user types and Codex unmounts its native suggestion cards.
+- Track the persistent homepage feature node separately from optional cards, with stable shell and Hero markers.
+- Add strict verification coverage for the typed homepage state and align every runtime version constant with the package version.
+
 ## 1.0.1 — 2026-07-17
 
 - Publish and install exclusively through `zjp1997720/zhijian-skills`.

@@ -5,7 +5,7 @@ import { colorsMatch, evaluateSnapshot } from "./verification-contract.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
-const SKIN_VERSION = "1.0.0";
+const SKIN_VERSION = "1.0.2";
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const MAX_ART_BYTES = 16 * 1024 * 1024;
 
@@ -575,10 +575,12 @@ async function collectSessionSnapshot(session) {
       candidate.querySelector('[data-testid="home-icon"], [data-feature="game-source"], .group\\\\/home-suggestions')) ?? null;
     const feature = home?.querySelector('[data-feature="game-source"]') ?? null;
     const suggestions = home?.querySelector('.group\\\\/home-suggestions') ?? null;
-    const enhancementHookPresent = Boolean(feature && suggestions);
+    const suggestionsPresent = Boolean(suggestions);
     const suggestionsRow = suggestions?.parentElement ?? null;
     const layout = suggestionsRow?.parentElement ?? null;
-    const heroNode = layout ? [...layout.children].find((node) => node !== suggestionsRow && node.querySelector?.('[data-feature="game-source"]')) : null;
+    const heroNode = home?.querySelector('.dream-skin-home-hero') ??
+      (layout ? [...layout.children].find((node) => node !== suggestionsRow && node.querySelector?.('[data-feature="game-source"]')) : null);
+    const enhancementHookPresent = Boolean(feature && heroNode);
     const groupRect = suggestions?.getBoundingClientRect() ?? null;
     const cards = suggestions && groupRect ? [...suggestions.querySelectorAll('button')].map((node) => {
       const rect = node.getBoundingClientRect();
@@ -635,6 +637,7 @@ async function collectSessionSnapshot(session) {
       },
       home: home ? {
         enhancementHookPresent,
+        suggestionsPresent,
         hero: heroBox ? {
           ...heroBox,
           backgroundImage: styleOf(heroNode)?.backgroundImage ?? 'none',

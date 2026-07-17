@@ -72,12 +72,12 @@
     {
       "name": "codex-theme-studio",
       "lifecycle": "active",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "path": "skills/codex-theme-studio",
       "documentation": "docs/skills/codex-theme-studio/README.md",
       "documentation_zh": "docs/skills/codex-theme-studio/README.zh-CN.md",
       "changelog": "docs/changelogs/codex-theme-studio.md",
-      "canonical_tag": "codex-theme-studio/v1.0.1",
+      "canonical_tag": "codex-theme-studio/v1.0.2",
       "validation": {
         "commands": [
           "bash skills/codex-theme-studio/tests/run-tests.sh"

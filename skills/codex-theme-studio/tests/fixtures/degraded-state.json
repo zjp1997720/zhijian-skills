@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "mode": "home",
   "installed": true,
-  "version": "1.0.0",
+  "version": "1.0.2",
   "stylePresent": true,
   "chromePresent": true,
   "chromePointerEvents": "none",
@@ -18,6 +18,7 @@
   },
   "home": {
     "enhancementHookPresent": false,
+    "suggestionsPresent": true,
     "hero": null,
     "cardColumns": null,
     "cards": [

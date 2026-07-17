@@ -184,7 +184,7 @@ html.codex-dream-skin main.main-surface article {
   color: var(--ds-text);
 }
 
-html.codex-dream-skin body:has([role="main"] [data-feature="game-source"]):has(.group\/home-suggestions)
+html.codex-dream-skin body:has([role="main"].dream-skin-home)
   #codex-dream-skin-chrome .dream-skin-brand {
   display: flex;
 }
@@ -216,26 +216,25 @@ html.codex-dream-skin body:has([role="main"] [data-feature="game-source"]):has(.
   display: none !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+html.codex-dream-skin [role="main"].dream-skin-home {
   --thread-content-max-width: min(1120px, calc(100cqw - 48px)) !important;
   overflow-x: hidden !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) > div {
+html.codex-dream-skin [role="main"].dream-skin-home > div {
   min-height: 100% !important;
   padding-top: 16px !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-  > div > div:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+html.codex-dream-skin [role="main"].dream-skin-home
+  > div > div:has(.dream-skin-home-shell) {
   min-height: 0 !important;
   flex: 0 0 auto !important;
   align-items: flex-start !important;
   padding-bottom: 32px !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-  div:has(> div > .group\/home-suggestions):has([data-feature="game-source"]) {
+html.codex-dream-skin [role="main"].dream-skin-home .dream-skin-home-shell {
   width: min(100%, var(--thread-content-max-width)) !important;
   max-width: none !important;
   height: auto !important;
@@ -251,9 +250,8 @@ html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group
   box-shadow: none !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-  div:has(> div > .group\/home-suggestions):has([data-feature="game-source"])
-  > div:has([data-feature="game-source"]) {
+html.codex-dream-skin [role="main"].dream-skin-home
+  .dream-skin-home-shell > .dream-skin-home-hero {
   position: relative !important;
   isolation: isolate;
   width: 100% !important;
@@ -273,20 +271,19 @@ html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group
   box-shadow: var(--ds-shadow-1) !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-  div:has(> div > .group\/home-suggestions) > div:has([data-feature="game-source"]) > div {
+html.codex-dream-skin [role="main"].dream-skin-home .dream-skin-home-hero > div {
   width: 100% !important;
   align-items: flex-start !important;
   justify-content: center !important;
   padding-left: 34px !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+html.codex-dream-skin [role="main"].dream-skin-home
   [data-testid="home-icon"] {
   display: none !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+html.codex-dream-skin [role="main"].dream-skin-home
   [data-feature="game-source"] {
   display: block !important;
   max-width: 54% !important;
@@ -299,7 +296,7 @@ html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group
   pointer-events: auto !important;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+html.codex-dream-skin [role="main"].dream-skin-home
   [data-feature="game-source"]::before {
   content: var(--dream-skin-name, "Warm Paper Studio");
   display: block;
@@ -309,7 +306,7 @@ html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group
   letter-spacing: .1em;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+html.codex-dream-skin [role="main"].dream-skin-home
   [data-feature="game-source"] button {
   margin: 0 5px;
   padding: 0 1px 2px;
@@ -321,8 +318,8 @@ html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group
   text-underline-offset: 4px;
 }
 
-html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-  div:has(> .group\/home-suggestions) {
+html.codex-dream-skin [role="main"].dream-skin-home
+  .dream-skin-home-shell div:has(> .group\/home-suggestions) {
   position: static !important;
   inset: auto !important;
   width: 100% !important;
@@ -463,9 +460,8 @@ html.codex-dream-skin :not(pre) > code {
     gap: 12px !important;
   }
 
-  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-    div:has(> div > .group\/home-suggestions):has([data-feature="game-source"])
-    > div:has([data-feature="game-source"]) {
+  html.codex-dream-skin [role="main"].dream-skin-home
+    .dream-skin-home-shell > .dream-skin-home-hero {
     height: 208px !important;
     min-height: 208px !important;
   }
@@ -476,11 +472,11 @@ html.codex-dream-skin :not(pre) > code {
     left: 15px;
   }
 
-  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+  html.codex-dream-skin [role="main"].dream-skin-home {
     --thread-content-max-width: min(860px, calc(100cqw - 30px)) !important;
   }
 
-  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  html.codex-dream-skin [role="main"].dream-skin-home
     [data-feature="game-source"] {
     max-width: 60% !important;
     font-size: 19px !important;
@@ -488,23 +484,21 @@ html.codex-dream-skin :not(pre) > code {
 }
 
 @media (max-width: 680px) {
-  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions) {
+  html.codex-dream-skin [role="main"].dream-skin-home {
     --thread-content-max-width: calc(100cqw - 18px) !important;
   }
 
-  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-    div:has(> div > .group\/home-suggestions):has([data-feature="game-source"])
-    > div:has([data-feature="game-source"]) {
+  html.codex-dream-skin [role="main"].dream-skin-home
+    .dream-skin-home-shell > .dream-skin-home-hero {
     height: 184px !important;
     min-height: 184px !important;
   }
 
-  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
-    div:has(> div > .group\/home-suggestions) > div:has([data-feature="game-source"]) > div {
+  html.codex-dream-skin [role="main"].dream-skin-home .dream-skin-home-hero > div {
     padding-left: 18px !important;
   }
 
-  html.codex-dream-skin [role="main"]:has([data-feature="game-source"]):has(.group\/home-suggestions)
+  html.codex-dream-skin [role="main"].dream-skin-home
     [data-feature="game-source"] {
     max-width: 58% !important;
     font-size: 17px !important;

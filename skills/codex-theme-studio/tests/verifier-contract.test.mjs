@@ -15,6 +15,15 @@ assert.equal(home.strictVisualPass, true);
 assert.equal(home.degraded, false);
 assert.deepEqual(home.reasons, []);
 
+const typedHome = structuredClone(await fixture("home-state.json"));
+typedHome.home.suggestionsPresent = false;
+typedHome.home.cards = [];
+typedHome.home.cardColumns = null;
+const typedHomeResult = evaluateSnapshot(typedHome);
+assert.equal(typedHomeResult.pass, true);
+assert.equal(typedHomeResult.strictVisualPass, true);
+assert.equal(typedHomeResult.degraded, false);
+
 const task = evaluateSnapshot(await fixture("task-state.json"));
 assert.equal(task.pass, true);
 assert.equal(task.strictVisualPass, true);

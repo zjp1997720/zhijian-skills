@@ -1,5 +1,5 @@
 const EXPECTED = {
-  version: "1.0.0",
+  version: "1.0.2",
   background: "#F5F3EE",
   sidebar: "#F1F0EC",
   selected: "#E8E6DC",
@@ -87,12 +87,13 @@ export function evaluateSnapshot(snapshot, options = {}) {
   if (snapshot.mode === "home") {
     const home = snapshot.home || {};
     const cards = Array.isArray(home.cards) ? home.cards : [];
-    add(coreReasons, home.enhancementHookPresent && cards.length !== 4, "home-card-count");
+    const suggestionsPresent = home.suggestionsPresent !== false;
+    add(coreReasons, suggestionsPresent && cards.length !== 4, "home-card-count");
     cards.forEach((card, index) => {
       add(coreReasons, !visible(card), `home-card-hidden:${index}`);
       add(coreReasons, !card.focusable || (card.role !== "button" && card.tagName !== "BUTTON"), `home-card-not-focusable:${index}`);
       add(coreReasons, card.clipped === true, `home-card-clipped:${index}`);
-      if (home.enhancementHookPresent) {
+      if (home.enhancementHookPresent && suggestionsPresent) {
         add(
           visualReasons,
           !card.iconOffset || Math.abs(card.iconOffset.x) > 1 || Math.abs(card.iconOffset.y) > 1,
@@ -109,7 +110,7 @@ export function evaluateSnapshot(snapshot, options = {}) {
       add(visualReasons, Math.abs((home.hero?.height || 0) - wantedHeight) > 2, "home-hero-height");
       add(visualReasons, home.hero?.backgroundImage === "none", "home-hero-art-missing");
       add(visualReasons, home.hero?.backgroundSize !== "cover", "home-hero-art-not-full-bleed");
-      const wantedColumns = expectedCardColumns(snapshot.viewport?.width || 0, cards.length);
+      const wantedColumns = suggestionsPresent ? expectedCardColumns(snapshot.viewport?.width || 0, cards.length) : null;
       if (wantedColumns) add(visualReasons, home.cardColumns !== wantedColumns, "home-card-columns");
     }
 
