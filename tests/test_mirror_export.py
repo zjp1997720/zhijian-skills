@@ -23,6 +23,10 @@ class MirrorExportTests(unittest.TestCase):
             encoding="utf-8",
         )
         (root / "skills/demo/references/policy.md").write_text("policy\n", encoding="utf-8")
+        (root / "skills/demo/node_modules/dependency").mkdir(parents=True)
+        (root / "skills/demo/node_modules/dependency/index.js").write_text(
+            "generated dependency\n", encoding="utf-8"
+        )
         (root / "docs/skills/demo/README.md").write_text("# Demo\n", encoding="utf-8")
         (root / "docs/skills/demo/README.zh-CN.md").write_text("# 演示\n", encoding="utf-8")
         (root / "docs/changelogs/demo.md").write_text("# Changelog\n", encoding="utf-8")
@@ -62,6 +66,7 @@ class MirrorExportTests(unittest.TestCase):
             metadata = json.loads((destination / "SOURCE.json").read_text(encoding="utf-8"))
             self.assertEqual(metadata["skill"], "demo")
             self.assertTrue((destination / "skills/demo/references/policy.md").is_file())
+            self.assertFalse((destination / "skills/demo/node_modules").exists())
             self.assertTrue((destination / ".github/workflows/redirect-contributions.yml").is_file())
             first_digest = metadata["export_digest"]
 

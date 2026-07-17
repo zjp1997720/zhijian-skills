@@ -13,6 +13,29 @@ from typing import Any
 
 
 MANIFEST_NAME = "SOURCE.json"
+IGNORED_PARTS = {
+    ".git",
+    "__pycache__",
+    "node_modules",
+    "coverage",
+    "dist",
+    "reports",
+    "_preview_frames",
+    "_preview_magazine",
+}
+EXPORT_IGNORES = shutil.ignore_patterns(
+    ".DS_Store",
+    ".git",
+    "__pycache__",
+    "*.pyc",
+    "node_modules",
+    "coverage",
+    "dist",
+    "reports",
+    "preview.html",
+    "_preview_frames",
+    "_preview_magazine",
+)
 WORKFLOW = """name: Redirect contributions
 
 on:
@@ -59,9 +82,11 @@ def file_manifest(root: Path, *, exclude_source: bool = True) -> dict[str, str]:
     if not root.exists():
         return result
     for path in sorted(root.rglob("*")):
-        if not path.is_file() or ".git" in path.parts:
+        if not path.is_file() or any(part in IGNORED_PARTS for part in path.parts):
             continue
         relative = path.relative_to(root).as_posix()
+        if path.name in {".DS_Store", "preview.html"} or path.suffix == ".pyc":
+            continue
         if exclude_source and relative == MANIFEST_NAME:
             continue
         result[relative] = sha256_bytes(path.read_bytes())
@@ -158,7 +183,12 @@ def export_mirror(
     copy_file(repo / f"docs/changelogs/{skill}.md", destination / "CHANGELOG.md")
     copy_file(repo / "LICENSE", destination / "LICENSE")
     copy_file(repo / "CONTRIBUTING.md", destination / "CONTRIBUTING.md")
-    shutil.copytree(skill_dir, destination / "skills" / skill, copy_function=shutil.copy2)
+    shutil.copytree(
+        skill_dir,
+        destination / "skills" / skill,
+        copy_function=shutil.copy2,
+        ignore=EXPORT_IGNORES,
+    )
     workflow = destination / ".github/workflows/redirect-contributions.yml"
     workflow.parent.mkdir(parents=True, exist_ok=True)
     workflow.write_text(WORKFLOW, encoding="utf-8")
