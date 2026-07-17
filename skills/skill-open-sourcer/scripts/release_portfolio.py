@@ -110,7 +110,23 @@ def tag_exists(repo: Path, tag: str) -> bool:
 def record_changed(repo: Path, record: dict[str, Any]) -> tuple[bool, str]:
     tag = record["canonical_tag"]
     if not tag_exists(repo, tag):
-        return True, "initial_baseline"
+        previous = git(
+            repo,
+            "tag",
+            "--list",
+            f"{record['name']}/v*",
+            "--sort=-v:refname",
+        ).stdout.splitlines()
+        if not previous:
+            return True, "initial_baseline"
+        paths = [
+            record["path"],
+            record["documentation"],
+            record["documentation_zh"],
+            record["changelog"],
+        ]
+        changed = git(repo, "diff", "--quiet", previous[0], "--", *paths, check=False).returncode != 0
+        return changed, "content_change" if changed else "version_declaration"
     paths = [
         record["path"],
         record["documentation"],

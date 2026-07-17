@@ -49,9 +49,10 @@ class PortfolioContractTest(unittest.TestCase):
     def test_versions_and_tags_are_independent(self) -> None:
         for record in self.records:
             with self.subTest(skill=record["name"]):
-                self.assertEqual("1.0.0", record["version"])
-                self.assertEqual(f"{record['name']}/v1.0.0", record["canonical_tag"])
-                self.assertEqual("v1.0.0", record["mirror_tag"])
+                version = record["version"]
+                self.assertRegex(version, r"^\d+\.\d+\.\d+$")
+                self.assertEqual(f"{record['name']}/v{version}", record["canonical_tag"])
+                self.assertEqual(f"v{version}", record["mirror_tag"])
 
     def test_capability_and_harness_contract(self) -> None:
         for record in self.records:
