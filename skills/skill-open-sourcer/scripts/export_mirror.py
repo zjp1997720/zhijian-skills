@@ -103,13 +103,17 @@ def payload_digest(skill_dir: Path) -> str:
 
 
 def ensure_existing_mirror_is_known(destination: Path, *, adopt: bool) -> list[str]:
+    if adopt:
+        return sorted(
+            path.relative_to(destination).as_posix()
+            for path in destination.rglob("*")
+            if path.is_file() and ".git" not in path.parts
+        )
     current = file_manifest(destination)
     if not current:
         return []
     metadata_path = destination / MANIFEST_NAME
     if not metadata_path.is_file():
-        if adopt:
-            return sorted(current)
         raise ExportError(
             "mirror.drift: destination contains files without SOURCE.json; review and rerun with --adopt"
         )
