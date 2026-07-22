@@ -18,13 +18,13 @@ agent_team/
   handoffs/
 ```
 
-`state.json` 至少记录：根任务目标、模式、并发/累计计数、每个 thread id、模型、thinking、职责、所有权、状态、尝试次数、输出路径、是否采纳、是否归档、审批与阻塞项。
+`state.json` 至少记录：根任务目标、模式、策略版本、并发/creation attempt 计数、每个 RoutePlan 的有序候选链、Provider allowlist、健康证据，以及遵守 [审计 schema](audit-schema.json) 的 Worker 记录。未返回 thread ID 的创建尝试也必须保留。
 
 `task-board.md` 展示待办、执行中、待集成、完成、阻塞。`packets/` 保存正式任务包，`handoffs/` 保存可恢复的交接摘要。
 
 ## 风险门
 
-Worker 可以准备外部或高风险动作所需的材料。发布、发送、付款、删除、账户、生产变更和不可逆操作必须回到主 Agent，并遵守当前用户授权。恢复任务时先读取 `state.json` 与交接文件，禁止重复创建已完成任务。
+Worker 可以准备外部或高风险动作所需的材料。发布、发送、付款、删除、账户、生产变更和不可逆操作必须回到主 Agent，并遵守当前用户授权。恢复任务时先读取 `state.json` 与交接文件，重新验证过期的 Provider/健康证据，禁止重复创建已完成任务。
 
 ## rollback boundary
 

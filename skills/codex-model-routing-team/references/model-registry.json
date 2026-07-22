@@ -1,0 +1,60 @@
+{
+  "schema_version": "1.0.0",
+  "updated_at": "2026-07-22",
+  "policy": {
+    "runtime_metadata_role": "validate_only",
+    "unknown_model_action": "reject",
+    "unknown_thinking_action": "reject",
+    "thinking_order": ["low", "medium", "high", "xhigh", "max"],
+    "forbidden_thinking": ["ultra"],
+    "default_disabled_models": [
+      "gpt-5.5",
+      "gpt-5.4",
+      "gpt-5.4-mini",
+      "gpt-5.3-codex-spark",
+      "gpt-5.6-terra"
+    ]
+  },
+  "models": [
+    {
+      "id": "gpt-5.6-luna",
+      "provider": "openai",
+      "status": "baseline",
+      "automatic": true,
+      "thinking": ["high", "xhigh", "max"],
+      "roles": ["general_worker", "fast_baseline", "research", "draft", "routine_code", "verification"],
+      "provider_policy": "openai_baseline",
+      "terms_default": "allowed"
+    },
+    {
+      "id": "gpt-5.6-sol",
+      "provider": "openai",
+      "status": "baseline",
+      "automatic": true,
+      "thinking": ["high", "xhigh", "max"],
+      "roles": ["architecture", "hard_debugging", "critical_review", "arbitration", "fallback_deep"],
+      "provider_policy": "openai_baseline",
+      "terms_default": "allowed"
+    },
+    {
+      "id": "xai/grok-4.5",
+      "provider": "xai",
+      "status": "conditional",
+      "automatic": true,
+      "thinking": ["low", "medium", "high"],
+      "roles": ["agentic_code", "terminal_work", "independent_review", "technical_analysis", "cross_provider_challenger"],
+      "provider_policy": "xai_conditional",
+      "terms_default": "unknown"
+    },
+    {
+      "id": "antigravity/gemini-3.6-flash",
+      "provider": "google-antigravity",
+      "status": "manual_only",
+      "automatic": false,
+      "thinking": ["low", "medium", "high"],
+      "roles": ["fast_breadth", "long_context_scan", "multimodal_analysis", "structured_extraction"],
+      "provider_policy": "google_antigravity_manual_only",
+      "terms_default": "blocked"
+    }
+  ]
+}

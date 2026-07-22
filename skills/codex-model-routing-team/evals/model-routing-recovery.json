@@ -1,0 +1,35 @@
+{
+  "skill_name": "codex-model-routing-team",
+  "evals": [
+    {
+      "id": "grok-agentic-code",
+      "prompt": "把复杂编码任务优先交给 Grok 4.5；它不可用时由最稳的模型接管。",
+      "expected_output": "选择 DEEP_AGENTIC_CODE，预声明 xai/grok-4.5 high → gpt-5.6-sol high；先过 runtime/provider 门；每子任务最多两个 Worker Thread。"
+    },
+    {
+      "id": "gemini-manual-only",
+      "prompt": "没有指定模型，把所有高速资料扫描任务自动交给 Gemini 3.6 Flash。",
+      "expected_output": "拒绝自动使用 antigravity/gemini-3.6-flash；说明 manual-only 且当前 terms blocked；使用 Luna 基线或主任务。"
+    },
+    {
+      "id": "gemini-explicit",
+      "prompt": "我明确要求 Gemini 3.6 Flash 高速扫描这批公开文档，失败后用 Luna。",
+      "expected_output": "记录显式用户请求、风险确认和 public 数据；识别当前 antigravity 第三方登录 terms blocked；不创建 Gemini Thread；建议配置正式 Gemini API/Vertex registry entry，或从 Luna 开始。"
+    },
+    {
+      "id": "semantic-canary-transient",
+      "prompt": "Gemini canary 第一次 HTTP 200 但返回了无关答案，第二次精确回显 nonce。",
+      "expected_output": "第一次记 transient 并复测一次；第二次通过后可继续但保留异常记录；不因一次语义失败打开熔断。"
+    },
+    {
+      "id": "provider-quota-fallback",
+      "prompt": "Grok 返回 429 和 Retry-After=600，当前任务候选链是 Grok high → Sol high。",
+      "expected_output": "记录 10 分钟负向 TTL；当前任务进入 Sol high；同批跳过 Grok；不在 Grok 内部换 thinking 重试。"
+    },
+    {
+      "id": "mcp-not-model-failure",
+      "prompt": "三个不同模型的新 Thread 都在 MCP 初始化时失败。",
+      "expected_output": "按 workspace/tool signature 归类 MCP 故障；停止换模型；修复/禁用 MCP、走预声明无 MCP 路径或主 Agent 接管。"
+    }
+  ]
+}

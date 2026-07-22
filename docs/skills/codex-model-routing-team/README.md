@@ -39,7 +39,7 @@ npx skills ls -g -a codex
 find ~/.agents/skills/codex-model-routing-team -maxdepth 2 -type f | sort
 ```
 
-The file list must include `SKILL.md`, `references/routing-policy.md`, `references/task-packet.md`, and `references/thread-lifecycle.md`. If only `SKILL.md` appears, remove that incomplete installation and install the current release again.
+The file list must include `SKILL.md`, `references/model-registry.json`, `references/audit-schema.json`, `references/routing-policy.md`, `references/provider-policy.md`, `references/recovery-policy.md`, `references/task-packet.md`, `references/thread-lifecycle.md`, `scripts/model_preflight.py`, and `scripts/validate_route_plan.py`. If only `SKILL.md` appears, remove that incomplete installation and install the current release again.
 
 ## Activate it
 
@@ -56,7 +56,7 @@ To let Codex activate the Skill automatically for suitable complex work, add the
 
 - The user authorizes Codex to use `$codex-model-routing-team` automatically for complex, parallelizable tasks, create independent background tasks, and assign a model and reasoning level to each task. Before dispatch, briefly state the number of tasks, model, reasoning level, and responsibility. No additional confirmation is required.
 - The lead agent keeps its current model and owns planning, file ownership, integration, verification, and final delivery.
-- Run at most 6 background tasks concurrently and create at most 8 for one root task. Background tasks must not create more background tasks or subagents.
+- Run at most 6 background tasks concurrently and make at most 8 creation attempts for one root task; failures, non-materialized calls, and fallbacks count. Background tasks must not create more background tasks or subagents.
 - Background tasks must not use Ultra. Terra is excluded from automatic routing by default. If Codex App background-task tools are unavailable, complete the work locally and do not use MultiAgentV2 `spawn_agent` as a substitute for model routing.
 - Do not auto-dispatch simple questions, status checks, small single-file edits, strongly sequential work, publishing, sending, payment, deletion, account, or production operations.
 ```
@@ -72,19 +72,22 @@ This Skill uses Codex App background tasks instead. The lead agent plans the wor
 ## What it does
 
 - Routes only complex, genuinely parallel work such as multi-source research, multi-section content, large Skills or decks, and independent engineering workstreams.
-- Uses Sol and Luna as the default routes, prohibits Ultra, and keeps Terra out of automatic routing unless evidence or the user calls for it.
-- Limits fan-out to three new tasks per wave, six concurrent tasks, and eight total tasks per root request.
-- Treats the first real task as a health probe, verifies every created task, prevents descendants, and archives only completed tasks whose results were adopted.
+- Keeps Luna and Sol as stable baselines, and conditionally routes agentic coding, terminal work, and heterogeneous review to Grok 4.5 after runtime/provider preflight.
+- Retains explicit Gemini 3.6 Flash route templates while blocking the current third-party Antigravity login path; an official API/Vertex path needs a separate registry entry.
+- Limits fan-out to three new tasks per wave, six concurrent tasks, and eight creation attempts per root request.
+- Uses the first business task for each model/reasoning/tool signature as its final health probe, separating HTTP, thread materialization, model data, and delivery quality.
+- Freezes fallback before dispatch, allows at most two Worker threads per subtask, and permits one quality follow-up in the original thread.
 - Acts as a Thread Orchestrator for upstream workflows such as Deep Research while preserving their stages, artifacts, and quality gates.
 - Keeps publishing, payments, deletion, account changes, and production mutations in the lead task.
 
 ## How it works
 
-1. The lead agent decides whether parallel execution is worth the coordination cost.
-2. It creates one real background task as a health probe and confirms that the task can be read.
-3. It creates later tasks in bounded waves with explicit model, reasoning, scope, file ownership, and acceptance criteria.
-4. It verifies facts and artifacts, resolves conflicts, and integrates the result.
-5. It archives adopted completed tasks one at a time.
+1. The lead agent decides whether parallel execution is worth the coordination cost and freezes a task profile, provider allowlist, and ordered candidate chain.
+2. It checks the registry, live runtime, reasoning level, and provider policy; when configured, it runs a nonce-based semantic probe outside App thread slots.
+3. The first business task for each exact route must pass materialization and model-data gates before later tasks using that route are released.
+4. It creates later tasks in bounded waves with explicit model, reasoning, scope, file ownership, and acceptance criteria.
+5. It verifies facts and artifacts, classifies failures, applies deterministic fallback, and integrates the result.
+6. It archives adopted completed tasks one at a time.
 
 When an upstream Skill already owns decomposition, this Skill accepts its stages and task budget. It controls model routing, task lifecycle, and safety caps without rewriting the upstream workflow. Any task with a workspace output path is project-bound; only chat-only work may be projectless.
 
@@ -108,6 +111,7 @@ Use $codex-model-routing-team as the Thread Orchestrator for $deep-research. Pre
 
 - Codex App with background-task tools for project discovery, task creation, task reading, follow-up messages, and archiving.
 - Access to the models and reasoning levels selected by the lead agent.
+- Provider terms, credential paths, and data boundaries must allow each cross-provider route. A working consumer subscription does not by itself authorize a third-party proxy.
 - Background task creation must be verifiable. The Skill stops delegation when a task does not materialize.
 - This does not change MultiAgentV2 or make native subagents support per-agent model selection.
 
@@ -123,7 +127,8 @@ Use $codex-model-routing-team as the Thread Orchestrator for $deep-research. Pre
 │       ├── SKILL.md
 │       ├── agents/
 │       ├── evals/
-│       └── references/
+│       ├── references/
+│       └── scripts/
 └── tests/
 ```
 
@@ -131,7 +136,7 @@ The agent workflow lives in [SKILL.md](skills/codex-model-routing-team/SKILL.md)
 
 ## Validation
 
-The workflow has been tested with projectless research tasks and project-bound workspace tasks, including model/reasoning verification, result collection, failure handling, and serial archival. The release is also tested through an isolated `npx skills` installation to confirm that supporting files are copied.
+The workflow covers Luna, Sol, conditional Grok 4.5 routes, and provider blocking for explicit Gemini requests, including registry/runtime checks, semantic nonces, RoutePlan validation, classified recovery, and serial archival. The release is also tested through an isolated `npx skills` installation to confirm that supporting files are copied.
 
 ## License
 

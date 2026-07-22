@@ -15,9 +15,10 @@
 本 Skill 拥有：
 
 - Worker `model` 与 `thinking`
+- RoutePlan、Provider allowlist、模型预检与 deterministic fallback
 - project / projectless 目标选择
 - Thread 创建、实体化、读取、追问与归档
-- 并发 6、累计 8、reserved slots 与升级次数
+- 并发 6、creation attempts 8、reserved slots 与升级次数
 - 单写者和禁止下级派遣等安全边界
 
 遇到冲突时，上游业务流程优先，路由安全上限保持强制。预算不足时收敛 Worker 数量并报告，禁止跳过上游验证阶段。
@@ -34,7 +35,7 @@
 8. 主 Agent 验证输出文件并更新上游账本。
 9. 只有上游阶段完成且结果采纳后才归档。
 
-每次 `create_thread` 成功后，立即把 `thread_id / role / model / thinking` 写入上游 run summary；完成验收和归档后补充 `status / output / archived`。`read_thread` 视图不保证返回模型字段，禁止依赖事后反查恢复路由信息。
+上游 run summary 的 Worker 记录遵守 [审计 schema](audit-schema.json)。每次调用 `create_thread` 前先写 creation/subtask attempt；返回 ID 后立即补 `thread_id`；实体化、DATA_READY、验收和归档分别更新对应字段。`model` 继续作为 `requested_model` 的兼容别名。`read_thread` 视图不保证返回模型字段，禁止依赖事后反查恢复路由信息。
 
 ## Deep Research 预设
 
@@ -42,9 +43,9 @@
 researcher_count + 1 verifier + 1 reviewer + retry_reserve <= 8
 ```
 
-- researcher：默认 2-4 个，Luna X High；机械抽取可用 Luna High。
+- researcher：默认 2–4 个，Luna X High；机械抽取可用 Luna High。公开技术研究可在 Provider 门通过后使用 Grok Medium。当前 Gemini Antigravity 第三方登录条款 blocked；只有新增合规的正式 API registry entry 后才能使用 Gemini。
 - verifier：1 个，Luna X High，在 draft 存在后创建。
-- reviewer：1 个，Sol High，在 cited 存在并通过检查后创建。
+- reviewer：1 个，Sol High，在 cited 存在并通过检查后创建；需要异构工程复核时可按 RoutePlan 使用 Grok High。
 - FATAL 复审：最多一次 Sol X High，使用 retry reserve。
 - 所有任务绑定包含 `01_项目/调研` 的 vault project。
 - 每个 researcher 写唯一的 T1/T2/T3/T4 文件。
@@ -55,10 +56,22 @@ researcher_count + 1 verifier + 1 reviewer + retry_reserve <= 8
 
 ```json
 {
+  "creation_attempt": 1,
+  "subtask_attempt": 1,
   "thread_id": null,
-  "model": null,
-  "thinking": null,
-  "attempt": 0,
+  "role": "researcher",
+  "model": "gpt-5.6-luna",
+  "requested_model": "gpt-5.6-luna",
+  "platform_accepted_model": null,
+  "observed_runtime_model": "unknown",
+  "thinking": "high",
+  "route_plan": {},
+  "provider_policy": {},
+  "materialized": false,
+  "data_ready": false,
+  "status": "planned",
+  "output": null,
+  "fallback_reason": null,
   "adopted": false,
   "archived": false
 }
