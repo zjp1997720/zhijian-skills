@@ -87,6 +87,12 @@ SKILLS = {
         "tagline": "Convert Markdown into polished WeChat-ready HTML.",
         "motif": "styler",
     },
+    "workbuddy-cli-model-bridge": {
+        "title": "WorkBuddy CLI Bridge",
+        "category": "MODEL INFRASTRUCTURE",
+        "tagline": "Connect verified CLI subscription models to WorkBuddy.",
+        "motif": "bridge",
+    },
 }
 
 
@@ -204,6 +210,21 @@ def motif_styler() -> str:
     return "".join(parts)
 
 
+def motif_bridge() -> str:
+    nodes = ((776, "CLI"), (920, "PROXY"), (1064, "WORKBUDDY"))
+    parts = [text(748, 91, "VERIFIED LOCAL ROUTE", 11, NAVY, 500, letter_spacing="1.1")]
+    for index, (x, label) in enumerate(nodes):
+        if index:
+            previous = nodes[index - 1][0]
+            parts += [line(previous + 38, 181, x - 38, 181, NAVY, 2), line(x - 46, 173, x - 38, 181, NAVY, 2), line(x - 46, 189, x - 38, 181, NAVY, 2)]
+        fill = CLAY if label == "PROXY" else SURFACE
+        stroke = CLAY if label == "PROXY" else NAVY
+        parts += [circle(x, 181, 38, fill, stroke, 2), text(x, 186, label, 10, SURFACE if label == "PROXY" else TERTIARY, 500, text_anchor="middle")]
+    for x, label in ((776, "OAUTH"), (920, "PROBE"), (1064, "SYNC")):
+        parts += [rect(x - 42, 246, 84, 30, SURFACE, 6, BORDER), text(x, 266, label, 9, SUCCESS, 500, text_anchor="middle", letter_spacing=".7")]
+    return "".join(parts)
+
+
 MOTIFS = {
     "doctor": motif_doctor,
     "routing": motif_routing,
@@ -214,6 +235,7 @@ MOTIFS = {
     "release": motif_release,
     "search": motif_search,
     "styler": motif_styler,
+    "bridge": motif_bridge,
 }
 
 
@@ -251,30 +273,32 @@ def skill_hero(name: str, item: dict[str, str]) -> str:
 
 def portfolio_hero() -> str:
     cards = []
-    labels = ["DOCTOR", "ROUTING", "ADMIN", "THEME", "CLONE", "HTML", "RELEASE", "SEARCH", "STYLER"]
+    labels = ["DOCTOR", "ROUTING", "ADMIN", "THEME", "CLONE", "HTML", "RELEASE", "SEARCH", "STYLER", "BRIDGE"]
     for index, label in enumerate(labels):
         column = index % 3
         row = index // 3
+        if index == 9:
+            column = 1
         x = 684 + column * 148
-        y = 78 + row * 67
-        marker = CLAY if label in {"ROUTING", "THEME", "RELEASE"} else NAVY
-        cards += [rect(x, y, 132, 46, SURFACE, 8, BORDER), rect(x, y, 4, 46, marker, 2), text(x + 18, y + 28, label, 10, TERTIARY, 500, letter_spacing=".45")]
+        y = 72 + row * 55
+        marker = CLAY if label in {"ROUTING", "THEME", "RELEASE", "BRIDGE"} else NAVY
+        cards += [rect(x, y, 132, 38, SURFACE, 8, BORDER), rect(x, y, 4, 38, marker, 2), text(x + 18, y + 24, label, 10, TERTIARY, 500, letter_spacing=".45")]
     body = "".join(
         [
             text(64, 64, "智见 AI  /  PUBLIC AGENT SKILLS", 12, CLAY_TEXT, 500, letter_spacing="1.4"),
             text(64, 139, "Zhijian Skills", 48, INK, 500),
-            text(64, 183, "One source. Nine focused skills.", 20, TERTIARY, 400),
+            text(64, 183, "One source. Ten focused skills.", 20, TERTIARY, 400),
             text(64, 215, "Complete packages · verifiable releases", 16, MUTED, 400),
             rect(64, 254, 224, 36, NAVY, 8),
             text(176, 277, "CANONICAL PORTFOLIO", 11, SURFACE, 500, text_anchor="middle", letter_spacing="1"),
             rect(660, 40, 484, 264, SURFACE, 12, BORDER),
-            text(684, 58, "9 ACTIVE SKILLS", 10, NAVY, 500, letter_spacing="1.1"),
+            text(684, 58, "10 ACTIVE SKILLS", 10, NAVY, 500, letter_spacing="1.1"),
             *cards,
         ]
     )
     return svg_shell(
         "Zhijian Skills",
-        "A canonical portfolio of nine focused, installable, and independently released Agent Skills.",
+        "A canonical portfolio of ten focused, installable, and independently released Agent Skills.",
         body,
     )
 

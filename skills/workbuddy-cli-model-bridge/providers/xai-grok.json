@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "id": "xai-grok",
+  "display_name": "xAI Grok",
+  "cli": {
+    "commands": ["grok"],
+    "auth_hints": [".grok"]
+  },
+  "cliproxy": {
+    "provider": "xai",
+    "login_flag": "--xai-login",
+    "auth_file_prefixes": ["xai-"]
+  },
+  "models": [
+    {
+      "key": "grok-primary",
+      "candidates": ["grok-4.5", "grok-4.5-build", "grok-4.5-build-local", "grok-4.3"],
+      "patterns": ["^grok-[0-9.]+$"],
+      "workbuddy": {
+        "supportsToolCall": true,
+        "supportsImages": true,
+        "supportsReasoning": true,
+        "useCustomProtocol": true,
+        "onlyReasoning": true,
+        "reasoning": {
+          "defaultEffort": "low",
+          "supportedEfforts": ["low", "medium", "high"],
+          "canDisableThinking": false
+        }
+      }
+    },
+    {
+      "key": "grok-fast",
+      "candidates": ["grok-composer-2.5-fast", "grok-3-mini-fast"],
+      "patterns": ["^grok-.*-fast$"],
+      "optional": true,
+      "workbuddy": {
+        "supportsToolCall": true,
+        "supportsImages": true,
+        "supportsReasoning": false,
+        "useCustomProtocol": true,
+        "onlyReasoning": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "id": "antigravity",
+  "display_name": "Google Antigravity",
+  "cli": {
+    "commands": ["antigravity", "agy"],
+    "auth_hints": [".config/antigravity"]
+  },
+  "cliproxy": {
+    "provider": "antigravity",
+    "login_flag": "--antigravity-login",
+    "auth_file_prefixes": ["antigravity-"]
+  },
+  "models": [
+    {
+      "key": "gemini-flash-primary",
+      "candidates": ["gemini-3.6-flash", "gemini-3.6-flash-high", "gemini-3.5-flash"],
+      "patterns": ["^gemini-[0-9.]+-flash(?:-high)?$"],
+      "workbuddy": {
+        "supportsToolCall": true,
+        "supportsImages": true,
+        "supportsReasoning": true,
+        "useCustomProtocol": true,
+        "onlyReasoning": true,
+        "reasoning": {
+          "defaultEffort": "high",
+          "supportedEfforts": ["high"],
+          "canDisableThinking": false
+        }
+      }
+    }
+  ]
+}

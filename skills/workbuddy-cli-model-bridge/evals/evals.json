@@ -1,0 +1,57 @@
+{
+  "skill_name": "workbuddy-cli-model-bridge",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我的 Mac 已经登录 Codex，WorkBuddy 也打开过，但是没有装 CLIProxyAPI。请把默认 GPT Sol 和可用的 Fast 模型接进去，直接完成配置。",
+      "expected_output": "Audits first, previews and applies a loopback-only CLIProxyAPI bootstrap, delegates Codex OAuth to the proxy, probes available models, and atomically registers only verified WorkBuddy entries without exposing credentials.",
+      "files": [],
+      "expectations": [
+        "The workflow runs audit before bootstrap or synchronization",
+        "CLIProxyAPI is installed through the official Homebrew path and bound to loopback",
+        "Codex authentication uses the native CLIProxyAPI OAuth command rather than copied token files",
+        "Only model IDs present in the live model list and passing text and streaming probes are registered",
+        "The report contains no API key, OAuth token, account identifier, prompt body, or image payload"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我已经在 WorkBuddy 里手工配了几个模型。现在把本地 Grok 也注册进去，图片输入和工具调用都要保留，不能破坏原来的配置。",
+      "expected_output": "Reuses the healthy proxy, authorizes only xAI when needed, independently probes text, streaming, image, and tool behavior, then merges verified Grok entries while preserving every manual model and blocking ID collisions.",
+      "files": [],
+      "expectations": [
+        "Existing CLIProxyAPI and manual WorkBuddy entries are preserved",
+        "The xAI provider alone is authorized unless another requested provider is missing",
+        "Image and tool capability flags are enabled only after their separate probes pass",
+        "A manual model ID collision is reported and never overwritten",
+        "A timestamped owner-only backup is created before a changed WorkBuddy file is written"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "我刚安装了一个新的 CLI，它能通过 CLIProxyAPI 原生 OAuth 登录，也会暴露 OpenAI-compatible 模型。请让以后任何 Agent 都能把它同步到 WorkBuddy。",
+      "expected_output": "Creates a machine-local declarative provider manifest, validates it before executing any login flag, follows the native OAuth path, probes the live route, and documents why the local registry is reusable across Agents without modifying the public Skill.",
+      "files": [],
+      "expectations": [
+        "The provider is represented by a manifest under the machine-local providers.d directory",
+        "The manifest is validated before authorization",
+        "Login flags are restricted to safe literal kebab-case CLI flags",
+        "The integration prefers native CLIProxyAPI OAuth over a custom adapter",
+        "Unsupported capabilities are omitted or downgraded instead of inferred from marketing claims"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "中午重新登录 Codex 后，WorkBuddy 里的 GPT 模型失效了。帮我修好；如果没必要，不要换 WorkBuddy 里填的 API Key。",
+      "expected_output": "Classifies proxy, client-key, OAuth, model, and WorkBuddy-cache failures separately; repairs the smallest affected layer; reauthorizes Codex only when needed; and keeps the dedicated WorkBuddy proxy key stable when the upstream OAuth session changes.",
+      "files": [],
+      "expectations": [
+        "The diagnostic distinguishes the local proxy client key from upstream Codex OAuth",
+        "The WorkBuddy API key is not rotated solely because Codex OAuth changed",
+        "The existing service is repaired before any reinstall is attempted",
+        "A real authenticated request and declared capabilities are re-probed after repair",
+        "The final report states any remaining unverified gate instead of claiming success"
+      ]
+    }
+  ]
+}

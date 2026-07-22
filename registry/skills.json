@@ -202,6 +202,29 @@
         "credentials": "none"
       },
       "harnesses": ["codex", "claude-code", "agents"]
+    },
+    {
+      "name": "workbuddy-cli-model-bridge",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/workbuddy-cli-model-bridge",
+      "documentation": "docs/skills/workbuddy-cli-model-bridge/README.md",
+      "documentation_zh": "docs/skills/workbuddy-cli-model-bridge/README.zh-CN.md",
+      "changelog": "docs/changelogs/workbuddy-cli-model-bridge.md",
+      "canonical_tag": "workbuddy-cli-model-bridge/v1.0.0",
+      "validation": {
+        "commands": [
+          "python3 -m unittest discover -s skills/workbuddy-cli-model-bridge/tests -v"
+        ],
+        "live_smoke": "python3 skills/workbuddy-cli-model-bridge/scripts/bridge.py audit"
+      },
+      "capabilities": {
+        "network": "required",
+        "subprocess": "required",
+        "filesystem": "write",
+        "credentials": "required"
+      },
+      "harnesses": ["codex", "claude-code", "agents"]
     }
   ]
 }

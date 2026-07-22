@@ -19,6 +19,7 @@ SKILLS = (
     "skill-open-sourcer",
     "wechat-article-search",
     "wechat-styler",
+    "workbuddy-cli-model-bridge",
 )
 
 
@@ -42,7 +43,7 @@ class ReadmeAssetTests(unittest.TestCase):
 
     def test_assets_are_safe_accessible_and_brand_aligned(self) -> None:
         assets = self.expected_assets()
-        self.assertEqual(len(assets), 10)
+        self.assertEqual(len(assets), 11)
         for asset in assets:
             content = asset.read_text(encoding="utf-8")
             self.assertLess(len(content.encode("utf-8")), 60_000, asset)

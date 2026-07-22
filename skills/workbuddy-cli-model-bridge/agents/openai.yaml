@@ -1,0 +1,4 @@
+interface:
+  display_name: "WorkBuddy CLI Model Bridge"
+  short_description: "Connect verified CLI models to WorkBuddy safely"
+  default_prompt: "Use $workbuddy-cli-model-bridge to audit my local CLI agents, repair or install the loopback proxy, authorize only the requested providers, and register verified models in WorkBuddy."

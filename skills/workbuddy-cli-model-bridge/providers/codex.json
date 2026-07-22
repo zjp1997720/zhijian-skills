@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "id": "codex",
+  "display_name": "OpenAI Codex",
+  "cli": {
+    "commands": ["codex"],
+    "auth_hints": [".codex/auth.json"]
+  },
+  "cliproxy": {
+    "provider": "codex",
+    "login_flag": "--codex-login",
+    "auth_file_prefixes": ["codex-"]
+  },
+  "models": [
+    {
+      "key": "gpt-sol-primary",
+      "candidates": ["gpt-5.6-sol", "gpt-5.6", "gpt-5.5"],
+      "patterns": ["^gpt-[0-9.]+-sol$"],
+      "workbuddy": {
+        "supportsToolCall": true,
+        "supportsImages": true,
+        "supportsReasoning": true,
+        "useCustomProtocol": true,
+        "onlyReasoning": true,
+        "reasoning": {
+          "defaultEffort": "high",
+          "supportedEfforts": ["medium", "high", "xhigh", "max"],
+          "canDisableThinking": false
+        }
+      }
+    },
+    {
+      "key": "gpt-sol-fast",
+      "candidates": ["gpt-5.6-sol-fast", "gpt-5.6-fast", "gpt-5.5-fast"],
+      "patterns": ["^gpt-[0-9.]+(?:-sol)?-fast$"],
+      "optional": true,
+      "workbuddy": {
+        "supportsToolCall": true,
+        "supportsImages": true,
+        "supportsReasoning": true,
+        "useCustomProtocol": true,
+        "onlyReasoning": true,
+        "reasoning": {
+          "defaultEffort": "high",
+          "supportedEfforts": ["medium", "high", "xhigh", "max"],
+          "canDisableThinking": false
+        }
+      }
+    }
+  ]
+}
