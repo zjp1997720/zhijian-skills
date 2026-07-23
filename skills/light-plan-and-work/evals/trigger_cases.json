@@ -1,0 +1,21 @@
+{
+  "recommended_threshold": 0.45,
+  "should_trigger": [
+    {"family": "explicit_light_flow", "text": "Use $light-plan-and-work to clean up this project README, make a short plan, edit it, and verify the links."},
+    {"family": "bounded_knowledge_work", "text": "用 light-plan-and-work 把这些培训笔记整理成客户可审阅的简报，短计划后直接完成。"},
+    {"family": "bounded_web_change", "text": "Use the lightweight plan-and-work flow to improve this one website section and run the existing tests."},
+    {"family": "bounded_cli_change", "text": "用轻量 plan + work 给这个本地 CLI 增加一个明确的小选项，直接实现并做定向验证。"}
+  ],
+  "should_not_trigger": [
+    {"family": "implicit_generic", "text": "Fix this typo in README."},
+    {"family": "brainstorm", "text": "我还没想清楚培训主题，先和我发散讨论方向、故事线和案例。"},
+    {"family": "high_risk_migration", "text": "Plan and execute a production database migration across three services with rollback and zero downtime."},
+    {"family": "release_orchestration", "text": "Coordinate the release, monitor CI, push tags, publish packages, and babysit the PR."},
+    {"family": "discovery_interview", "text": "Batch interview me until every product requirement and tradeoff is settled."}
+  ],
+  "near_neighbor": [
+    {"family": "direct_execution", "text": "Rename this one local variable and run the unit test; no plan needed."},
+    {"family": "specialist_skill", "text": "Use the slide deck Skill to build and render a 40-page training presentation."},
+    {"family": "full_spec", "text": "Write a detailed implementation specification for a multi-repository authentication redesign before anyone codes."}
+  ]
+}

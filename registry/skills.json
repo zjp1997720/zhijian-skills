@@ -135,6 +135,29 @@
       "harnesses": ["codex", "claude-code", "agents"]
     },
     {
+      "name": "light-plan-and-work",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/light-plan-and-work",
+      "documentation": "docs/skills/light-plan-and-work/README.md",
+      "documentation_zh": "docs/skills/light-plan-and-work/README.zh-CN.md",
+      "changelog": "docs/changelogs/light-plan-and-work.md",
+      "canonical_tag": "light-plan-and-work/v1.0.0",
+      "validation": {
+        "commands": [
+          "python3 -m unittest discover -s skills/light-plan-and-work/tests -v"
+        ],
+        "live_smoke": null
+      },
+      "capabilities": {
+        "network": "none",
+        "subprocess": "none",
+        "filesystem": "write",
+        "credentials": "none"
+      },
+      "harnesses": ["codex", "claude-code", "agents"]
+    },
+    {
       "name": "skill-open-sourcer",
       "lifecycle": "active",
       "version": "2.0.0",

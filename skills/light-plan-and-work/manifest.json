@@ -1,0 +1,23 @@
+{
+  "name": "light-plan-and-work",
+  "version": "1.0.0",
+  "owner": "zjp1997720",
+  "updated_at": "2026-07-23",
+  "status": "active",
+  "maturity_tier": "library",
+  "lifecycle_stage": "library",
+  "context_budget_tier": "production",
+  "review_cadence": "quarterly",
+  "skill_archetype": "workflow",
+  "target_platforms": [
+    "openai",
+    "claude",
+    "generic",
+    "agent-skills-compatible",
+    "vscode"
+  ],
+  "factory_components": [
+    "evals",
+    "tests"
+  ]
+}

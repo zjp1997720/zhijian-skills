@@ -1,0 +1,42 @@
+{
+  "optimizer_hints": {
+    "capability": "Plan and execute bounded work with a lightweight workflow",
+    "inputs": ["bounded task", "project context", "边界清楚的任务", "项目上下文"],
+    "trigger_actions": ["use light-plan-and-work", "use the lightweight plan-and-work flow", "用轻量 plan + work", "短计划后直接完成"],
+    "exclusions": ["implicit direct work", "brainstorming", "heavy migrations", "specialist artifacts", "普通直接任务", "脑暴", "高风险迁移", "专用交付物"],
+    "artifacts": ["execution brief", "short plan", "verification evidence", "执行简报", "短计划", "验证证据"]
+  },
+  "fallback_positive_concepts": ["explicit_light_flow", "execute_and_verify"],
+  "positive_concepts": {
+    "explicit_light_flow": {
+      "weight": 0.65,
+      "phrases": ["$light-plan-and-work", "light-plan-and-work", "lightweight plan-and-work", "lightweight plan and work", "lightweight plan-and-work flow", "light workflow", "light-plan-and-work", "用 light-plan-and-work", "轻量 plan + work", "轻量计划"]
+    },
+    "execute_and_verify": {
+      "weight": 0.35,
+      "phrases": ["execute immediately", "short plan", "make a short plan", "run the existing tests", "短计划后直接完成", "直接实现并做定向验证", "短计划", "直接完成", "运行现有测试"]
+    }
+  },
+  "negative_concepts": {
+    "implicit_direct": {
+      "weight": 0.65,
+      "exclusive": true,
+      "phrases": ["fix this typo", "no plan needed", "rename this one local variable", "修正这个错别字"]
+    },
+    "brainstorm_or_discovery": {
+      "weight": 0.65,
+      "exclusive": true,
+      "phrases": ["brainstorm", "batch interview me", "发散讨论方向", "还没想清楚培训主题", "批量问我问题"]
+    },
+    "heavy_work": {
+      "weight": 0.7,
+      "exclusive": true,
+      "phrases": ["production database migration", "multi-repository authentication", "coordinate the release", "authentication redesign", "生产数据库迁移", "跨三个服务", "协同发布"]
+    },
+    "specialist_artifact": {
+      "weight": 0.6,
+      "exclusive": true,
+      "phrases": ["slide deck skill", "40-page training presentation", "用 ppt skill"]
+    }
+  }
+}

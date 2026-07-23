@@ -1,7 +1,7 @@
 # Zhijian Skills
 
 <p align="center">
-  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="Zhijian Skills: one canonical portfolio of ten focused Agent Skills">
+  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="Zhijian Skills: one canonical portfolio of eleven focused Agent Skills">
 </p>
 
 <p align="center"><strong>Install focused Agent Skills from one trusted source, with complete payloads and independently verified releases.</strong></p>
@@ -12,11 +12,11 @@
   <a href="./CONTRIBUTING.md">Contribute</a>
 </p>
 
-Zhijian Skills is the canonical source for ten focused Agent Skills spanning Codex operations and experience, model infrastructure, knowledge systems, research, information design, and publishing.
+Zhijian Skills is the canonical source for eleven focused Agent Skills spanning Codex operations and experience, workflow orchestration, model infrastructure, knowledge systems, research, information design, and publishing.
 
 ## Start in 30 seconds
 
-List all ten Skills:
+List all eleven Skills:
 
 ```bash
 npx skills add zjp1997720/zhijian-skills --list
@@ -47,6 +47,7 @@ npx skills add zjp1997720/zhijian-skills \
 | Codex experience | [`codex-theme-studio`](docs/skills/codex-theme-studio/README.md) | Design, apply, verify, and restore reversible Codex Desktop themes | [Docs](docs/skills/codex-theme-studio/README.md) |
 | Knowledge systems | [`enterprise-clone-builder`](docs/skills/enterprise-clone-builder/README.md) | Build a structured enterprise digital-twin repository from evidence | [Docs](docs/skills/enterprise-clone-builder/README.md) |
 | Information design | [`html-express`](docs/skills/html-express/README.md) | Turn dense material into a clear, self-contained HTML report | [Docs](docs/skills/html-express/README.md) |
+| Workflow orchestration | [`light-plan-and-work`](docs/skills/light-plan-and-work/README.md) | Plan bounded work briefly, execute immediately, and escalate only on heavy conditions | [Docs](docs/skills/light-plan-and-work/README.md) |
 | Release governance | [`skill-open-sourcer`](docs/skills/skill-open-sourcer/README.md) | Audit, package, document, verify, and publish Agent Skills | [Docs](docs/skills/skill-open-sourcer/README.md) |
 | Content research | [`wechat-article-search`](docs/skills/wechat-article-search/README.md) | Discover WeChat public-account articles as structured JSON | [Docs](docs/skills/wechat-article-search/README.md) |
 | Editorial publishing | [`wechat-styler`](docs/skills/wechat-styler/README.md) | Convert Markdown into polished, WeChat-compatible inline HTML | [Docs](docs/skills/wechat-styler/README.md) |

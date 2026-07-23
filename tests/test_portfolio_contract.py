@@ -14,6 +14,7 @@ EXPECTED_SKILLS = {
     "codex-theme-studio",
     "enterprise-clone-builder",
     "html-express",
+    "light-plan-and-work",
     "skill-open-sourcer",
     "wechat-article-search",
     "wechat-styler",
@@ -30,7 +31,7 @@ class PortfolioContractTest(unittest.TestCase):
         cls.registry = json.loads(REGISTRY_PATH.read_text(encoding="utf-8"))
         cls.records = cls.registry["skills"]
 
-    def test_registry_has_exact_first_wave(self) -> None:
+    def test_registry_has_exact_active_skill_set(self) -> None:
         self.assertEqual(EXPECTED_SKILLS, {record["name"] for record in self.records})
 
     def test_identity_and_paths_are_unique(self) -> None:

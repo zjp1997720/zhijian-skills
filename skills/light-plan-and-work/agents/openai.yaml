@@ -1,0 +1,6 @@
+interface:
+  display_name: "Light Plan and Work"
+  short_description: "Plan bounded work briefly, then execute and verify"
+  default_prompt: "Use $light-plan-and-work to make a short execution plan for this bounded task, complete it now, verify the outcome, and hand back the evidence."
+policy:
+  allow_implicit_invocation: false

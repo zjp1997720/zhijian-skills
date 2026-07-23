@@ -1,0 +1,26 @@
+interface:
+  display_name: "Light Plan and Work"
+  short_description: "Plan bounded work briefly, execute, verify, hand back"
+  default_prompt: "Use $light-plan-and-work to create the smallest useful plan for this bounded task, execute it immediately, verify the result, and escalate only if a heavy condition appears."
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets:
+    - "openai"
+    - "claude"
+    - "generic"
+    - "vscode"
+  activation:
+    mode: "manual"
+    paths: []
+  execution:
+    context: "inline"
+    shell: "bash"
+  trust:
+    source_tier: "local"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "allow-metadata-only"
+  degradation:
+    openai: "metadata-adapter"
+    claude: "neutral-source-plus-adapter"
+    generic: "neutral-source"
+    vscode: "agent-skills-source-with-vscode-notes"
