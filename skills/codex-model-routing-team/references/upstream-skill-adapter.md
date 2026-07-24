@@ -31,11 +31,11 @@
 4. 输出派遣通知，列明当前 Worker 与保留额度。
 5. 把上游任务转换成 `references/task-packet.md`，保留原始验收标准。
 6. 有工作区输出时绑定匹配 project local。
-7. 按 `references/thread-lifecycle.md` 创建、验证和读取 Thread。
+7. 按 `references/thread-lifecycle.md` 与 `references/thread-supervision-protocol.md` 创建、解析 pending setup、验证和读取 Thread。
 8. 主 Agent 验证输出文件并更新上游账本。
 9. 只有上游阶段完成且结果采纳后才归档。
 
-上游 run summary 的 Worker 记录遵守 [审计 schema](audit-schema.json)。每次调用 `create_thread` 前先写 creation/subtask attempt；返回 ID 后立即补 `thread_id`；实体化、DATA_READY、验收和归档分别更新对应字段。`model` 继续作为 `requested_model` 的兼容别名。`read_thread` 视图不保证返回模型字段，禁止依赖事后反查恢复路由信息。
+上游 run summary 的 Worker 记录遵守 [审计 schema](audit-schema.json)。每次创建使用唯一 task id；每次调用 `create_thread` 前写 creation/subtask attempt；返回正式 id 或 pending id 后写入对应字段；排队恢复、实体化、DATA_READY、验收和归档分别更新控制状态。`model` 继续作为 `requested_model` 的兼容别名。`read_thread` 视图不保证返回模型字段，禁止依赖事后反查恢复路由信息。
 
 ## Deep Research 预设
 
@@ -58,7 +58,13 @@ researcher_count + 1 verifier + 1 reviewer + retry_reserve <= 8
 {
   "creation_attempt": 1,
   "subtask_attempt": 1,
+  "task_id": "deepresearch-topic-t1-a1",
   "thread_id": null,
+  "pending_worktree_id": null,
+  "control_state": "PLANNED",
+  "thread_status": null,
+  "turn_status": null,
+  "last_observed_at": null,
   "role": "researcher",
   "model": "gpt-5.6-luna",
   "requested_model": "gpt-5.6-luna",

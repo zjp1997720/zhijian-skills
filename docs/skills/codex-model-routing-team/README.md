@@ -39,7 +39,7 @@ npx skills ls -g -a codex
 find ~/.agents/skills/codex-model-routing-team -maxdepth 2 -type f | sort
 ```
 
-The file list must include `SKILL.md`, `references/model-registry.json`, `references/audit-schema.json`, `references/routing-policy.md`, `references/provider-policy.md`, `references/recovery-policy.md`, `references/task-packet.md`, `references/thread-lifecycle.md`, `scripts/model_preflight.py`, and `scripts/validate_route_plan.py`. If only `SKILL.md` appears, remove that incomplete installation and install the current release again.
+The file list must include `SKILL.md`, `references/model-registry.json`, `references/audit-schema.json`, `references/routing-policy.md`, `references/provider-policy.md`, `references/recovery-policy.md`, `references/task-packet.md`, `references/thread-lifecycle.md`, `references/thread-supervision-protocol.md`, `scripts/model_preflight.py`, `scripts/validate_route_plan.py`, and `scripts/validate_team_ledger.py`. If only `SKILL.md` appears, remove that incomplete installation and install the current release again.
 
 ## Activate it
 
@@ -76,6 +76,9 @@ This Skill uses Codex App background tasks instead. The lead agent plans the wor
 - Retains explicit Gemini 3.6 Flash route templates while blocking the current third-party Antigravity login path; an official API/Vertex path needs a separate registry entry.
 - Limits fan-out to three new tasks per wave, six concurrent tasks, and eight creation attempts per root request.
 - Uses the first business task for each model/reasoning/tool signature as its final health probe, separating HTTP, thread materialization, model data, and delivery quality.
+- Separates formal `threadId`, queued `pendingWorktreeId`, transport timeout, and ambiguous state; a unique task id recovers queued work, while `UNKNOWN` blocks follow-up, archival, fallback, and duplicate creation.
+- Treats the latest official Thread/turn read as current truth and uses a minimal ledger validator for attempt, materialization, DATA_READY, and archive invariants.
+- Uses `task_intent` and `mutation_authority` to keep inspection and verification Workers from expanding their write scope.
 - Freezes fallback before dispatch, allows at most two Worker threads per subtask, and permits one quality follow-up in the original thread.
 - Acts as a Thread Orchestrator for upstream workflows such as Deep Research while preserving their stages, artifacts, and quality gates.
 - Keeps publishing, payments, deletion, account changes, and production mutations in the lead task.
@@ -84,10 +87,10 @@ This Skill uses Codex App background tasks instead. The lead agent plans the wor
 
 1. The lead agent decides whether parallel execution is worth the coordination cost and freezes a task profile, provider allowlist, and ordered candidate chain.
 2. It checks the registry, live runtime, reasoning level, and provider policy; when configured, it runs a nonce-based semantic probe outside App thread slots.
-3. The first business task for each exact route must pass materialization and model-data gates before later tasks using that route are released.
-4. It creates later tasks in bounded waves with explicit model, reasoning, scope, file ownership, and acceptance criteria.
-5. It verifies facts and artifacts, classifies failures, applies deterministic fallback, and integrates the result.
-6. It archives adopted completed tasks one at a time.
+3. Every creation has a unique task id. A direct formal id is read immediately; a queued worktree is resolved through `list_threads` and stable official observations.
+4. The first business task for each exact route must pass materialization and model-data gates before later tasks using that route are released.
+5. The lead rebuilds state from official reads, verifies artifacts, and classifies failures; it never guesses through `UNKNOWN` by creating a replacement.
+6. It archives adopted completed tasks one at a time after the archive gate passes.
 
 When an upstream Skill already owns decomposition, this Skill accepts its stages and task budget. It controls model routing, task lifecycle, and safety caps without rewriting the upstream workflow. Any task with a workspace output path is project-bound; only chat-only work may be projectless.
 
@@ -109,7 +112,7 @@ Use $codex-model-routing-team as the Thread Orchestrator for $deep-research. Pre
 
 ## Requirements and boundaries
 
-- Codex App with background-task tools for project discovery, task creation, task reading, follow-up messages, and archiving.
+- Codex App with background-task tools for project discovery, task creation, task listing, task reading, follow-up messages, and archiving.
 - Access to the models and reasoning levels selected by the lead agent.
 - Provider terms, credential paths, and data boundaries must allow each cross-provider route. A working consumer subscription does not by itself authorize a third-party proxy.
 - Background task creation must be verifiable. The Skill stops delegation when a task does not materialize.
@@ -136,7 +139,7 @@ The agent workflow lives in [SKILL.md](../../../skills/codex-model-routing-team/
 
 ## Validation
 
-The workflow covers Luna, Sol, conditional Grok 4.5 routes, and provider blocking for explicit Gemini requests, including registry/runtime checks, semantic nonces, RoutePlan validation, classified recovery, and serial archival. The release is also tested through an isolated `npx skills` installation to confirm that supporting files are copied.
+The workflow covers Luna, Sol, conditional Grok 4.5 routes, and provider blocking for explicit Gemini requests, including registry/runtime checks, semantic nonces, RoutePlan validation, queued-worktree recovery, authoritative state reconciliation, ledger validation, and serial archival. The release is also tested through an isolated `npx skills` installation to confirm that supporting files are copied.
 
 ## License
 

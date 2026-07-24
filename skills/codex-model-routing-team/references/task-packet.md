@@ -6,6 +6,11 @@
 # 任务身份
 你是本任务的独立执行 Worker。禁止创建任何后台任务、线程或子 Agent。
 
+- task_id：
+- task_intent：`mutate | inspect | verify`
+- mutation_authority：`none | declared-output-only | declared-workspace | isolated-worktree`
+- result_correlation_id（可选）：
+
 ## 目标与位置
 - 总目标：
 - 你负责的子目标：
@@ -17,7 +22,7 @@
 ## 交付物
 - 产物：
 - 写入路径（如有）：
-- 返回格式：结论、证据/变更、验证、风险
+- 返回格式：先回显 task_id；再给结论、证据/变更、验证、风险；有 result_correlation_id 时在最终回复中原样返回
 
 ## 边界
 - 可读取：
@@ -39,6 +44,10 @@
 - 必须运行的验证：
 - 缺失信息时的处理：报告缺口，不猜测
 ```
+
+`task_intent` 表达权限语义：`mutate` 可以在声明范围内修改；`inspect` 只研究、诊断或写声明的报告；`verify` 只验证既有产物。`mutation_authority` 是实际写入硬门，不能由 Worker 扩大。`declared-output-only` 只允许写交付物路径，不允许顺手修改源文件。
+
+每次 Worker creation attempt 使用唯一 task id。fallback Worker 使用新 task id，避免 `list_threads(query=task_id)` 匹配旧 Thread。`result_correlation_id` 只用于结果关联，不代表任务正确完成。
 
 主 Agent 另外记录所选 `model`、`thinking` 与选择理由。任务包中严禁声称 Worker 已加载某个预制 Agent Type。
 

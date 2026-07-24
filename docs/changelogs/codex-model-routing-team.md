@@ -7,6 +7,9 @@
 - Add dependency-free model and RoutePlan validators for registry/runtime evidence, optional semantic nonces, ordered fallbacks, Provider allowlists, and minimum thinking.
 - Add a single audit schema with conservative creation-attempt accounting and backward-compatible `model` records.
 - Expand contract tests and evaluation cases for provider quota, semantic mismatch, MCP isolation, and explicit Gemini routing.
+- Add a minimal Thread supervision state model inspired by FirstMate's authoritative-state and reconciliation contracts, without importing its terminal fleet runtime.
+- Support queued `pendingWorktreeId` creation through unique task-id discovery and stable official observations; ambiguous zero/multiple matches now remain `UNKNOWN` and block follow-up, fallback, duplicate creation, and archival.
+- Add task-intent mutation boundaries, durable resume ordering, a dependency-free team-ledger validator, and focused regression coverage for state truth, pending recovery, archive gates, and duplicate prevention.
 
 ## 1.0.2 — 2026-07-17
 

@@ -20,6 +20,16 @@
       "id": "pure-chat-projectless",
       "prompt": "并行查询三个独立事实，只在聊天中返回结果，不写任何工作区文件。",
       "expected_output": "允许 projectless；仍执行实体化健康探针、6/8 上限和禁止递归。"
+    },
+    {
+      "id": "durable-resume-no-duplicate",
+      "prompt": "上游账本已有正式 thread_id，恢复时最新 read_thread 显示 turn 仍在 inProgress。",
+      "expected_output": "复用上游账本并继续监督原 Thread；先按官方状态重建 control_state；禁止重复创建 Worker。"
+    },
+    {
+      "id": "inspect-authority-boundary",
+      "prompt": "研究 Worker 的 task_intent 是 inspect，mutation_authority 只允许 declared-output-only，但它想顺手修改源文件。",
+      "expected_output": "拒绝源文件写入，只允许声明的报告路径；权限不能由 Worker 自行扩大。"
     }
   ]
 }

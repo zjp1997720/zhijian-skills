@@ -30,6 +30,21 @@
       "id": "mcp-not-model-failure",
       "prompt": "三个不同模型的新 Thread 都在 MCP 初始化时失败。",
       "expected_output": "按 workspace/tool signature 归类 MCP 故障；停止换模型；修复/禁用 MCP、走预声明无 MCP 路径或主 Agent 接管。"
+    },
+    {
+      "id": "pending-worktree-resolution",
+      "prompt": "create_thread 只返回 pendingWorktreeId，稍后 list_threads 用唯一 task_id 找到一个 worktree Thread。",
+      "expected_output": "pending id 只进审计；验证初始 task_id；两次连续官方观察的 thread id/cwd 一致后进入 CONTROL_READY；pending id 不传给 read/send/archive。"
+    },
+    {
+      "id": "creation-timeout-ambiguous",
+      "prompt": "create_thread 超时，按 task_id 查询得到零个或两个候选。",
+      "expected_output": "记录 UNKNOWN 而非确定未创建；禁止 follow-up、archive、fallback 和重复创建；继续官方查证或主 Agent 接管。"
+    },
+    {
+      "id": "official-read-overrides-event",
+      "prompt": "旧 ledger status 写着 done，但最新 read_thread 显示 turn 仍在 inProgress。",
+      "expected_output": "以最新官方 read_thread 为当前状态真相，继续监督原 Thread；旧 status 只作诊断，不创建替代 Worker。"
     }
   ]
 }

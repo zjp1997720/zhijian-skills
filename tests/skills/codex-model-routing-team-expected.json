@@ -3,6 +3,7 @@
   "required_tools": [
     "codex_app__list_projects",
     "codex_app__create_thread",
+    "codex_app__list_threads",
     "codex_app__read_thread",
     "codex_app__send_message_to_thread",
     "codex_app__set_thread_archived"
@@ -23,7 +24,13 @@
   "required_thread_audit_fields": [
     "creation_attempt",
     "subtask_attempt",
+    "task_id",
     "thread_id",
+    "pending_worktree_id",
+    "control_state",
+    "thread_status",
+    "turn_status",
+    "last_observed_at",
     "role",
     "model",
     "requested_model",

@@ -18,13 +18,25 @@ agent_team/
   handoffs/
 ```
 
-`state.json` 至少记录：根任务目标、模式、策略版本、并发/creation attempt 计数、每个 RoutePlan 的有序候选链、Provider allowlist、健康证据，以及遵守 [审计 schema](audit-schema.json) 的 Worker 记录。未返回 thread ID 的创建尝试也必须保留。
+`state.json` 至少记录：根任务目标、模式、策略版本、并发/creation attempt 计数、每个 RoutePlan 的有序候选链、Provider allowlist、健康证据，以及遵守 [审计 schema](audit-schema.json) 的 Worker 记录。每个 Worker 使用唯一 `task_id`；正式 id、pending id、`control_state` 和最新官方观察分开记录。未返回正式 thread id 的创建尝试也必须保留。
 
 `task-board.md` 展示待办、执行中、待集成、完成、阻塞。`packets/` 保存正式任务包，`handoffs/` 保存可恢复的交接摘要。
 
 ## 风险门
 
 Worker 可以准备外部或高风险动作所需的材料。发布、发送、付款、删除、账户、生产变更和不可逆操作必须回到主 Agent，并遵守当前用户授权。恢复任务时先读取 `state.json` 与交接文件，重新验证过期的 Provider/健康证据，禁止重复创建已完成任务。
+
+## 恢复门
+
+恢复时遵守 [Thread 监督协议](thread-supervision-protocol.md)：先读取现有账本；再按 task id 解析 `CREATION_PENDING/UNKNOWN`；随后读取每个正式 Thread；最后才决定 fallback 或新建。active/inProgress、排队未决和歧义记录都不能被“重新跑一个”覆盖。
+
+运行前后可执行：
+
+```bash
+python3 scripts/validate_team_ledger.py /path/to/state.json
+```
+
+validator 只检查确定性状态不变量，不把本地 ledger 伪装成实时 Thread 真相。
 
 ## rollback boundary
 

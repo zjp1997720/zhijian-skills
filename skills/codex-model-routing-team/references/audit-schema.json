@@ -6,7 +6,13 @@
   "required": [
     "creation_attempt",
     "subtask_attempt",
+    "task_id",
     "thread_id",
+    "pending_worktree_id",
+    "control_state",
+    "thread_status",
+    "turn_status",
+    "last_observed_at",
     "role",
     "model",
     "requested_model",
@@ -26,7 +32,30 @@
   "properties": {
     "creation_attempt": {"type": "integer", "minimum": 1, "maximum": 8},
     "subtask_attempt": {"type": "integer", "minimum": 1, "maximum": 2},
+    "task_id": {"type": "string", "minLength": 1, "maxLength": 128},
     "thread_id": {"type": ["string", "null"]},
+    "pending_worktree_id": {"type": ["string", "null"]},
+    "control_state": {
+      "type": "string",
+      "enum": [
+        "PLANNED",
+        "CREATION_PENDING",
+        "CONTROL_READY",
+        "DATA_READY",
+        "COMPLETED",
+        "UNKNOWN",
+        "FAILED"
+      ]
+    },
+    "thread_status": {"type": ["string", "null"]},
+    "turn_status": {"type": ["string", "null"]},
+    "last_observed_at": {"type": ["string", "null"], "format": "date-time"},
+    "task_intent": {"type": "string", "enum": ["mutate", "inspect", "verify"]},
+    "mutation_authority": {
+      "type": "string",
+      "enum": ["none", "declared-output-only", "declared-workspace", "isolated-worktree"]
+    },
+    "result_correlation_id": {"type": ["string", "null"]},
     "role": {"type": "string", "minLength": 1},
     "model": {"type": "string", "minLength": 1},
     "requested_model": {"type": "string", "minLength": 1},

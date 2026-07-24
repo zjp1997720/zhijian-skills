@@ -33,6 +33,8 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("禁止", package)
         self.assertIn("projectless", package)
         self.assertIn("reserved slots", package)
+        for tool in contract["required_tools"]:
+            self.assertIn(tool, package)
         for field in contract["required_thread_audit_fields"]:
             self.assertIn(field, package)
 
@@ -309,15 +311,130 @@ class SkillContractTests(unittest.TestCase):
     def test_lifecycle_defines_data_ready_without_claiming_model_identity(self) -> None:
         lifecycle = (SKILL_ROOT / "references/thread-lifecycle.md").read_text(encoding="utf-8")
         self.assertIn("assistant-originated", lifecycle)
-        self.assertIn("items 暂时为空", lifecycle)
-        self.assertIn("先工具调用可以计入", lifecycle)
-        self.assertIn("observed_runtime_model` 保持 `unknown", lifecycle)
+        self.assertIn("observed_runtime_model", lifecycle)
+        self.assertIn("list_threads", lifecycle)
+
+    def test_supervision_protocol_handles_pending_unknown_and_resume(self) -> None:
+        protocol = (SKILL_ROOT / "references/thread-supervision-protocol.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("pendingWorktreeId", protocol)
+        self.assertIn("list_threads(query=task_id)", protocol)
+        self.assertIn("两次连续官方观察", protocol)
+        self.assertIn("UNKNOWN` 禁止 follow-up、归档、fallback 和重复创建", protocol)
+        self.assertIn("最新成功", protocol)
+        self.assertLess(protocol.index("读取上游账本"), protocol.index("才沿原 RoutePlan"))
+
+    def run_ledger_validator(self, payload: object) -> subprocess.CompletedProcess[str]:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "team-ledger.json"
+            path.write_text(json.dumps(payload), encoding="utf-8")
+            return subprocess.run(
+                [
+                    sys.executable,
+                    str(SKILL_ROOT / "scripts/validate_team_ledger.py"),
+                    str(path),
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+    def ledger_record(self, **overrides: object) -> dict[str, object]:
+        record: dict[str, object] = {
+            "creation_attempt": 1,
+            "subtask_attempt": 1,
+            "task_id": "task-alpha-a1",
+            "thread_id": "thread-alpha",
+            "pending_worktree_id": None,
+            "control_state": "COMPLETED",
+            "thread_status": "idle",
+            "turn_status": "completed",
+            "last_observed_at": "2026-07-25T00:00:00+08:00",
+            "role": "reviewer",
+            "model": "gpt-5.6-sol",
+            "requested_model": "gpt-5.6-sol",
+            "platform_accepted_model": "gpt-5.6-sol",
+            "observed_runtime_model": "unknown",
+            "thinking": "xhigh",
+            "route_plan": {},
+            "provider_policy": {},
+            "materialized": True,
+            "data_ready": True,
+            "status": "completed",
+            "output": "reports/review.md",
+            "adopted": True,
+            "fallback_reason": None,
+            "archived": True,
+        }
+        record.update(overrides)
+        return record
+
+    def test_ledger_validator_accepts_completed_and_pending_records(self) -> None:
+        completed = self.ledger_record()
+        pending = self.ledger_record(
+            creation_attempt=2,
+            task_id="task-beta-a1",
+            thread_id=None,
+            pending_worktree_id="pending-beta",
+            control_state="CREATION_PENDING",
+            thread_status=None,
+            turn_status=None,
+            last_observed_at=None,
+            materialized=False,
+            data_ready=False,
+            status="creation_pending",
+            output=None,
+            adopted=False,
+            archived=False,
+        )
+        result = self.run_ledger_validator(
+            {"creation_attempts": 2, "workers": [completed, pending]}
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload["ledger_valid"])
+        self.assertEqual(payload["in_flight_count"], 1)
+
+    def test_ledger_validator_rejects_unknown_archive_and_pending_as_thread(self) -> None:
+        invalid = self.ledger_record(
+            thread_id="pending-same",
+            pending_worktree_id="pending-same",
+            control_state="UNKNOWN",
+        )
+        result = self.run_ledger_validator([invalid])
+        self.assertEqual(result.returncode, 2, result.stderr or result.stdout)
+        self.assertIn("pending id as a formal thread id", result.stdout)
+        self.assertIn("cannot archive UNKNOWN", result.stdout)
+
+    def test_ledger_validator_uses_official_state_not_legacy_status(self) -> None:
+        active = self.ledger_record(
+            control_state="DATA_READY",
+            thread_status="active",
+            turn_status="inProgress",
+            status="done",
+            output=None,
+            adopted=False,
+            archived=False,
+        )
+        result = self.run_ledger_validator([active])
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+
+    def test_ledger_validator_rejects_inspect_source_mutation(self) -> None:
+        inspect = self.ledger_record(
+            task_intent="inspect",
+            mutation_authority="declared-workspace",
+        )
+        result = self.run_ledger_validator([inspect])
+        self.assertEqual(result.returncode, 2, result.stderr or result.stdout)
+        self.assertIn("grants source mutation to inspect", result.stdout)
 
     def test_adapter_keeps_verifier_before_reviewer(self) -> None:
         adapter = (SKILL_ROOT / "references/upstream-skill-adapter.md").read_text(encoding="utf-8")
         self.assertLess(adapter.index("verifier：1 个"), adapter.index("reviewer：1 个"))
         self.assertIn("每次调用 `create_thread` 前", adapter)
-        self.assertIn("返回 ID 后立即补 `thread_id`", adapter)
+        self.assertIn("返回正式 id 或 pending id 后写入对应字段", adapter)
 
 
 if __name__ == "__main__":
