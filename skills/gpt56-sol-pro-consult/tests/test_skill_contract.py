@@ -38,6 +38,26 @@ class SkillContractTests(unittest.TestCase):
         for case in payload["evals"]:
             self.assertIn("Chrome", case["expected_output"])
 
+    def test_chrome_workflow_has_atomic_upload_and_verified_composer_recovery(self) -> None:
+        workflow = (SKILL_DIR / "references/chrome-workflow.md").read_text(encoding="utf-8")
+        for required in (
+            "one `node_repl js` invocation",
+            'waitForEvent("filechooser")',
+            "chooser.setFiles",
+            "innerText()",
+            "在文本字段中显示",
+            "Show in text field",
+            "Never click Send with an empty or unverified packet",
+        ):
+            self.assertIn(required, workflow)
+
+    def test_chrome_workflow_blocks_duplicate_send_after_ambiguous_reset(self) -> None:
+        workflow = (SKILL_DIR / "references/chrome-workflow.md").read_text(encoding="utf-8")
+        for state in ("NOT_SENT", "SENT", "UNKNOWN"):
+            self.assertIn(f"`{state}`", workflow)
+        self.assertIn("Never create a fresh consultation or click Send again", workflow)
+        self.assertIn("mark the consultation incomplete instead of risking a duplicate", workflow)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -59,9 +59,9 @@ python3 "$SKILL_DIR/scripts/check_packet_safety.py" packet.md
 2. Build a restorable context packet using [the template](references/context-packet-template.md). Separate facts, local judgment, and unknowns.
 3. Select the smallest evidence set that still contains the truth. Use real attachments when structure, formatting, source layout, logs, images, or implementation details matter.
 4. Run the safety scanner. Remove credential-like material; keep useful project context.
-5. Execute the default [Chrome workflow](references/chrome-workflow.md). Use the optional [OpenCLI fallback](references/opencli-fallback.md) only when the routing contract permits it.
-6. Confirm GPT 5.6 Sol Pro before sending. Record the model evidence, timestamp, context strategy, attachment names, and sentinel.
-7. Wait for the complete assistant turn. A preamble or missing sentinel while the page is still generating means “not ready.” Continue the same conversation; do not submit a duplicate request.
+5. Execute the default [Chrome workflow](references/chrome-workflow.md). Keep each file-chooser lifecycle inside one browser invocation, then reacquire and verify the composer after uploads. Use the optional [OpenCLI fallback](references/opencli-fallback.md) only when the routing contract permits it.
+6. Confirm GPT 5.6 Sol Pro before sending. Verify the complete packet from the composer's rendered text, then record the model evidence, timestamp, context strategy, attachment names, sentinel, and dispatch state.
+7. Wait for the complete assistant turn. A preamble or missing sentinel while the page is still generating means “not ready.” Continue or recover the same conversation; do not submit a duplicate request when Send was clicked or its outcome is uncertain.
 8. Extract the complete answer, verify the sentinel, compare it with local evidence, and decide what to adopt, reject, or modify.
 
 ## Context assembly
@@ -100,7 +100,7 @@ List every attachment in the packet. Upload original human-readable files first;
 A consultation is complete only when all are true:
 
 - GPT 5.6 Sol Pro selection was verified.
-- The prompt and every required attachment were visibly present before sending.
+- The prompt's distinctive prefix and sentinel were verified in the composer's rendered text, and every required attachment was visibly present before sending.
 - The assistant stopped generating.
 - The complete assistant turn was extracted.
 - The expected `GPT56_SOL_PRO_RESULT_...` sentinel appears in that assistant turn.
@@ -137,6 +137,8 @@ Return:
 - **Not logged in:** ask the user to sign in to ChatGPT Web in the selected Chrome profile.
 - **Pro unavailable:** stop without silently selecting another model.
 - **Attachment failed:** retry through Chrome's real file chooser, paste small content, or use one Markdown bundle. Do not claim the file was received.
+- **Composer remains empty:** use the exact packet-preview action “在文本字段中显示” or “Show in text field” once when it is uniquely associated with the uploaded packet, then reacquire and verify the composer. Never send an empty or unverified packet.
+- **Chrome resets around Send:** retry preparation only when Send was definitely not clicked. When it was clicked or the outcome is uncertain, recover the existing conversation and never submit a duplicate.
 - **Still generating:** keep waiting in the same conversation and inspect targeted completion signals.
 - **Missing sentinel after completion:** extract the complete assistant turn once more, including escaped underscores; otherwise mark the consultation incomplete.
 - **Low-quality answer:** use only supported parts. The local Agent retains final judgment.

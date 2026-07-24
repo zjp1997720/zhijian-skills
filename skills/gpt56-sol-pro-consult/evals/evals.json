@@ -27,6 +27,20 @@
         "/path/to/skills/docx-template-reformatter/SKILL.md",
         "/path/to/skills/docx-template-reformatter/scripts/reformat.py"
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "Markdown 上下文包已经通过 Chrome 上传，附件卡片能看到，但 ChatGPT 输入框还是空的。继续完成 Pro 咨询，不能发空提示词。",
+      "expected_output": "Uses the Codex Chrome plugin; reacquires the composer after upload; verifies rendered composer innerText for a distinctive prefix and sentinel; if empty, clicks the uniquely associated 在文本字段中显示 or Show in text field action once and verifies again; never sends an empty or unverified packet.",
+      "files": [
+        "/path/to/context-packet.md"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "我点发送时 Chrome 连接重置了，现在不确定请求到底有没有发出去。恢复这次 GPT 5.6 Sol Pro 咨询。",
+      "expected_output": "Uses the Codex Chrome plugin; records the dispatch outcome as UNKNOWN when the Send click cannot be proven; recovers the existing ChatGPT conversation and waits or extracts; does not open a fresh consultation or send a duplicate request.",
+      "files": []
     }
   ]
 }

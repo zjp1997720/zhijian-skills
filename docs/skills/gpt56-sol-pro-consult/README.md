@@ -30,6 +30,8 @@ npx skills add zjp1997720/zhijian-skills \
 - Builds a structured context packet from the decision, evidence, constraints, local judgment, risks, and unknowns.
 - Uses Codex Chrome by default for text entry, model selection, attachments, waiting, and response extraction.
 - Verifies that the picker shows the GPT-5.6 Sol family and that the exact `Pro` option is checked before sending.
+- Completes each file-chooser lifecycle within one Chrome invocation, then reacquires the composer and verifies its packet prefix and sentinel.
+- Uses the exact “Show in text field” recovery once for an empty composer and recovers the original conversation when Send has an uncertain outcome.
 - Scans packets for credential-like material before external submission.
 - Waits for a complete assistant turn and verifies a unique sentinel before treating the consultation as finished.
 - Brings the answer back into the local workflow as an adoption decision: adopt, reject, or modify.
@@ -42,6 +44,7 @@ Local judgment
   -> credential scan
   -> Codex Chrome
   -> verify GPT-5.6 Sol + checked Pro
+  -> verify composer text and attachments
   -> submit once and wait
   -> extract the complete answer
   -> local verification and final decision
