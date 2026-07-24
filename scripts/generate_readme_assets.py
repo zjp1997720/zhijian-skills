@@ -273,30 +273,30 @@ def skill_hero(name: str, item: dict[str, str]) -> str:
 
 def portfolio_hero() -> str:
     cards = []
-    labels = ["DOCTOR", "ROUTING", "ADMIN", "THEME", "CLONE", "HTML", "PLAN", "RELEASE", "SEARCH", "STYLER", "BRIDGE"]
+    labels = ["DOCTOR", "ROUTING", "ADMIN", "THEME", "CLONE", "PRO", "HTML", "PLAN", "RELEASE", "SEARCH", "STYLER", "BRIDGE"]
     for index, label in enumerate(labels):
         column = index % 3
         row = index // 3
         x = 684 + column * 148
         y = 72 + row * 55
-        marker = CLAY if label in {"ROUTING", "THEME", "RELEASE", "BRIDGE"} else NAVY
+        marker = CLAY if label in {"ROUTING", "THEME", "PRO", "RELEASE", "BRIDGE"} else NAVY
         cards += [rect(x, y, 132, 38, SURFACE, 8, BORDER), rect(x, y, 4, 38, marker, 2), text(x + 18, y + 24, label, 10, TERTIARY, 500, letter_spacing=".45")]
     body = "".join(
         [
             text(64, 64, "智见 AI  /  PUBLIC AGENT SKILLS", 12, CLAY_TEXT, 500, letter_spacing="1.4"),
             text(64, 139, "Zhijian Skills", 48, INK, 500),
-            text(64, 183, "One source. Eleven focused skills.", 20, TERTIARY, 400),
+            text(64, 183, "One source. Twelve focused skills.", 20, TERTIARY, 400),
             text(64, 215, "Complete packages · verifiable releases", 16, MUTED, 400),
             rect(64, 254, 224, 36, NAVY, 8),
             text(176, 277, "CANONICAL PORTFOLIO", 11, SURFACE, 500, text_anchor="middle", letter_spacing="1"),
             rect(660, 40, 484, 264, SURFACE, 12, BORDER),
-            text(684, 58, "11 ACTIVE SKILLS", 10, NAVY, 500, letter_spacing="1.1"),
+            text(684, 58, "12 ACTIVE SKILLS", 10, NAVY, 500, letter_spacing="1.1"),
             *cards,
         ]
     )
     return svg_shell(
         "Zhijian Skills",
-        "A canonical portfolio of eleven focused, installable, and independently released Agent Skills.",
+        "A canonical portfolio of twelve focused, installable, and independently released Agent Skills.",
         body,
     )
 

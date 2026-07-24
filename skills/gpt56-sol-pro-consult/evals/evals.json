@@ -1,0 +1,32 @@
+{
+  "skill_name": "gpt56-sol-pro-consult",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "我在设计一个新的内容生产 Skill，里面有几个方案拿不准。帮我把上下文打包给 GPT 5.6 Sol Pro 做严格评审，然后把它的意见合并成最终方案。",
+      "expected_output": "Uses the Codex Chrome plugin by default; builds a high-quality context packet with user intent, local judgment, evidence, options, and risks; confirms GPT-5.6 Sol plus checked Pro; returns a local adoption decision.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "这个商业咨询问题有点复杂：我想把企业 AI 培训拆成公开课、闭门课、训练营和陪跑，你先自己判断，再请 Pro 模型挑最大漏洞。",
+      "expected_output": "Uses the Codex Chrome plugin for the text-only consultation; includes concrete business context and tradeoffs rather than over-sanitizing; asks Pro for the biggest flaw and stronger path; integrates advice without treating it as final truth.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "我有一份客户合同和报价单，里面有公司名、金额、联系人和微信。这个问题很复杂，帮我整理好关键上下文给 GPT 5.6 Sol Pro 评估风险，但里面如果有 token 或 cookie 这种凭据就不要发。",
+      "expected_output": "Uses the Codex Chrome plugin by default; includes contract and pricing facts that affect judgment; removes executable credentials such as tokens, cookies, and private keys; focuses on context quality.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "请让 GPT 5.6 Sol Pro 审查这个本地 Skill 目录：/path/to/skills/docx-template-reformatter。它要看完整源码和说明，判断泛化能力。",
+      "expected_output": "Uses the skill and treats local paths as inaccessible to ChatGPT Web; selects the relevant Skill files or builds a text attachment bundle; uploads the actual files or pasted bundle through the Chrome file chooser when attachments are required; does not use the text-only wrapper for real file uploads; does not claim GPT can read /Users paths.",
+      "files": [
+        "/path/to/skills/docx-template-reformatter/SKILL.md",
+        "/path/to/skills/docx-template-reformatter/scripts/reformat.py"
+      ]
+    }
+  ]
+}

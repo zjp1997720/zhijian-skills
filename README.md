@@ -1,7 +1,7 @@
 # Zhijian Skills
 
 <p align="center">
-  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="Zhijian Skills: one canonical portfolio of eleven focused Agent Skills">
+  <img src="./assets/readme/portfolio-hero.svg" width="100%" alt="Zhijian Skills: one canonical portfolio of twelve focused Agent Skills">
 </p>
 
 <p align="center"><strong>Install focused Agent Skills from one trusted source, with complete payloads and independently verified releases.</strong></p>
@@ -12,11 +12,11 @@
   <a href="./CONTRIBUTING.md">Contribute</a>
 </p>
 
-Zhijian Skills is the canonical source for eleven focused Agent Skills spanning Codex operations and experience, workflow orchestration, model infrastructure, knowledge systems, research, information design, and publishing.
+Zhijian Skills is the canonical source for twelve focused Agent Skills spanning Codex operations and experience, workflow orchestration, model reasoning and infrastructure, knowledge systems, research, information design, and publishing.
 
 ## Start in 30 seconds
 
-List all eleven Skills:
+List all twelve Skills:
 
 ```bash
 npx skills add zjp1997720/zhijian-skills --list
@@ -46,6 +46,7 @@ npx skills add zjp1997720/zhijian-skills \
 | Codex control | [`codex-skill-admin`](docs/skills/codex-skill-admin/README.md) | Audit, disable, restore, and verify local Codex Skills | [Docs](docs/skills/codex-skill-admin/README.md) |
 | Codex experience | [`codex-theme-studio`](docs/skills/codex-theme-studio/README.md) | Design, apply, verify, and restore reversible Codex Desktop themes | [Docs](docs/skills/codex-theme-studio/README.md) |
 | Knowledge systems | [`enterprise-clone-builder`](docs/skills/enterprise-clone-builder/README.md) | Build a structured enterprise digital-twin repository from evidence | [Docs](docs/skills/enterprise-clone-builder/README.md) |
+| Model reasoning | [`gpt56-sol-pro-consult`](docs/skills/gpt56-sol-pro-consult/README.md) | Get a file-grounded, model-verified GPT 5.6 Sol Pro second opinion through Codex Chrome | [Docs](docs/skills/gpt56-sol-pro-consult/README.md) |
 | Information design | [`html-express`](docs/skills/html-express/README.md) | Turn dense material into a clear, self-contained HTML report | [Docs](docs/skills/html-express/README.md) |
 | Workflow orchestration | [`light-plan-and-work`](docs/skills/light-plan-and-work/README.md) | Plan bounded work briefly, execute immediately, and escalate only on heavy conditions | [Docs](docs/skills/light-plan-and-work/README.md) |
 | Release governance | [`skill-open-sourcer`](docs/skills/skill-open-sourcer/README.md) | Audit, package, document, verify, and publish Agent Skills | [Docs](docs/skills/skill-open-sourcer/README.md) |
