@@ -60,14 +60,6 @@ def inside_root(path: Path, root: Path) -> bool:
     return True
 
 
-def repository_boundary(release_root: Path) -> Path:
-    """Allow Portfolio docs to resolve canonical repository links safely."""
-    for candidate in (release_root, *release_root.parents):
-        if (candidate / "registry" / "skills.json").is_file() and (candidate / "skills").is_dir():
-            return candidate.resolve()
-    return release_root.resolve()
-
-
 def prose_before_second_heading(lines: list[str]) -> str | None:
     seen_h1 = False
     in_fence = False
@@ -175,7 +167,7 @@ def check_local_target(
         return None
     target = (readme.parent / clean).resolve()
     shown = readme.relative_to(release_root)
-    boundary = repository_boundary(release_root)
+    boundary = release_root
     if not inside_root(target, boundary):
         add(findings, "error", shown, f"{kind} escapes the release repository: {src}")
         return None
@@ -266,20 +258,33 @@ def audit_package_layout(release_root: Path, findings: list[Finding]) -> None:
         )
 
 
-def discover_readmes(inputs: list[str]) -> tuple[Path, list[Path]]:
+def discover_readmes(
+    inputs: list[str],
+    repository_root: str | None = None,
+) -> tuple[Path, list[Path]]:
     paths = [Path(raw).expanduser().resolve() for raw in inputs]
     missing = [path for path in paths if not path.exists()]
     if missing:
         raise ValueError(f"path does not exist: {missing[0]}")
 
     if len(paths) == 1 and paths[0].is_dir():
-        release_root = paths[0]
-        readmes = sorted(path for path in release_root.glob("README*.md") if path.is_file())
+        discovery_root = paths[0]
+        readmes = sorted(path for path in discovery_root.glob("README*.md") if path.is_file())
     else:
         readmes = paths
         if any(not path.is_file() for path in readmes):
             raise ValueError("when passing multiple inputs, every input must be a README file")
-        release_root = Path(os.path.commonpath([str(path.parent) for path in readmes])).resolve()
+        discovery_root = Path(os.path.commonpath([str(path.parent) for path in readmes])).resolve()
+
+    if repository_root is None:
+        release_root = discovery_root
+    else:
+        release_root = Path(repository_root).expanduser().resolve()
+        if not release_root.is_dir():
+            raise ValueError(f"repository root is not a directory: {release_root}")
+        outside = [path for path in readmes if not inside_root(path, release_root)]
+        if outside:
+            raise ValueError(f"README is outside repository root: {outside[0]}")
 
     if not readmes:
         raise ValueError("no README*.md files found")
@@ -291,11 +296,15 @@ def discover_readmes(inputs: list[str]) -> tuple[Path, list[Path]]:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit release README files and local visual assets.")
     parser.add_argument("paths", nargs="+", help="Release repository directory or one or more README files")
+    parser.add_argument(
+        "--repository-root",
+        help="Explicit repository boundary for shared links and assets; every README must be inside it",
+    )
     parser.add_argument("--strict", action="store_true", help="Treat warnings as failures")
     args = parser.parse_args()
 
     try:
-        release_root, readmes = discover_readmes(args.paths)
+        release_root, readmes = discover_readmes(args.paths, args.repository_root)
     except ValueError as exc:
         print(f"ERROR: {exc}", file=sys.stderr)
         return 2

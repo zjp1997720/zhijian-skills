@@ -1,0 +1,7 @@
+interface:
+  display_name: "GPT 5.6 Sol Pro Consult"
+  short_description: "Verified ChatGPT Pro second-opinion reviews"
+  default_prompt: "Use $gpt56-sol-pro-consult to get a verified GPT 5.6 Sol Pro review of this difficult problem."
+
+policy:
+  allow_implicit_invocation: true

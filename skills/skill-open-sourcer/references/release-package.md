@@ -76,11 +76,18 @@ python3 skills/skill-open-sourcer/scripts/portfolio.py \
   validate-skill skills/<skill-name>
 python3 skills/skill-open-sourcer/scripts/portfolio.py \
   audit --repo . --strict
+python3 skills/skill-open-sourcer/scripts/audit_release_readme.py \
+  --repository-root . \
+  docs/skills/<skill-name>/README.md \
+  docs/skills/<skill-name>/README.zh-CN.md --strict
 python3 -m unittest discover -s tests -v
+npx --no-install skills --help
 npx --no-install skills add . --list
 ```
 
 Then install from the local Portfolio into an isolated HOME with copy mode and compare the complete installed tree. After pushing, repeat listing and installation from `zjp1997720/zhijian-skills`.
+
+Never run `npx skills add <source> --help` to inspect CLI help. In `skills` CLI 1.5.x, the valid `<source>` may perform a real installation and write `.agents/` plus `skills-lock.json`. Use `npx --no-install skills --help` for help and `npx --no-install skills add . --list` for discovery.
 
 ## Publication boundary
 

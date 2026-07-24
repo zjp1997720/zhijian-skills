@@ -15,6 +15,7 @@ SKILLS = (
     "codex-skill-admin",
     "codex-theme-studio",
     "enterprise-clone-builder",
+    "gpt56-sol-pro-consult",
     "html-express",
     "light-plan-and-work",
     "skill-open-sourcer",
@@ -44,7 +45,7 @@ class ReadmeAssetTests(unittest.TestCase):
 
     def test_assets_are_safe_accessible_and_brand_aligned(self) -> None:
         assets = self.expected_assets()
-        self.assertEqual(len(assets), 12)
+        self.assertEqual(len(assets), 13)
         compositions: set[str] = set()
         for asset in assets:
             content = asset.read_text(encoding="utf-8")

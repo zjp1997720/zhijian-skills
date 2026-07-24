@@ -114,6 +114,29 @@
       "harnesses": ["codex", "claude-code", "agents"]
     },
     {
+      "name": "gpt56-sol-pro-consult",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/gpt56-sol-pro-consult",
+      "documentation": "docs/skills/gpt56-sol-pro-consult/README.md",
+      "documentation_zh": "docs/skills/gpt56-sol-pro-consult/README.zh-CN.md",
+      "changelog": "docs/changelogs/gpt56-sol-pro-consult.md",
+      "canonical_tag": "gpt56-sol-pro-consult/v1.0.0",
+      "validation": {
+        "commands": [
+          "python3 -m unittest discover -s skills/gpt56-sol-pro-consult/tests -v"
+        ],
+        "live_smoke": "Use Codex Chrome to verify ChatGPT shows GPT-5.6 Sol with the exact Pro option checked, without sending a prompt"
+      },
+      "capabilities": {
+        "network": "required",
+        "subprocess": "required",
+        "filesystem": "write",
+        "credentials": "required"
+      },
+      "harnesses": ["codex"]
+    },
+    {
       "name": "html-express",
       "lifecycle": "active",
       "version": "1.0.2",

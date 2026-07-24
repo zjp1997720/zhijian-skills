@@ -13,6 +13,7 @@ EXPECTED_SKILLS = {
     "codex-skill-admin",
     "codex-theme-studio",
     "enterprise-clone-builder",
+    "gpt56-sol-pro-consult",
     "html-express",
     "light-plan-and-work",
     "skill-open-sourcer",

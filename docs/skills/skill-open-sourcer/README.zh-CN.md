@@ -31,6 +31,8 @@ npx skills add zjp1997720/zhijian-skills \
 - 把完整载荷导入 `skills/<name>/`，同步建立中英文文档、Changelog、Registry 和总目录入口。
 - 锁定八字段发布故事，选择 `clean-doc` 或 `proof-led` 呈现层级，并拒绝跨 Skill 复用的通用 Hero 模板。
 - 验证 Skill、整个 Portfolio、声明测试、README 结构与资产、本地发现和隔离复制安装。
+- 以显式的统一仓库根目录作为 README 共享链接的审计边界。
+- 使用顶层 CLI 帮助和只读列表发现，避免帮助探测误触真实安装。
 - 只推送统一仓库，只创建 `<skill>/v<version>` Tag。
 - 输出统一安装命令和发布文案。
 
@@ -57,7 +59,7 @@ registry/skills.json    版本、验证、权限和 Harness 声明
 
 ## 安全边界
 
-流程不会创建独立 GitHub 仓库、写入镜像元数据、强制推送或改写已发布 Tag。缺失证据会继续标记为缺失。
+流程不会创建独立 GitHub 仓库、写入镜像元数据、强制推送或改写已发布 Tag。README 链接只能解析到显式选择的统一仓库内部，不能越过仓库边界。缺失证据会继续标记为缺失。
 
 ## 许可证
 

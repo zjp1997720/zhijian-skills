@@ -64,7 +64,7 @@ def portfolio() -> str:
         text(58, 62, "ZHIJIAN / OPEN AGENT SKILLS", 16, mint, 650, family=MONO, letter_spacing="2"),
         text(58, 140, "Zhijian", 58, paper, 700),
         text(58, 200, "Skills", 58, paper, 700),
-        text(58, 244, "One source. Eleven focused capabilities.", 22, muted, 450),
+        text(58, 244, "One source. Twelve focused capabilities.", 22, muted, 450),
         rect(58, 278, 356, 46, mint, 8),
         text(78, 308, "$ npx skills add zjp1997720/zhijian-skills", 16, bg, 700, family=MONO),
         line(478, 42, 478, 318, "#355B75", 2),
@@ -72,7 +72,7 @@ def portfolio() -> str:
     ]
     groups = [
         (520, 90, "CONTROL", ["doctor", "routing", "admin", "theme"], mint),
-        (735, 90, "CREATE", ["clone", "html", "styler"], orange),
+        (735, 90, "CREATE", ["clone", "pro", "html", "styler"], orange),
         (950, 90, "SHIP", ["plan", "release", "search", "bridge"], "#A78BFA"),
     ]
     for x, y, label, skills, colour in groups:
@@ -80,7 +80,7 @@ def portfolio() -> str:
         for index, skill in enumerate(skills):
             yy = y + 18 + index * 42
             body += [rect(x, yy, 184, 32, "#173B57", 6), rect(x, yy, 5, 32, colour, 2), text(x + 18, yy + 22, skill, 15, paper, 600, family=MONO)]
-    return svg("Zhijian Skills", "One canonical portfolio of eleven focused and independently verified Agent Skills.", bg, "portfolio-outcome-map", body)
+    return svg("Zhijian Skills", "One canonical portfolio of twelve focused and independently verified Agent Skills.", bg, "portfolio-outcome-map", body)
 
 
 def codex_doctor() -> str:
@@ -211,6 +211,23 @@ def light_plan() -> str:
     return svg("Light Plan and Work", "A three-route execution system that highlights the light path from goal to verified result.", bg, "three-route-decision", body)
 
 
+def sol_pro_consult() -> str:
+    bg, paper, gold, violet, green, panel = "#241A32", "#FFF8E8", "#F2C14E", "#A78BFA", "#66D9A6", "#342545"
+    body = [
+        text(48, 50, "VERIFIED SECOND OPINION", 15, gold, 800, family=MONO, letter_spacing="2"),
+        text(48, 108, "GPT 5.6 Sol", 46, paper, 760), text(48, 158, "Pro Consult", 46, paper, 760),
+        text(48, 202, "Evidence in. Verified Pro. Local decision.", 21, "#CFC2DA", 500),
+        rect(48, 246, 340, 48, panel, 7, violet, 2), text(68, 277, "CHROME FIRST  •  SAFETY SCAN", 15, paper, 800, family=MONO),
+    ]
+    stages = [(466, "PACKET", "facts + files", gold), (650, "CHROME", "upload once", violet), (834, "PRO", "model checked", gold), (1018, "DECIDE", "adopt / reject", green)]
+    for index, (x, label, note, colour) in enumerate(stages):
+        if index:
+            body += [line(stages[index - 1][0] + 62, 178, x - 62, 178, violet, 3), path(f"M{x-76} 168 L{x-62} 178 L{x-76} 188", stroke=violet, stroke_width=3)]
+        body += [circle(x, 178, 58, panel, colour, 3), text(x, 173, label, 16, paper, 850, family=MONO, text_anchor="middle"), text(x, 198, note, 13, "#CFC2DA", 650, family=MONO, text_anchor="middle")]
+    body += [rect(452, 270, 624, 44, panel, 6), text(474, 298, "LOCAL JUDGMENT", 14, gold, 800, family=MONO), line(638, 292, 862, 292, "#5D496F", 2), text(1054, 298, "SENTINEL VERIFIED ✓", 14, green, 800, family=MONO, text_anchor="end")]
+    return svg("GPT 5.6 Sol Pro Consult", "A file-grounded second-opinion loop that verifies the Pro model and returns the decision to the local Agent.", bg, "verified-second-opinion-loop", body)
+
+
 def open_sourcer() -> str:
     bg, paper, green, red, gray = "#171A18", "#F4F1E8", "#6FD08C", "#ED6A5A", "#525B55"
     body = [
@@ -285,6 +302,7 @@ HEROES = {
     ROOT / "docs/skills/codex-skill-admin/assets/readme/hero.svg": skill_admin,
     ROOT / "docs/skills/codex-theme-studio/assets/readme/hero.svg": theme_studio,
     ROOT / "docs/skills/enterprise-clone-builder/assets/readme/hero.svg": enterprise_clone,
+    ROOT / "docs/skills/gpt56-sol-pro-consult/assets/readme/hero.svg": sol_pro_consult,
     ROOT / "docs/skills/html-express/assets/readme/hero.svg": html_express,
     ROOT / "docs/skills/light-plan-and-work/assets/readme/hero.svg": light_plan,
     ROOT / "docs/skills/skill-open-sourcer/assets/readme/hero.svg": open_sourcer,
