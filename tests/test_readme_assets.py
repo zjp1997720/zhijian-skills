@@ -16,6 +16,7 @@ SKILLS = (
     "codex-theme-studio",
     "enterprise-clone-builder",
     "html-express",
+    "light-plan-and-work",
     "skill-open-sourcer",
     "wechat-article-search",
     "wechat-styler",
@@ -43,16 +44,20 @@ class ReadmeAssetTests(unittest.TestCase):
 
     def test_assets_are_safe_accessible_and_brand_aligned(self) -> None:
         assets = self.expected_assets()
-        self.assertEqual(len(assets), 11)
+        self.assertEqual(len(assets), 12)
+        compositions: set[str] = set()
         for asset in assets:
             content = asset.read_text(encoding="utf-8")
             self.assertLess(len(content.encode("utf-8")), 60_000, asset)
             self.assertIn('viewBox="0 0 1200 360"', content, asset)
             self.assertIn("<title", content, asset)
             self.assertIn("<desc", content, asset)
-            self.assertIn("#F5F4ED", content, asset)
+            match = re.search(r'data-composition="([^"]+)"', content)
+            self.assertIsNotNone(match, f"{asset}: missing project-native composition id")
+            compositions.add(match.group(1))
             for unsafe in ("<script", "<foreignObject", "<image", "href=", "@import", "url("):
                 self.assertNotIn(unsafe, content, f"{asset}: unsafe token {unsafe}")
+        self.assertEqual(len(compositions), len(assets), "README heroes must not reuse one generic composition")
 
     def test_generator_is_deterministic(self) -> None:
         before = {path: path.read_bytes() for path in self.expected_assets()}

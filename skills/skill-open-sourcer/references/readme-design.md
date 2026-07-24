@@ -17,11 +17,15 @@ Primary proof:
 First successful action:
 Requirements or safety boundary:
 Native visual material:
+Presentation tier: clean-doc / proof-led
+Composition ID (proof-led only):
 ```
 
 `Native visual material` means something the skill truly works with: an interface, generated document, chart, terminal output, transformation, architecture, media artifact, or structured workflow. Empty grids, glowing nodes, stock illustrations, and fake code do not count as proof.
 
 Do not invent adoption, benchmarks, testimonials, compatibility, or capabilities. If the source package has no proof asset, use a concrete example request and expected result in Markdown.
+
+The release story is a required working artifact. Keep it in the task record or release plan; do not publish it as filler in the README.
 
 ## 2. Choose one presentation tier
 
@@ -44,6 +48,18 @@ Use this tier when a visual output materially helps a visitor judge the skill: U
 - Keep deterministic titles, diagrams, comparison modules, and simple architecture in SVG.
 
 Do not escalate to proof-led merely because an image generator is available. The evidence decides the tier.
+
+### Portfolio anti-template gate
+
+Shared brand tokens are allowed. Shared composition is not. For every proof-led Skill:
+
+- assign one stable lowercase `data-composition` value that names the information structure, such as `diagnostic-report`, `source-to-report`, or `verified-loopback-route`;
+- derive the layout from the real mechanism or proof before choosing colors and decoration;
+- reject a Hero when removing the repository name makes it interchangeable with another Skill;
+- reject a Portfolio set that repeats the same title-left/proof-right frame and changes only labels, colors, or a small motif;
+- update the deterministic asset generator and its uniqueness test in the same change.
+
+Different Skills may share typography or brand colors while using different spatial logic: report, route map, switchboard, artboard, evidence graph, before/after, decision lanes, pipeline, result stack, editorial spread, or verified connection path.
 
 ## 3. Build the reading order
 
@@ -147,6 +163,7 @@ Then render every SVG or raster composition at GitHub content width and inspect:
 - missing or vague alt text;
 - image weight and broken local references;
 - visual material that could belong to an unrelated project;
+- duplicated composition IDs or a layout already used by another Portfolio Skill;
 - mobile readability and excessive vertical length.
 
 The audit script catches structural defects. Visual judgment remains a manual gate. Prefer the simpler version when two designs communicate equally well.

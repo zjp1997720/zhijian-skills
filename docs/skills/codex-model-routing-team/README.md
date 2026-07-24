@@ -132,7 +132,7 @@ Use $codex-model-routing-team as the Thread Orchestrator for $deep-research. Pre
 └── tests/
 ```
 
-The agent workflow lives in [SKILL.md](skills/codex-model-routing-team/SKILL.md). Supporting policies live in [references](skills/codex-model-routing-team/references/).
+The agent workflow lives in [SKILL.md](../../../skills/codex-model-routing-team/SKILL.md). Supporting policies live in [references](../../../skills/codex-model-routing-team/references/).
 
 ## Validation
 
@@ -140,4 +140,4 @@ The workflow covers Luna, Sol, conditional Grok 4.5 routes, and provider blockin
 
 ## License
 
-[MIT](LICENSE)
+[MIT](../../../skills/codex-model-routing-team/LICENSE)

@@ -60,6 +60,14 @@ def inside_root(path: Path, root: Path) -> bool:
     return True
 
 
+def repository_boundary(release_root: Path) -> Path:
+    """Allow Portfolio docs to resolve canonical repository links safely."""
+    for candidate in (release_root, *release_root.parents):
+        if (candidate / "registry" / "skills.json").is_file() and (candidate / "skills").is_dir():
+            return candidate.resolve()
+    return release_root.resolve()
+
+
 def prose_before_second_heading(lines: list[str]) -> str | None:
     seen_h1 = False
     in_fence = False
@@ -95,13 +103,26 @@ def audit_svg(path: Path, display_path: Path, findings: list[Finding]) -> None:
 
     if "viewBox" not in root.attrib:
         add(findings, "error", display_path, "SVG is missing viewBox")
+    if root.attrib.get("role") != "img":
+        add(findings, "error", display_path, 'SVG root must declare role="img"')
+    aria_labels = set(root.attrib.get("aria-labelledby", "").split())
+    if not {"title", "desc"} <= aria_labels:
+        add(findings, "error", display_path, "SVG root must reference title and desc with aria-labelledby")
+    if path.name == "hero.svg" and not root.attrib.get("data-composition", "").strip():
+        add(findings, "warning", display_path, "proof-led Hero is missing a stable data-composition id")
 
     found_title = False
     found_desc = False
+    title_text = ""
+    desc_text = ""
     for node in root.iter():
         tag = node.tag.rsplit("}", 1)[-1]
         found_title = found_title or tag == "title"
         found_desc = found_desc or tag == "desc"
+        if tag == "title":
+            title_text = "".join(node.itertext()).strip()
+        if tag == "desc":
+            desc_text = "".join(node.itertext()).strip()
         if tag in UNSAFE_SVG_TAGS:
             add(findings, "error", display_path, f"SVG contains unsupported <{tag}>")
         if tag in ANIMATION_SVG_TAGS:
@@ -121,8 +142,17 @@ def audit_svg(path: Path, display_path: Path, findings: list[Finding]) -> None:
 
     if not found_title:
         add(findings, "error", display_path, "SVG is missing <title>")
+    elif len(title_text) < 3:
+        add(findings, "error", display_path, "SVG <title> is empty or not meaningful")
     if not found_desc:
         add(findings, "error", display_path, "SVG is missing <desc>")
+    elif len(desc_text) < 12:
+        add(findings, "error", display_path, "SVG <desc> is empty or not meaningful")
+
+
+def meaningful_alt(value: str) -> bool:
+    normalized = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", " ", value.lower()).strip()
+    return len(normalized) >= 12 and normalized not in {"image", "hero", "banner", "logo", "readme hero"}
 
 
 def check_local_target(
@@ -145,14 +175,15 @@ def check_local_target(
         return None
     target = (readme.parent / clean).resolve()
     shown = readme.relative_to(release_root)
-    if not inside_root(target, release_root):
+    boundary = repository_boundary(release_root)
+    if not inside_root(target, boundary):
         add(findings, "error", shown, f"{kind} escapes the release repository: {src}")
         return None
     if not target.exists():
         add(findings, "error", shown, f"missing local {kind}: {src}")
         return None
     if target.is_file() and target.stat().st_size > MAX_ASSET_BYTES:
-        add(findings, "warning", target.relative_to(release_root), f"asset exceeds {MAX_ASSET_BYTES} bytes")
+        add(findings, "warning", target.relative_to(boundary), f"asset exceeds {MAX_ASSET_BYTES} bytes")
     return target
 
 
@@ -181,6 +212,8 @@ def audit_readme(readme: Path, release_root: Path, findings: list[Finding]) -> N
     for alt, src in MARKDOWN_IMAGE.findall(text):
         if not alt.strip():
             add(findings, "error", shown, f"Markdown image has empty alt text: {src}")
+        elif not allowed_remote_badge(src) and not meaningful_alt(alt):
+            add(findings, "warning", shown, f"Markdown image alt text is too generic: {src}")
         image_sources.append((src, "image"))
 
     for tag in HTML_IMAGE_TAG.findall(text):
@@ -192,6 +225,8 @@ def audit_readme(readme: Path, release_root: Path, findings: list[Finding]) -> N
         src = src_match.group(1)
         if not alt_match or not alt_match.group(1).strip():
             add(findings, "error", shown, f"HTML image has empty or missing alt text: {src}")
+        elif not allowed_remote_badge(src) and not meaningful_alt(alt_match.group(1)):
+            add(findings, "warning", shown, f"HTML image alt text is too generic: {src}")
         image_sources.append((src, "image"))
 
     audited_svgs: set[Path] = set()

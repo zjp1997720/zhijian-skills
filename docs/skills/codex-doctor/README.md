@@ -101,4 +101,4 @@ The test suite covers instruction scope and truncation, redaction, MCP and hook 
 
 ## License
 
-[MIT](LICENSE)
+[MIT](../../../skills/codex-doctor/LICENSE)

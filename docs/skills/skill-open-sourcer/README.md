@@ -29,13 +29,14 @@ Then invoke `$skill-open-sourcer` with a local `SKILL.md` or Skill directory.
 
 - Scans the incoming Skill for secrets, personal paths, caches, private data, unsafe links, and unclear assets.
 - Imports the complete payload into `skills/<name>/` and creates bilingual docs, Changelog, Registry metadata, and catalog entries.
-- Validates the Skill, full Portfolio, declared tests, README package, local discovery, and isolated copy installation.
+- Locks an eight-field release story, chooses a clean-doc or proof-led presentation tier, and rejects generic Hero templates shared across unrelated Skills.
+- Validates the Skill, full Portfolio, declared tests, README structure and assets, local discovery, and isolated copy installation.
 - Pushes only the canonical Portfolio and creates only `<skill>/v<version>` Tags.
 - Produces the canonical install command and launch copy.
 
 ## How It Works
 
-The Skill treats open-sourcing as a governed import into one Portfolio. A direct `SKILL.md` input identifies what to import; it never selects a new-repository mode. Publishing fails closed when the canonical remote, source ownership, security scan, package completeness, or installation proof is missing.
+The Skill treats open-sourcing as a governed import into one Portfolio. A direct `SKILL.md` input identifies what to import; it never selects a new-repository mode. README design begins with audience, repeated problem, value, proof, first action, safety boundary, native material, and presentation tier. Proof-led Heroes then receive a unique composition derived from that Skill's real mechanism or output. Publishing fails closed when the canonical remote, source ownership, security scan, package completeness, README evidence, or installation proof is missing.
 
 ## Example Requests
 

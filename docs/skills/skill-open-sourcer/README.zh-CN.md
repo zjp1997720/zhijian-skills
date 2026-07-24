@@ -29,13 +29,14 @@ npx skills add zjp1997720/zhijian-skills \
 
 - 扫描密钥、个人路径、缓存、私有数据、越界链接和授权不清的资产。
 - 把完整载荷导入 `skills/<name>/`，同步建立中英文文档、Changelog、Registry 和总目录入口。
-- 验证 Skill、整个 Portfolio、声明测试、README、本地发现和隔离复制安装。
+- 锁定八字段发布故事，选择 `clean-doc` 或 `proof-led` 呈现层级，并拒绝跨 Skill 复用的通用 Hero 模板。
+- 验证 Skill、整个 Portfolio、声明测试、README 结构与资产、本地发现和隔离复制安装。
 - 只推送统一仓库，只创建 `<skill>/v<version>` Tag。
 - 输出统一安装命令和发布文案。
 
 ## 原理
 
-这个 Skill 把“开源一个 Skill”定义为向统一 Portfolio 导入。直接提供 `SKILL.md` 只用于识别导入对象，不再触发新建仓库模式。统一远端、代码归属、安全扫描、载荷完整性或安装证据任何一项失败，发布都会停止。
+这个 Skill 把“开源一个 Skill”定义为向统一 Portfolio 导入。直接提供 `SKILL.md` 只用于识别导入对象，不再触发新建仓库模式。README 会先锁定受众、重复问题、价值、证据、首次动作、安全边界、原生素材和呈现层级；采用 `proof-led` 时，再从 Skill 的真实机制或输出中推导独立构图。统一远端、代码归属、安全扫描、载荷完整性、README 证据或安装证明任何一项失败，发布都会停止。
 
 ## 示例请求
 

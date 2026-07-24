@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the GitHub-safe, light-theme Zhijian Skills README hero system."""
+"""Generate project-native, GitHub-safe README heroes for Zhijian Skills."""
 
 from __future__ import annotations
 
@@ -8,307 +8,297 @@ from xml.sax.saxutils import escape
 
 
 ROOT = Path(__file__).resolve().parents[1]
-
-# ZhiJian AI Warm Paper OS tokens. Keep decorative colour deliberately scarce.
-PAPER = "#F5F4ED"
-SURFACE = "#FAF9F5"
-SURFACE_MUTED = "#E8E6DC"
-INK = "#141413"
-TERTIARY = "#504E49"
-MUTED = "#6B6A64"
-BORDER = "#E5E3D8"
-CLAY = "#B85235"
-CLAY_TEXT = "#A04A2E"
-NAVY = "#1B365D"
-INK_BLUE = "#2D5A8A"
-SUCCESS = "#2F6F4E"
-CODE = "#30302E"
-CODE_TEXT = "#F5F4ED"
-
-SERIF = (
-    "'Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC',"
-    "'Songti SC',STSong,SimSun,Georgia,serif"
-)
-MONO = "'SF Mono','JetBrains Mono',Menlo,Consolas,monospace"
+SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC',sans-serif"
+SERIF = "Georgia,'Songti SC',serif"
+MONO = "ui-monospace,'SFMono-Regular',Menlo,monospace"
 
 
-SKILLS = {
-    "codex-doctor": {
-        "title": "Codex Doctor",
-        "category": "WORKSPACE HEALTH",
-        "tagline": "Diagnose context, configuration, and workspace drift.",
-        "motif": "doctor",
-    },
-    "codex-model-routing-team": {
-        "title": "Model Routing Team",
-        "category": "CODEX ORCHESTRATION",
-        "tagline": "Route bounded background work to the right model.",
-        "motif": "routing",
-    },
-    "codex-skill-admin": {
-        "title": "Codex Skill Admin",
-        "category": "SKILL OPERATIONS",
-        "tagline": "Audit, disable, restore, and verify local Skills.",
-        "motif": "admin",
-    },
-    "codex-theme-studio": {
-        "title": "Codex Theme Studio",
-        "category": "CODEX EXPERIENCE",
-        "tagline": "Design, apply, verify, and restore reversible themes.",
-        "motif": "theme",
-    },
-    "enterprise-clone-builder": {
-        "title": "Enterprise Clone Builder",
-        "category": "KNOWLEDGE SYSTEM",
-        "tagline": "Turn company evidence into a structured digital twin.",
-        "motif": "enterprise",
-    },
-    "html-express": {
-        "title": "HTML Express",
-        "category": "INFORMATION DESIGN",
-        "tagline": "Transform dense material into a clear standalone report.",
-        "motif": "html",
-    },
-    "skill-open-sourcer": {
-        "title": "Skill Open Sourcer",
-        "category": "RELEASE GOVERNANCE",
-        "tagline": "Audit, package, verify, and publish complete Agent Skills.",
-        "motif": "release",
-    },
-    "wechat-article-search": {
-        "title": "WeChat Article Search",
-        "category": "CONTENT RESEARCH",
-        "tagline": "Discover public-account articles as structured evidence.",
-        "motif": "search",
-    },
-    "wechat-styler": {
-        "title": "WeChat Styler",
-        "category": "EDITORIAL PUBLISHING",
-        "tagline": "Convert Markdown into polished WeChat-ready HTML.",
-        "motif": "styler",
-    },
-    "workbuddy-cli-model-bridge": {
-        "title": "WorkBuddy CLI Bridge",
-        "category": "MODEL INFRASTRUCTURE",
-        "tagline": "Connect verified CLI subscription models to WorkBuddy.",
-        "motif": "bridge",
-    },
-}
-
-
-def text(x: int, y: int, value: str, size: int, fill: str, weight: int = 400, *, family: str = SERIF, **attrs: str) -> str:
-    extra = " ".join(f'{key.replace("_", "-")}="{escape(str(val))}"' for key, val in attrs.items())
-    return (
-        f'<text x="{x}" y="{y}" fill="{fill}" font-family="{family}" '
-        f'font-size="{size}" font-weight="{weight}" {extra}>{escape(value)}</text>'
+def attrs(**values: object) -> str:
+    return " ".join(
+        f'{key.replace("_", "-")}="{escape(str(value))}"'
+        for key, value in values.items()
+        if value is not None
     )
 
 
-def circle(x: int, y: int, radius: int, fill: str, stroke: str = "none", width: int = 1) -> str:
-    return f'<circle cx="{x}" cy="{y}" r="{radius}" fill="{fill}" stroke="{stroke}" stroke-width="{width}"/>'
+def text(x: int, y: int, value: str, size: int, fill: str, weight: int = 500, *, family: str = SANS, **extra: object) -> str:
+    return (
+        f'<text x="{x}" y="{y}" fill="{fill}" font-family="{family}" '
+        f'font-size="{size}" font-weight="{weight}" {attrs(**extra)}>{escape(value)}</text>'
+    )
 
 
-def line(x1: int, y1: int, x2: int, y2: int, stroke: str, width: int = 2, dash: str | None = None) -> str:
-    dashed = f' stroke-dasharray="{dash}"' if dash else ""
-    return f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{stroke}" stroke-width="{width}" stroke-linecap="round"{dashed}/>'
+def rect(x: int, y: int, width: int, height: int, fill: str, radius: int = 0, stroke: str = "none", stroke_width: int = 1, **extra: object) -> str:
+    return f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{radius}" fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}" {attrs(**extra)}/>'
 
 
-def rect(x: int, y: int, width: int, height: int, fill: str, radius: int = 8, stroke: str = "none", stroke_width: int = 1) -> str:
-    return f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="{radius}" fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}"/>'
+def circle(x: int, y: int, radius: int, fill: str, stroke: str = "none", stroke_width: int = 1, **extra: object) -> str:
+    return f'<circle cx="{x}" cy="{y}" r="{radius}" fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}" {attrs(**extra)}/>'
 
 
-def motif_doctor() -> str:
-    parts = [circle(804, 181, 74, SURFACE, BORDER, 2), circle(804, 181, 55, "none", NAVY, 3)]
-    parts += [line(770, 181, 790, 181, CLAY, 4), line(790, 181, 800, 161, CLAY, 4), line(800, 161, 816, 202, CLAY, 4), line(816, 202, 832, 178, CLAY, 4), line(832, 178, 844, 178, CLAY, 4)]
-    for y, label in ((112, "CONTEXT"), (164, "CONFIG"), (216, "WORKSPACE")):
-        parts += [rect(914, y - 23, 174, 42, SURFACE, 8, BORDER), circle(939, y - 2, 6, SUCCESS), text(956, y + 3, label, 12, TERTIARY, 500)]
-    parts += [text(914, 276, "3 checks verified", 12, SUCCESS, 500)]
-    return "".join(parts)
+def line(x1: int, y1: int, x2: int, y2: int, stroke: str, stroke_width: int = 2, **extra: object) -> str:
+    return f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{stroke}" stroke-width="{stroke_width}" {attrs(**extra)}/>'
 
 
-def motif_routing() -> str:
-    workers = [(938, 96, "RESEARCH"), (1046, 138, "WRITE"), (1046, 224, "VERIFY"), (938, 266, "BUILD"), (832, 224, "PLAN")]
-    parts = [line(916, 181, x, y, NAVY, 2) for x, y, _ in workers]
-    parts += [circle(916, 181, 38, CLAY), text(916, 187, "LEAD", 12, SURFACE, 500, text_anchor="middle")]
-    for x, y, label in workers:
-        parts += [circle(x, y, 22, SURFACE, NAVY, 2), text(x, y + 38, label, 10, MUTED, 500, text_anchor="middle", letter_spacing=".5")]
-    return "".join(parts)
+def path(d: str, *, fill: str = "none", stroke: str = "none", stroke_width: int = 1, **extra: object) -> str:
+    return f'<path d="{d}" fill="{fill}" stroke="{stroke}" stroke-width="{stroke_width}" {attrs(**extra)}/>'
 
 
-def motif_admin() -> str:
-    parts = [text(748, 90, "PROMPT-VISIBLE SKILLS", 11, NAVY, 500, letter_spacing="1.2")]
-    for y, label, enabled in ((124, "RESEARCH", True), (178, "LEGACY TOOL", False), (232, "PUBLISHING", True)):
-        parts += [rect(748, y - 23, 340, 44, SURFACE, 8, BORDER), text(770, y + 3, label, 13, TERTIARY, 500)]
-        toggle_fill = NAVY if enabled else SURFACE_MUTED
-        knob_x = 1058 if enabled else 1036
-        parts += [rect(1026, y - 11, 44, 22, toggle_fill, 11), circle(knob_x, y, 8, SURFACE if enabled else MUTED)]
-    parts += [text(748, 287, "2 active  ·  1 restorable", 12, SUCCESS, 500)]
-    return "".join(parts)
+def group(composition: str, body: list[str]) -> str:
+    return f'<g data-composition="{composition}">{"".join(body)}</g>'
 
 
-def motif_theme() -> str:
-    parts = [rect(726, 72, 390, 224, SURFACE, 14, BORDER)]
-    parts += [circle(748, 91, 4, CLAY), circle(762, 91, 4, "#D6A82A"), circle(776, 91, 4, SUCCESS)]
-    parts += [line(726, 106, 1116, 106, BORDER, 1), rect(742, 120, 82, 158, SURFACE_MUTED, 8)]
-    for y, width in ((138, 54), (162, 62), (186, 46), (222, 60), (246, 50)):
-        parts.append(rect(754, y, width, 5, MUTED, 2))
-    parts += [rect(840, 120, 258, 82, PAPER, 10, BORDER), rect(969, 120, 129, 82, "#EEE7D8", 10)]
-    parts += [rect(856, 139, 90, 7, CLAY, 3), rect(856, 160, 102, 5, TERTIARY, 2), rect(856, 176, 72, 4, SURFACE_MUTED, 2)]
-    parts += [rect(994, 143, 50, 36, NAVY, 6), circle(1006, 155, 3, SURFACE), circle(1032, 155, 3, SURFACE), line(1006, 169, 1032, 169, SURFACE, 2)]
-    for index, colour in enumerate((CLAY, NAVY, SUCCESS, SURFACE_MUTED)):
-        x = 852 + index * 62
-        parts += [rect(x, 218, 50, 48, SURFACE, 8, BORDER), circle(x + 25, 235, 7, colour), rect(x + 12, 251, 26, 4, SURFACE_MUTED, 2)]
-    parts += [text(1088, 282, "VERIFY ✓", 10, SUCCESS, 500, text_anchor="end", letter_spacing=".7")]
-    return "".join(parts)
-
-
-def motif_enterprise() -> str:
-    parts = []
-    for y, label in ((108, "DOCS"), (181, "WEB"), (254, "VOICE")):
-        parts += [rect(742, y - 21, 94, 42, SURFACE, 8, BORDER), text(789, y + 4, label, 11, TERTIARY, 500, text_anchor="middle"), line(836, y, 900, 181, NAVY, 2)]
-    parts += [circle(920, 181, 32, CLAY), text(920, 186, "CORE", 11, SURFACE, 500, text_anchor="middle")]
-    for x, y, label in ((1012, 96, "PROFILE"), (1048, 154, "ASSETS"), (1048, 214, "VOICE"), (1012, 272, "CLAIMS")):
-        parts += [line(952, 181, x - 28, y, NAVY, 2), circle(x - 18, y, 6, NAVY), text(x, y + 4, label, 11, TERTIARY, 500)]
-    return "".join(parts)
-
-
-def motif_html() -> str:
-    parts = [rect(738, 82, 146, 198, SURFACE_MUTED, 12, BORDER), text(756, 108, "SOURCE", 10, NAVY, 500, family=MONO, letter_spacing="1")]
-    for index, width in enumerate((92, 105, 74, 110, 86, 100, 64)):
-        parts.append(rect(756, 128 + index * 19, width, 5, MUTED, 2))
-    parts += [line(904, 181, 936, 181, CLAY, 3), line(928, 173, 936, 181, CLAY, 3), line(928, 189, 936, 181, CLAY, 3)]
-    parts += [rect(956, 82, 160, 198, SURFACE, 12, BORDER), rect(974, 101, 124, 22, NAVY, 4), rect(974, 140, 58, 52, PAPER, 8, BORDER), rect(1040, 140, 58, 52, PAPER, 8, BORDER), rect(974, 207, 124, 9, CLAY, 3), rect(974, 232, 98, 6, SURFACE_MUTED, 3), rect(974, 250, 116, 6, SURFACE_MUTED, 3)]
-    return "".join(parts)
-
-
-def motif_release() -> str:
-    nodes = [(748, "LOCAL"), (844, "AUDIT"), (940, "SOURCE"), (1036, "MIRROR")]
-    parts = [rect(748, 92, 288, 28, SURFACE, 6, BORDER), text(766, 111, "COMPLETE PAYLOAD  ·  VERIFIED RELEASE", 10, NAVY, 500, letter_spacing=".7")]
-    for index, (x, label) in enumerate(nodes):
-        if index:
-            parts.append(line(nodes[index - 1][0] + 27, 181, x - 27, 181, NAVY, 2))
-        fill = CLAY if label == "SOURCE" else SURFACE
-        stroke = CLAY if label == "SOURCE" else NAVY
-        parts += [circle(x, 181, 26, fill, stroke, 2), text(x, 226, label, 10, TERTIARY, 500, text_anchor="middle")]
-    parts += [text(844, 187, "✓", 19, SUCCESS, 500, text_anchor="middle"), text(940, 186, "1", 15, SURFACE, 500, text_anchor="middle")]
-    return "".join(parts)
-
-
-def motif_search() -> str:
-    parts = [rect(740, 72, 350, 44, SURFACE, 22, BORDER), circle(770, 94, 8, "none", NAVY, 2), line(776, 100, 783, 107, NAVY, 2), text(800, 100, "AI training", 13, TERTIARY, 400)]
-    for index, (source, width) in enumerate((("智见 AI", 212), ("产业观察", 182), ("学习笔记", 230))):
-        y = 138 + index * 58
-        parts += [rect(740, y, 350, 46, SURFACE, 8, BORDER), rect(756, y + 12, width, 5, NAVY, 2), rect(756, y + 27, 134, 4, SURFACE_MUTED, 2), text(1068, y + 31, source, 10, MUTED, 400, text_anchor="end")]
-    return "".join(parts)
-
-
-def motif_styler() -> str:
-    parts = [rect(732, 78, 145, 204, CODE, 12), text(750, 104, "MARKDOWN", 10, CODE_TEXT, 500, family=MONO, letter_spacing="1")]
-    parts += [rect(750, 126, 94, 8, CLAY, 3), rect(750, 152, 108, 5, MUTED, 2), rect(750, 171, 83, 5, MUTED, 2), rect(750, 202, 108, 38, "#3B3B38", 7), rect(750, 255, 72, 5, MUTED, 2)]
-    parts += [line(900, 181, 934, 181, CLAY, 3), line(926, 173, 934, 181, CLAY, 3), line(926, 189, 934, 181, CLAY, 3)]
-    parts += [rect(956, 62, 158, 238, SURFACE, 12, BORDER), rect(976, 84, 118, 17, NAVY, 4), text(1035, 97, "WECHAT", 9, SURFACE, 500, text_anchor="middle", letter_spacing="1"), rect(976, 121, 92, 7, CLAY, 3), rect(976, 146, 118, 5, SURFACE_MUTED, 2), rect(976, 164, 103, 5, SURFACE_MUTED, 2), rect(976, 192, 118, 48, PAPER, 8, BORDER), rect(976, 256, 82, 5, SURFACE_MUTED, 2)]
-    return "".join(parts)
-
-
-def motif_bridge() -> str:
-    nodes = ((776, "CLI"), (920, "PROXY"), (1064, "WORKBUDDY"))
-    parts = [text(748, 91, "VERIFIED LOCAL ROUTE", 11, NAVY, 500, letter_spacing="1.1")]
-    for index, (x, label) in enumerate(nodes):
-        if index:
-            previous = nodes[index - 1][0]
-            parts += [line(previous + 38, 181, x - 38, 181, NAVY, 2), line(x - 46, 173, x - 38, 181, NAVY, 2), line(x - 46, 189, x - 38, 181, NAVY, 2)]
-        fill = CLAY if label == "PROXY" else SURFACE
-        stroke = CLAY if label == "PROXY" else NAVY
-        parts += [circle(x, 181, 38, fill, stroke, 2), text(x, 186, label, 10, SURFACE if label == "PROXY" else TERTIARY, 500, text_anchor="middle")]
-    for x, label in ((776, "OAUTH"), (920, "PROBE"), (1064, "SYNC")):
-        parts += [rect(x - 42, 246, 84, 30, SURFACE, 6, BORDER), text(x, 266, label, 9, SUCCESS, 500, text_anchor="middle", letter_spacing=".7")]
-    return "".join(parts)
-
-
-MOTIFS = {
-    "doctor": motif_doctor,
-    "routing": motif_routing,
-    "admin": motif_admin,
-    "theme": motif_theme,
-    "enterprise": motif_enterprise,
-    "html": motif_html,
-    "release": motif_release,
-    "search": motif_search,
-    "styler": motif_styler,
-    "bridge": motif_bridge,
-}
-
-
-def svg_shell(title_value: str, description: str, body: str) -> str:
-    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc">
+def svg(title_value: str, description: str, background: str, composition: str, body: list[str]) -> str:
+    return f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" role="img" aria-labelledby="title desc" data-composition="{composition}">
   <title id="title">{escape(title_value)}</title>
   <desc id="desc">{escape(description)}</desc>
-  <rect width="1200" height="360" rx="28" fill="{PAPER}"/>
-  <path d="M46 314 H1154" stroke="{BORDER}" stroke-width="1"/>
-  <path d="M620 40 V320" stroke="{BORDER}" stroke-width="1" stroke-dasharray="3 7"/>
-  <circle cx="1150" cy="34" r="92" fill="{NAVY}" opacity="0.025"/>
-  <circle cx="34" cy="350" r="74" fill="{CLAY}" opacity="0.035"/>
-  {body}
+  <rect width="1200" height="360" rx="28" fill="{background}"/>
+  {group(composition, body)}
 </svg>
 '''
 
 
-def skill_hero(name: str, item: dict[str, str]) -> str:
-    body = "".join(
-        [
-            text(64, 64, "智见 AI  /  ZHIJIAN SKILLS", 12, CLAY_TEXT, 500, letter_spacing="1.4"),
-            text(64, 105, item["category"], 11, NAVY, 500, letter_spacing="1.3"),
-            text(64, 164, item["title"], 43, INK, 500),
-            text(64, 205, item["tagline"], 18, TERTIARY, 400),
-            rect(64, 246, 190, 36, SURFACE, 8, BORDER),
-            rect(64, 246, 5, 36, CLAY, 2),
-            text(84, 269, "OPEN AGENT SKILL", 11, NAVY, 500, letter_spacing="1"),
-            text(64, 335, name, 11, MUTED, 400, family=MONO),
-            rect(660, 40, 484, 264, SURFACE, 12, BORDER),
-            MOTIFS[item["motif"]](),
-        ]
-    )
-    return svg_shell(item["title"], item["tagline"], body)
+def portfolio() -> str:
+    bg, paper, mint, orange, muted = "#102A43", "#F8F3E7", "#65D6AD", "#FF9F43", "#A9C2D6"
+    body = [
+        text(58, 62, "ZHIJIAN / OPEN AGENT SKILLS", 16, mint, 650, family=MONO, letter_spacing="2"),
+        text(58, 140, "Zhijian", 58, paper, 700),
+        text(58, 200, "Skills", 58, paper, 700),
+        text(58, 244, "One source. Eleven focused capabilities.", 22, muted, 450),
+        rect(58, 278, 356, 46, mint, 8),
+        text(78, 308, "$ npx skills add zjp1997720/zhijian-skills", 16, bg, 700, family=MONO),
+        line(478, 42, 478, 318, "#355B75", 2),
+        text(530, 62, "CHOOSE BY OUTCOME", 15, muted, 650, family=MONO, letter_spacing="2"),
+    ]
+    groups = [
+        (520, 90, "CONTROL", ["doctor", "routing", "admin", "theme"], mint),
+        (735, 90, "CREATE", ["clone", "html", "styler"], orange),
+        (950, 90, "SHIP", ["plan", "release", "search", "bridge"], "#A78BFA"),
+    ]
+    for x, y, label, skills, colour in groups:
+        body += [text(x, y, label, 14, colour, 700, family=MONO, letter_spacing="1.5")]
+        for index, skill in enumerate(skills):
+            yy = y + 18 + index * 42
+            body += [rect(x, yy, 184, 32, "#173B57", 6), rect(x, yy, 5, 32, colour, 2), text(x + 18, yy + 22, skill, 15, paper, 600, family=MONO)]
+    return svg("Zhijian Skills", "One canonical portfolio of eleven focused and independently verified Agent Skills.", bg, "portfolio-outcome-map", body)
 
 
-def portfolio_hero() -> str:
-    cards = []
-    labels = ["DOCTOR", "ROUTING", "ADMIN", "THEME", "CLONE", "HTML", "PLAN", "RELEASE", "SEARCH", "STYLER", "BRIDGE"]
-    for index, label in enumerate(labels):
-        column = index % 3
-        row = index // 3
-        x = 684 + column * 148
-        y = 72 + row * 55
-        marker = CLAY if label in {"ROUTING", "THEME", "RELEASE", "BRIDGE"} else NAVY
-        cards += [rect(x, y, 132, 38, SURFACE, 8, BORDER), rect(x, y, 4, 38, marker, 2), text(x + 18, y + 24, label, 10, TERTIARY, 500, letter_spacing=".45")]
-    body = "".join(
-        [
-            text(64, 64, "智见 AI  /  PUBLIC AGENT SKILLS", 12, CLAY_TEXT, 500, letter_spacing="1.4"),
-            text(64, 139, "Zhijian Skills", 48, INK, 500),
-            text(64, 183, "One source. Eleven focused skills.", 20, TERTIARY, 400),
-            text(64, 215, "Complete packages · verifiable releases", 16, MUTED, 400),
-            rect(64, 254, 224, 36, NAVY, 8),
-            text(176, 277, "CANONICAL PORTFOLIO", 11, SURFACE, 500, text_anchor="middle", letter_spacing="1"),
-            rect(660, 40, 484, 264, SURFACE, 12, BORDER),
-            text(684, 58, "11 ACTIVE SKILLS", 10, NAVY, 500, letter_spacing="1.1"),
-            *cards,
-        ]
-    )
-    return svg_shell(
-        "Zhijian Skills",
-        "A canonical portfolio of eleven focused, installable, and independently released Agent Skills.",
-        body,
-    )
+def codex_doctor() -> str:
+    bg, ink, red, green, gray = "#F3F0E8", "#171717", "#E4572E", "#2A9D62", "#D8D3C8"
+    body = [
+        text(56, 55, "WORKSPACE HEALTH / READ-ONLY", 15, red, 700, family=MONO, letter_spacing="1.8"),
+        text(56, 132, "Codex", 58, ink, 700), text(56, 190, "Doctor", 58, ink, 700),
+        text(56, 235, "Find context drift before changing files.", 23, "#57534E", 450),
+        rect(56, 270, 300, 42, ink, 6), text(75, 298, "SCAN  →  EXPLAIN  →  APPROVE", 15, bg, 700, family=MONO),
+        rect(570, 42, 570, 276, "#FAF9F5", 10, ink, 2),
+        text(602, 76, "DIAGNOSTIC REPORT", 15, ink, 700, family=MONO, letter_spacing="1.5"),
+        line(602, 92, 1108, 92, gray, 2),
+    ]
+    checks = [("CONTEXT PRESSURE", "72%", green), ("CONFIG DRIFT", "2", red), ("WORKSPACE ROOT", "CLEAR", green), ("THREAD SCOPE", "CHECK", red)]
+    for index, (label, value, colour) in enumerate(checks):
+        y = 122 + index * 43
+        body += [text(602, y + 21, label, 17, ink, 650, family=MONO), rect(900, y, 180, 28, gray, 4), rect(900, y, 132 if colour == green else 76, 28, colour, 4), text(1098, y + 21, value, 16, ink, 700, family=MONO, text_anchor="end")]
+    body += [path("M602 294 L636 294 L651 264 L674 310 L697 280 L722 294 L760 294", stroke=red, stroke_width=4, stroke_linecap="round", stroke_linejoin="round"), circle(1092, 294, 10, green), text(1068, 299, "verified", 15, green, 700, family=MONO, text_anchor="end")]
+    return svg("Codex Doctor", "A read-only diagnostic report for Codex context, configuration, and workspace drift.", bg, "diagnostic-report", body)
+
+
+def routing_team() -> str:
+    bg, white, cyan, orange, panel = "#101827", "#F7F5EF", "#66D9EF", "#FF8A4C", "#18263A"
+    body = [
+        text(52, 55, "CODEX ORCHESTRATION", 15, cyan, 700, family=MONO, letter_spacing="2"),
+        text(52, 118, "Model Routing", 48, white, 720), text(52, 168, "Team", 48, white, 720),
+        text(52, 212, "One lead. Bounded workers. Explicit routes.", 21, "#A8B5C7", 450),
+        rect(52, 253, 358, 48, panel, 8, cyan, 2), text(72, 284, "PLAN  /  DELEGATE  /  VERIFY", 17, white, 700, family=MONO),
+        circle(760, 178, 58, orange), text(760, 173, "LEAD", 19, bg, 800, family=MONO, text_anchor="middle"), text(760, 198, "integrates", 14, bg, 650, family=MONO, text_anchor="middle"),
+    ]
+    nodes = [(560, 86, "RESEARCH", "LUNA"), (980, 86, "REVIEW", "SOL"), (560, 270, "BUILD", "GROK"), (980, 270, "VERIFY", "LUNA")]
+    for x, y, job, model in nodes:
+        body += [line(760, 178, x, y, "#3B5975", 3), rect(x - 92, y - 36, 184, 72, panel, 10, cyan if model == "LUNA" else orange, 2), text(x, y - 5, job, 16, white, 700, family=MONO, text_anchor="middle"), text(x, y + 20, model, 14, cyan if model == "LUNA" else orange, 700, family=MONO, text_anchor="middle")]
+    body += [text(760, 338, "provider gate  •  file ownership  •  final evidence", 15, "#8EA4B8", 500, family=MONO, text_anchor="middle")]
+    return svg("Codex Model Routing Team", "A lead Codex task routes bounded background work to explicit models and verifies the result.", bg, "radial-routing-control", body)
+
+
+def skill_admin() -> str:
+    bg, ink, lime, gray, white = "#E9ECE5", "#161A16", "#B7F34A", "#C9CEC6", "#FAFBF8"
+    body = [
+        text(54, 55, "PROMPT SURFACE CONTROL", 15, ink, 750, family=MONO, letter_spacing="2"),
+        text(54, 142, "42", 96, ink, 780, family=MONO), text(212, 112, "SKILLS", 18, ink, 700, family=MONO), text(212, 142, "VISIBLE", 18, ink, 700, family=MONO),
+        text(54, 198, "Audit what loads. Disable safely.", 23, "#4C534C", 500),
+        text(54, 232, "Restore from recorded state.", 23, "#4C534C", 500),
+        rect(54, 272, 290, 42, ink, 5), text(75, 299, "AUDIT → DRY RUN → APPLY", 16, lime, 700, family=MONO),
+        rect(470, 36, 670, 288, white, 8, ink, 2),
+        text(500, 70, "PROMPT-VISIBLE SKILLS", 15, ink, 700, family=MONO),
+    ]
+    rows = [("RESEARCH", True, "USED TODAY"), ("LEGACY-PUBLISH", False, "RESTORABLE"), ("THEME-STUDIO", True, "USED 2D AGO"), ("OLD-EXPORT", False, "BACKUP 07/24")]
+    for index, (label, enabled, note) in enumerate(rows):
+        y = 92 + index * 55
+        body += [line(500, y + 42, 1110, y + 42, gray, 1), text(500, y + 26, label, 17, ink, 700, family=MONO), text(860, y + 26, note, 14, "#6B746B", 600, family=MONO), rect(1040, y + 8, 64, 30, ink if enabled else gray, 15), circle(1087 if enabled else 1057, y + 23, 11, lime if enabled else white)]
+    return svg("Codex Skill Admin", "A reversible switchboard for auditing, disabling, restoring, and verifying local Codex Skills.", bg, "prompt-switchboard", body)
+
+
+def theme_studio() -> str:
+    bg, ink, purple, coral, mint, paper = "#EEE9FF", "#24213A", "#6C4CF5", "#FF6B6B", "#59C9A5", "#FFFDF8"
+    body = [
+        text(54, 52, "CODEX EXPERIENCE / REVERSIBLE", 15, purple, 750, family=MONO, letter_spacing="1.8"),
+        text(54, 116, "Theme", 54, ink, 760), text(54, 172, "Studio", 54, ink, 760),
+        text(54, 216, "Brand the app. Verify every route.", 22, "#5F5874", 500),
+        rect(54, 257, 46, 46, purple, 8), rect(112, 257, 46, 46, coral, 8), rect(170, 257, 46, 46, mint, 8), rect(228, 257, 46, 46, ink, 8),
+        text(300, 286, "APPLY  •  PAUSE  •  RESTORE", 16, ink, 700, family=MONO),
+        rect(520, 42, 620, 276, paper, 14, ink, 2),
+        rect(520, 42, 620, 38, ink, 12), circle(545, 61, 5, coral), circle(562, 61, 5, "#FFD166"), circle(579, 61, 5, mint),
+        rect(544, 100, 138, 194, "#E6E0F6", 10),
+    ]
+    for index, width in enumerate((82, 104, 65, 98, 76)):
+        body += [rect(564, 126 + index * 31, width, 7, "#8B83A3", 3)]
+    body += [rect(706, 100, 408, 82, bg, 10), text(730, 132, "WELCOME BACK", 15, purple, 750, family=MONO), text(730, 160, "Codex, in your visual language.", 22, ink, 700), rect(706, 202, 194, 92, ink, 10), rect(920, 202, 194, 92, "#F6EFE7", 10), circle(758, 247, 18, coral), circle(972, 247, 18, mint), text(808, 252, "task route", 16, paper, 650), text(1024, 252, "home route", 16, ink, 650), text(1094, 310, "VERIFY ✓", 14, mint, 800, family=MONO, text_anchor="end")]
+    return svg("Codex Theme Studio", "A reversible Codex Desktop theme shown as a branded interface with verified routes.", bg, "theme-artboards", body)
+
+
+def enterprise_clone() -> str:
+    bg, paper, green, gold, ink = "#163B2D", "#F5F0E2", "#7ED6A6", "#E9C46A", "#122018"
+    body = [
+        text(50, 52, "KNOWLEDGE SYSTEM", 15, green, 750, family=MONO, letter_spacing="2"),
+        text(50, 112, "Enterprise", 48, paper, 720), text(50, 162, "Clone Builder", 48, paper, 720),
+        text(50, 205, "Evidence becomes a traceable company core.", 21, "#B8D5C6", 450),
+        rect(50, 246, 354, 48, paper, 7), text(72, 277, "LOCAL MATERIALS + PUBLIC PROOF", 15, ink, 750, family=MONO),
+        text(50, 329, "collect  →  verify  →  structure  →  reuse", 15, green, 650, family=MONO),
+    ]
+    sources = [(500, 70, "DOCS"), (500, 144, "WEB"), (500, 218, "VOICE"), (500, 292, "CASES")]
+    for x, y, label in sources:
+        body += [rect(x, y - 24, 120, 48, paper, 5), text(x + 60, y + 6, label, 16, ink, 750, family=MONO, text_anchor="middle"), line(x + 120, y, 700, 181, green, 2)]
+    body += [circle(746, 181, 60, gold), text(746, 174, "CLAIM", 17, ink, 800, family=MONO, text_anchor="middle"), text(746, 198, "CORE", 17, ink, 800, family=MONO, text_anchor="middle")]
+    outputs = [(900, 75, "PROFILE"), (980, 135, "ASSETS"), (980, 227, "VOICE"), (900, 287, "LEDGER")]
+    for x, y, label in outputs:
+        body += [line(806, 181, x - 18, y, green, 2), circle(x, y, 8, green), text(x + 24, y + 6, label, 17, paper, 700, family=MONO)]
+    return svg("Enterprise Clone Builder", "Company documents, web evidence, voice, and cases flow into a traceable digital-twin repository.", bg, "evidence-to-knowledge-core", body)
+
+
+def html_express() -> str:
+    bg, white, blue, orange, ink = "#164E63", "#FCFAF4", "#38BDF8", "#FB923C", "#132C35"
+    body = [
+        text(50, 50, "INFORMATION DESIGN", 15, blue, 750, family=MONO, letter_spacing="2"),
+        text(50, 112, "HTML", 58, white, 760), text(50, 170, "Express", 58, white, 760),
+        text(50, 216, "Dense source in. Clear report out.", 22, "#B8DDE7", 500),
+        rect(50, 258, 310, 44, blue, 7), text(72, 287, "ONE FILE  •  ZERO RUNTIME", 16, ink, 800, family=MONO),
+        rect(452, 52, 220, 256, "#DCE6E5", 8), text(478, 84, "SOURCE", 14, ink, 750, family=MONO),
+    ]
+    for index, width in enumerate((150, 124, 168, 104, 148, 132, 164, 92)):
+        body += [rect(478, 108 + index * 22, width, 6, "#6C7E7E", 3)]
+    body += [line(700, 181, 756, 181, orange, 5), path("M742 168 L756 181 L742 194", stroke=orange, stroke_width=5, stroke_linecap="round", stroke_linejoin="round"), rect(790, 34, 360, 292, white, 12), rect(812, 56, 316, 32, blue, 5), text(830, 78, "DECISION REPORT", 14, ink, 800, family=MONO), rect(812, 108, 146, 72, "#E7F6FB", 8), rect(972, 108, 156, 72, "#FFF0E5", 8), text(830, 138, "72%", 28, blue, 800, family=MONO), text(990, 138, "04", 28, orange, 800, family=MONO), rect(812, 202, 316, 12, ink, 4), rect(812, 230, 230, 7, "#B7C5C5", 3), rect(812, 252, 280, 7, "#B7C5C5", 3), rect(812, 274, 196, 7, "#B7C5C5", 3), text(1128, 309, ".html", 16, orange, 800, family=MONO, text_anchor="end")]
+    return svg("HTML Express", "Dense source material transforms into a clear, self-contained HTML decision report.", bg, "source-to-report", body)
+
+
+def light_plan() -> str:
+    bg, ink, cream, orange, gray = "#F8D7B8", "#241A15", "#FFF7EE", "#F0642E", "#C29C7C"
+    body = [
+        text(52, 52, "BOUNDED EXECUTION", 15, orange, 800, family=MONO, letter_spacing="2"),
+        text(52, 114, "Light Plan", 52, ink, 760), text(52, 168, "and Work", 52, ink, 760),
+        text(52, 214, "Plan briefly. Start now. Verify the result.", 22, "#6E4F3E", 500),
+        rect(42, 261, 320, 50, ink, 7),
+        text(62, 294, "$light-plan-and-work", 17, cream, 750, family=MONO),
+    ]
+    routes = [(470, 62, "DIRECT", "tiny / obvious", False), (470, 144, "LIGHT", "bounded / reversible", True), (470, 240, "HEAVY", "risky / multi-owner", False)]
+    for x, y, label, note, active in routes:
+        fill = orange if active else cream
+        stroke = ink if active else gray
+        body += [rect(x, y, 640, 66, fill, 8, stroke, 2), text(x + 24, y + 29, label, 20, ink, 850, family=MONO), text(x + 170, y + 29, note, 17, ink, 600, family=MONO)]
+        if active:
+            steps = ["GOAL", "PLAN", "WORK", "VERIFY"]
+            for index, step in enumerate(steps):
+                sx = x + 170 + index * 104
+                body += [text(sx, y + 53, step, 13, cream, 800, family=MONO), line(sx + 54, y + 48, sx + 82, y + 48, cream, 2) if index < 3 else ""]
+    body += [text(1110, 334, "ESCALATE ONLY WHEN THE RISK CHANGES", 14, ink, 750, family=MONO, text_anchor="end")]
+    return svg("Light Plan and Work", "A three-route execution system that highlights the light path from goal to verified result.", bg, "three-route-decision", body)
+
+
+def open_sourcer() -> str:
+    bg, paper, green, red, gray = "#171A18", "#F4F1E8", "#6FD08C", "#ED6A5A", "#525B55"
+    body = [
+        text(48, 50, "RELEASE GOVERNANCE", 15, green, 800, family=MONO, letter_spacing="2"),
+        text(48, 108, "Skill Open", 48, paper, 730), text(48, 158, "Sourcer", 48, paper, 730),
+        text(48, 203, "One Portfolio. Complete payloads.", 21, "#B8C0BA", 500),
+        text(48, 232, "Verified releases.", 21, "#B8C0BA", 500),
+        rect(48, 272, 338, 44, paper, 5), text(68, 301, "SCAN  •  PACKAGE  •  PUBLISH", 16, bg, 800, family=MONO),
+    ]
+    stages = [(470, "LOCAL", gray), (630, "AUDIT", green), (790, "PACKAGE", green), (950, "PORTFOLIO", red)]
+    for index, (x, label, colour) in enumerate(stages):
+        if index:
+            body += [line(stages[index - 1][0] + 104, 181, x - 14, 181, green, 3), path(f"M{x-28} 173 L{x-14} 181 L{x-28} 189", stroke=green, stroke_width=3)]
+        body += [rect(x, 126, 118, 110, "#222824", 8, colour, 2), text(x + 59, 165, label, 15, paper, 800, family=MONO, text_anchor="middle"), circle(x + 59, 202, 15, colour), text(x + 59, 208, "✓" if label != "LOCAL" else "1", 18, bg, 850, family=MONO, text_anchor="middle")]
+    body += [rect(470, 72, 598, 32, "#222824", 5), text(492, 94, "SKILL.md + references + scripts + assets", 14, "#AAB5AD", 650, family=MONO), rect(470, 264, 598, 44, "#222824", 5), text(492, 292, "skills/<name>  ·  docs  ·  registry  ·  tag", 15, green, 700, family=MONO)]
+    return svg("Skill Open Sourcer", "A verified pipeline from a local Agent Skill to one canonical Portfolio release.", bg, "canonical-release-pipeline", body)
+
+
+def wechat_search() -> str:
+    bg, white, green, ink, pale = "#EAF8EF", "#FFFFFF", "#07C160", "#17352A", "#CDEBD8"
+    body = [
+        text(50, 50, "CONTENT RESEARCH", 15, green, 800, family=MONO, letter_spacing="2"),
+        text(50, 110, "WeChat Article", 46, ink, 760), text(50, 158, "Search", 46, ink, 760),
+        text(50, 202, "Turn one keyword into structured evidence.", 21, "#537165", 500),
+        rect(50, 246, 344, 50, white, 25, green, 2), circle(80, 271, 10, "none", green, 3), line(87, 279, 98, 290, green, 3), text(112, 278, "AI training", 18, ink, 600),
+        text(50, 330, "JSON  •  SOURCE  •  TIME  •  DIRECT URL", 14, green, 800, family=MONO),
+    ]
+    results = [(520, 62, "AI training in real workflows", "ZHIJIAN AI", "2026-07-24"), (520, 150, "From tools to operating systems", "FIELD NOTES", "2026-07-22"), (520, 238, "How to organize Agent Skills", "BUILD LOG", "2026-07-20")]
+    for x, y, title_value, source, date in results:
+        body += [rect(x, y, 620, 70, white, 10), rect(x, y, 7, 70, green, 3), text(x + 28, y + 30, title_value, 20, ink, 700), text(x + 28, y + 55, source, 14, "#567065", 600), text(x + 588, y + 55, date, 14, "#567065", 600, family=MONO, text_anchor="end")]
+    return svg("WeChat Article Search", "A WeChat-green search interface turns a keyword into dated, source-labelled article evidence.", bg, "search-evidence-stack", body)
+
+
+def wechat_styler() -> str:
+    bg, paper, wine, gold, ink = "#6F1D35", "#FFF8EC", "#B43E5D", "#E8B86D", "#24191D"
+    body = [
+        text(48, 50, "EDITORIAL PUBLISHING", 15, gold, 800, family=MONO, letter_spacing="2"),
+        text(48, 112, "WeChat", 52, paper, 760, family=SERIF), text(48, 166, "Styler", 52, paper, 760, family=SERIF),
+        text(48, 210, "Markdown becomes WeChat-ready HTML.", 21, "#E8C9D1", 500),
+        rect(48, 252, 334, 48, paper, 5), text(70, 282, "8 THEMES  •  INLINE CSS  •  QA", 15, ink, 800, family=MONO),
+        rect(456, 44, 248, 272, "#251F21", 10), text(482, 78, "MARKDOWN", 14, gold, 800, family=MONO),
+        text(482, 122, "# A clear idea", 22, paper, 700, family=MONO), text(482, 158, "> one claim", 17, "#B8AFB2", 550, family=MONO), text(482, 192, "- proof", 17, "#B8AFB2", 550, family=MONO), text(482, 222, "- action", 17, "#B8AFB2", 550, family=MONO), rect(482, 250, 162, 32, wine, 4), text(498, 272, "validate.mjs ✓", 14, paper, 700, family=MONO),
+        line(724, 181, 774, 181, gold, 4), path("M760 168 L774 181 L760 194", stroke=gold, stroke_width=4),
+        rect(806, 26, 328, 308, paper, 12), text(834, 66, "ZHIJIAN AI", 14, wine, 800, letter_spacing="2"), text(834, 112, "A clear idea", 30, ink, 760, family=SERIF), line(834, 132, 1106, 132, gold, 3), text(834, 170, "Lead with the claim.", 18, ink, 550), rect(834, 194, 272, 62, "#F5E7DA", 6), text(852, 224, "KEY RESULT", 16, wine, 800), text(852, 247, "Compatibility passed", 17, ink, 600), rect(834, 278, 112, 30, wine, 4), text(890, 299, "SAVE DRAFT", 14, paper, 700, text_anchor="middle")]
+    return svg("WeChat Styler", "A Markdown source panel transforms into a branded, validated WeChat article page.", bg, "editorial-before-after", body)
+
+
+def model_bridge() -> str:
+    bg, white, cyan, green, red, panel = "#071E2C", "#F4F8FA", "#38C6D9", "#5DD39E", "#FF6B5E", "#0D2D3E"
+    body = [
+        text(48, 50, "MODEL INFRASTRUCTURE / LOOPBACK", 15, cyan, 800, family=MONO, letter_spacing="1.7"),
+        text(48, 108, "WorkBuddy", 46, white, 740), text(48, 158, "CLI Bridge", 46, white, 740),
+        text(48, 202, "Authorize. Probe. Register exact routes.", 21, "#A9C5D1", 500),
+        rect(48, 248, 318, 48, panel, 6, cyan, 2), text(68, 279, "LOCAL PROXY  •  NO KEY COPY", 15, white, 800, family=MONO),
+    ]
+    nodes = [(500, "CLI", cyan), (744, "PROXY", red), (988, "WORKBUDDY", green)]
+    for index, (x, label, colour) in enumerate(nodes):
+        if index:
+            body += [line(nodes[index - 1][0] + 72, 164, x - 72, 164, cyan, 4), path(f"M{x-88} 151 L{x-72} 164 L{x-88} 177", stroke=cyan, stroke_width=4)]
+        body += [circle(x, 164, 64, panel, colour, 4), text(x, 170, label, 17, white, 800, family=MONO, text_anchor="middle")]
+    metrics = [(464, "AUTH", "READY", green), (660, "TOOLS", "PASS", green), (856, "VISION", "PASS", green), (1020, "LIMITS", "EXACT", cyan)]
+    for x, label, value, colour in metrics:
+        body += [rect(x, 254, 150, 58, panel, 6), text(x + 16, 277, label, 13, "#84A7B6", 700, family=MONO), text(x + 134, 298, value, 16, colour, 850, family=MONO, text_anchor="end")]
+    body += [text(1134, 338, "VERIFIED ROUTE ✓", 14, green, 850, family=MONO, text_anchor="end")]
+    return svg("WorkBuddy CLI Model Bridge", "A verified loopback route connects CLI subscription models through a proxy to WorkBuddy.", bg, "verified-loopback-route", body)
+
+
+HEROES = {
+    ROOT / "assets/readme/portfolio-hero.svg": portfolio,
+    ROOT / "docs/skills/codex-doctor/assets/readme/hero.svg": codex_doctor,
+    ROOT / "docs/skills/codex-model-routing-team/assets/readme/hero.svg": routing_team,
+    ROOT / "docs/skills/codex-skill-admin/assets/readme/hero.svg": skill_admin,
+    ROOT / "docs/skills/codex-theme-studio/assets/readme/hero.svg": theme_studio,
+    ROOT / "docs/skills/enterprise-clone-builder/assets/readme/hero.svg": enterprise_clone,
+    ROOT / "docs/skills/html-express/assets/readme/hero.svg": html_express,
+    ROOT / "docs/skills/light-plan-and-work/assets/readme/hero.svg": light_plan,
+    ROOT / "docs/skills/skill-open-sourcer/assets/readme/hero.svg": open_sourcer,
+    ROOT / "docs/skills/wechat-article-search/assets/readme/hero.svg": wechat_search,
+    ROOT / "docs/skills/wechat-styler/assets/readme/hero.svg": wechat_styler,
+    ROOT / "docs/skills/workbuddy-cli-model-bridge/assets/readme/hero.svg": model_bridge,
+}
 
 
 def main() -> int:
-    targets = {ROOT / "assets/readme/portfolio-hero.svg": portfolio_hero()}
-    for name, item in SKILLS.items():
-        targets[ROOT / f"docs/skills/{name}/assets/readme/hero.svg"] = skill_hero(name, item)
-    for path, content in targets.items():
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content, encoding="utf-8")
-        print(path.relative_to(ROOT))
+    for target, render in HEROES.items():
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(render(), encoding="utf-8")
+        print(target.relative_to(ROOT))
     return 0
 
 

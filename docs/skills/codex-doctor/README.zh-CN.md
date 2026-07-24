@@ -101,4 +101,4 @@ python3 scripts/scan_workspace.py --cwd /path/to/project --compact-json
 
 ## 许可证
 
-[MIT](LICENSE)
+[MIT](../../../skills/codex-doctor/LICENSE)

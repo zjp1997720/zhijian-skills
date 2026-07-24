@@ -1,8 +1,14 @@
 # Light Plan and Work
 
-**Plan bounded work in a few steps, execute it immediately, verify the result, and escalate only when the risk deserves a heavier workflow.**
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Light Plan and Work routes bounded tasks through direct, light, or heavy execution paths">
+</p>
 
-[简体中文](./README.zh-CN.md) · [Canonical source](https://github.com/zjp1997720/zhijian-skills/tree/main/skills/light-plan-and-work)
+<p align="center"><strong>Plan bounded work in a few steps, execute it immediately, verify the result, and escalate only when the risk deserves a heavier workflow.</strong></p>
+
+<p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/light-plan-and-work">Canonical source</a></p>
+
+Use it when a task is concrete enough to start now and still deserves a visible plan, proportional verification, and a clear escalation boundary.
 
 ## Install
 

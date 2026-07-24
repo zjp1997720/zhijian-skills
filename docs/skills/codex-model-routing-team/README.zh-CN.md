@@ -132,7 +132,7 @@ Deep Research 默认预算为 `2-4 个 researcher + 1 个 verifier + 1 个 revie
 └── tests/
 ```
 
-Agent 的完整工作流见 [SKILL.md](skills/codex-model-routing-team/SKILL.md)，配套策略见 [references](skills/codex-model-routing-team/references/)。
+Agent 的完整工作流见 [SKILL.md](../../../skills/codex-model-routing-team/SKILL.md)，配套策略见 [references](../../../skills/codex-model-routing-team/references/)。
 
 ## 验证情况
 
@@ -140,4 +140,4 @@ Agent 的完整工作流见 [SKILL.md](skills/codex-model-routing-team/SKILL.md)
 
 ## 许可证
 
-[MIT](LICENSE)
+[MIT](../../../skills/codex-model-routing-team/LICENSE)

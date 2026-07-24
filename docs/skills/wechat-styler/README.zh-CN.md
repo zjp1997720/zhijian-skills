@@ -84,4 +84,4 @@ $wechat-styler 然后运行: node scripts/validate.mjs path/to/output.html
 
 ## 协议
 
-MIT — 见 [LICENSE](LICENSE)。
+MIT — 见 [LICENSE](../../../skills/wechat-styler/LICENSE)。

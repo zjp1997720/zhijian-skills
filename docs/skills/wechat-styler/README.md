@@ -84,4 +84,4 @@ To make it yours: copy `themes/zhijian.yaml`, change the colors, fonts, and `top
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](../../../skills/wechat-styler/LICENSE).

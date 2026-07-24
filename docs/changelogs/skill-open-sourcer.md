@@ -1,5 +1,12 @@
 # skill-open-sourcer Changelog
 
+## 2.1.0 — 2026-07-24
+
+- Add a required eight-field README release story and explicit `clean-doc` / `proof-led` tier decision.
+- Require project-native composition IDs, deterministic generator updates, and Portfolio-level duplicate-composition tests for proof-led Heroes.
+- Strengthen README audits with semantic alt text, accessible SVG root metadata, meaningful titles/descriptions, and strict Hero composition checks.
+- Require rendered desktop and mobile inspection so deterministic validation cannot substitute for visual review.
+
 ## 2.0.0 — 2026-07-17
 
 - Make `zjp1997720/zhijian-skills` the only publishing repository for every imported Skill.

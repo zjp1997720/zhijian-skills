@@ -21,7 +21,7 @@ class AuditReleaseReadmeTests(unittest.TestCase):
         assets = root / "assets" / "readme"
         assets.mkdir(parents=True)
         (assets / "hero.svg").write_text(
-            """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320">
+            """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc" data-composition="input-to-output">
 <title>Demo Skill</title><desc>A concrete demo workflow</desc>
 <rect width="1200" height="320" fill="#111"/>
 </svg>
@@ -91,8 +91,8 @@ MIT
             self.write_valid_release(root)
             svg = root / "assets" / "readme" / "hero.svg"
             svg.write_text(
-                """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320">
-<title>Demo</title><desc>Demo</desc><script>alert(1)</script>
+                """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc" data-composition="input-to-output">
+<title>Demo</title><desc>A concrete demo workflow</desc><script>alert(1)</script>
 </svg>
 """,
                 encoding="utf-8",
@@ -100,6 +100,19 @@ MIT
             result = self.run_audit(root)
             self.assertEqual(result.returncode, 1)
             self.assertIn("unsupported <script>", result.stdout)
+
+    def test_generic_alt_and_missing_composition_fail_strict_audit(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.write_valid_release(root)
+            readme = root / "README.md"
+            readme.write_text(readme.read_text(encoding="utf-8").replace("Demo Skill workflow", "hero"), encoding="utf-8")
+            svg = root / "assets" / "readme" / "hero.svg"
+            svg.write_text(svg.read_text(encoding="utf-8").replace(' data-composition="input-to-output"', ""), encoding="utf-8")
+            result = self.run_audit(root)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("alt text is too generic", result.stdout)
+            self.assertIn("missing a stable data-composition", result.stdout)
 
     def test_root_skill_with_support_files_fails(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

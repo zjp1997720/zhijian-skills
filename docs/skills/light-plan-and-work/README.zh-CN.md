@@ -1,8 +1,14 @@
 # Light Plan and Work
 
-**用几步短计划完成边界清楚的任务，立即执行、按风险验证，只在后果和协作成本确实更高时升级到重流程。**
+<p align="center">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Light Plan and Work 为有边界任务选择直接、轻量或重型执行路径">
+</p>
 
-[English](./README.md) · [唯一源码](https://github.com/zjp1997720/zhijian-skills/tree/main/skills/light-plan-and-work)
+<p align="center"><strong>用几步短计划完成边界清楚的任务，立即执行、按风险验证，只在后果和协作成本确实更高时升级到重流程。</strong></p>
+
+<p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/light-plan-and-work">唯一源码</a></p>
+
+适合目标具体、可以立即开工，同时需要可见计划、按风险验证和明确升级边界的任务。
 
 ## 安装
 
