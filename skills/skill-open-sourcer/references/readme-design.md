@@ -136,8 +136,13 @@ Essential install or usage information must remain outside the image.
 Run the deterministic audit from the canonical Portfolio repository:
 
 ```bash
-python3 "${CODEX_HOME:-$HOME/.codex}/skills/skill-open-sourcer/scripts/audit_release_readme.py" . --strict
+python3 <zhijian-skills>/skills/skill-open-sourcer/scripts/audit_release_readme.py \
+  --repository-root <zhijian-skills> \
+  <zhijian-skills>/docs/skills/<skill-name>/README.md \
+  <zhijian-skills>/docs/skills/<skill-name>/README.zh-CN.md --strict
 ```
+
+`--repository-root` is an explicit safety boundary. It permits shared Portfolio links such as `../../../LICENSE` while still rejecting files and links outside the canonical repository. For a standalone release directory, omit the option and audit that directory directly.
 
 Then render every SVG or raster composition at GitHub content width and inspect:
 

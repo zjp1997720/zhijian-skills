@@ -11,8 +11,15 @@ SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "audit_release_readme
 
 
 class AuditReleaseReadmeTests(unittest.TestCase):
-    def run_audit(self, root: Path, strict: bool = True) -> subprocess.CompletedProcess[str]:
-        command = [sys.executable, str(SCRIPT), str(root)]
+    def run_audit(
+        self,
+        *paths: Path,
+        strict: bool = True,
+        repository_root: Path | None = None,
+    ) -> subprocess.CompletedProcess[str]:
+        command = [sys.executable, str(SCRIPT), *(str(path) for path in paths)]
+        if repository_root is not None:
+            command.extend(["--repository-root", str(repository_root)])
         if strict:
             command.append("--strict")
         return subprocess.run(command, text=True, capture_output=True, check=False)
@@ -130,6 +137,50 @@ MIT
             (references / "policy.md").write_text("# Policy\n", encoding="utf-8")
             result = self.run_audit(root)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_explicit_repository_root_allows_shared_license_link(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repository_root = Path(tmp)
+            docs_root = repository_root / "docs" / "skills" / "demo-skill"
+            self.write_valid_release(docs_root)
+            (repository_root / "LICENSE").write_text("MIT\n", encoding="utf-8")
+            (docs_root / "LICENSE").unlink()
+            readme = docs_root / "README.md"
+            readme.write_text(
+                readme.read_text(encoding="utf-8")
+                + "\n[Repository license](../../../LICENSE)\n",
+                encoding="utf-8",
+            )
+
+            bounded = self.run_audit(
+                docs_root / "README.md",
+                docs_root / "README.zh-CN.md",
+                repository_root=repository_root,
+            )
+            self.assertEqual(bounded.returncode, 0, bounded.stdout + bounded.stderr)
+            self.assertIn(f"Release root: {repository_root.resolve()}", bounded.stdout)
+
+            unbounded = self.run_audit(
+                docs_root / "README.md",
+                docs_root / "README.zh-CN.md",
+            )
+            self.assertEqual(unbounded.returncode, 1)
+            self.assertIn("link escapes the release repository", unbounded.stdout)
+
+    def test_repository_root_must_contain_every_readme(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            release_root = root / "release"
+            boundary = root / "different-repository"
+            boundary.mkdir()
+            self.write_valid_release(release_root)
+            result = self.run_audit(
+                release_root / "README.md",
+                release_root / "README.zh-CN.md",
+                repository_root=boundary,
+            )
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("README is outside repository root", result.stderr)
 
 
 if __name__ == "__main__":

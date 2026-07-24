@@ -1,5 +1,12 @@
 # skill-open-sourcer Changelog
 
+## 2.0.1 — 2026-07-24
+
+- Add an explicit `--repository-root` boundary for auditing Portfolio README files that link to shared repository assets such as `LICENSE`.
+- Keep repository-boundary checks fail-closed when a README or local link resolves outside the selected root.
+- Replace ambiguous add-subcommand help probes with top-level CLI help and document that `skills add <source> --help` may perform a real installation.
+- Add deterministic regression tests for repository-root containment and CLI help safety guidance.
+
 ## 2.0.0 — 2026-07-17
 
 - Make `zjp1997720/zhijian-skills` the only publishing repository for every imported Skill.

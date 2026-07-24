@@ -1,6 +1,6 @@
 ---
 name: skill-open-sourcer
-description: Audit, package, add, verify, and publish local Agent Skills through the canonical zjp1997720/zhijian-skills portfolio. Use when the user gives a SKILL.md or Skill directory and asks to open-source, publish, release, share, validate, manage versions, make installable with npx skills, prepare documentation, or generate launch copy. Every public Skill must live under skills/<name>/ in Zhijian Skills; never create or update a standalone Skill repository.
+description: Audit, package, add, verify, and publish local Agent Skills through the canonical zjp1997720/zhijian-skills portfolio. Use when the user gives a SKILL.md or Skill directory and asks to open-source, publish, release, share, validate, manage versions, make installable with npx skills, prepare documentation, or generate launch copy. Every public Skill must live in the canonical repository's nested skills directory; never create or update a standalone Skill repository.
 ---
 
 # Skill Open Sourcer
@@ -41,10 +41,14 @@ python3 "$SKILL_OPEN_SOURCER_DIR/scripts/portfolio.py" \
   validate-skill <zhijian-skills>/skills/<name>
 python3 "$SKILL_OPEN_SOURCER_DIR/scripts/portfolio.py" \
   audit --repo <zhijian-skills> --strict
+python3 "$SKILL_OPEN_SOURCER_DIR/scripts/audit_release_readme.py" \
+  --repository-root <zhijian-skills> \
+  <zhijian-skills>/docs/skills/<name>/README.md \
+  <zhijian-skills>/docs/skills/<name>/README.zh-CN.md --strict
 python3 -m unittest discover -s <zhijian-skills>/tests -v
 ```
 
-8. Verify local `npx skills` discovery and one isolated copy install from the canonical repository. Inspect the installed tree; listing success alone is insufficient.
+8. Verify local `npx skills` discovery and one isolated copy install from the canonical repository. Inspect the installed tree; listing success alone is insufficient. Use top-level help only: `npx --no-install skills --help`. Never run `npx skills add <source> --help`; `skills` CLI 1.5.x may perform a real installation because `<source>` is already a valid add request.
 9. Commit and push canonical `main` only when publishing is authorized. Never call `gh repo create` or publish to `<owner>/<skill-name>`.
 10. Verify the remote Portfolio listing and isolated install, then create the canonical Tag and launch copy.
 
@@ -86,12 +90,14 @@ Never force-push, rewrite published Tags, create a standalone repository, or tre
 ## Publication verification
 
 ```bash
+npx --no-install skills --help
 npx --no-install skills add zjp1997720/zhijian-skills --list
 npx skills add zjp1997720/zhijian-skills \
   -g -a codex --skill <skill-name> --copy -y
 ```
 
 Use the Portfolio's pinned `skills` CLI for deterministic checks. In an empty isolated HOME, invoke the recorded version explicitly with `npx --yes skills@<version>`.
+Never use `npx skills add <source> --help` as a help probe. It may perform a real installation and create `.agents/` plus `skills-lock.json` in the current directory.
 
 ## Launch copy
 

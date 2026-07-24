@@ -183,12 +183,12 @@
     {
       "name": "skill-open-sourcer",
       "lifecycle": "active",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "path": "skills/skill-open-sourcer",
       "documentation": "docs/skills/skill-open-sourcer/README.md",
       "documentation_zh": "docs/skills/skill-open-sourcer/README.zh-CN.md",
       "changelog": "docs/changelogs/skill-open-sourcer.md",
-      "canonical_tag": "skill-open-sourcer/v2.0.0",
+      "canonical_tag": "skill-open-sourcer/v2.0.1",
       "validation": {
         "commands": [
           "python3 -m unittest discover -s skills/skill-open-sourcer/tests -v"

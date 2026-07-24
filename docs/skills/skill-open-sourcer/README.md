@@ -30,6 +30,8 @@ Then invoke `$skill-open-sourcer` with a local `SKILL.md` or Skill directory.
 - Scans the incoming Skill for secrets, personal paths, caches, private data, unsafe links, and unclear assets.
 - Imports the complete payload into `skills/<name>/` and creates bilingual docs, Changelog, Registry metadata, and catalog entries.
 - Validates the Skill, full Portfolio, declared tests, README package, local discovery, and isolated copy installation.
+- Audits shared Portfolio README links against an explicit canonical repository boundary.
+- Uses top-level CLI help and list-only discovery so a help probe cannot trigger an unintended installation.
 - Pushes only the canonical Portfolio and creates only `<skill>/v<version>` Tags.
 - Produces the canonical install command and launch copy.
 
@@ -56,7 +58,7 @@ registry/skills.json    version, validation, capabilities, and Harnesses
 
 ## Safety
 
-The workflow never creates an independent GitHub repository, writes mirror metadata, force-pushes, or rewrites published Tags. Missing evidence remains explicit.
+The workflow never creates an independent GitHub repository, writes mirror metadata, force-pushes, or rewrites published Tags. README links may resolve inside the explicitly selected canonical repository and nowhere beyond it. Missing evidence remains explicit.
 
 ## License
 
