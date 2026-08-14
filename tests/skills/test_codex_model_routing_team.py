@@ -82,8 +82,18 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(models["gpt-5.6-sol"]["thinking"], ["high", "xhigh", "max"])
         self.assertEqual(models["gpt-5.6-terra"]["status"], "opt_in")
         self.assertFalse(models["gpt-5.6-terra"]["automatic"])
-        self.assertEqual(models["antigravity/gemini-3.6-flash"]["status"], "manual_only")
-        self.assertFalse(models["antigravity/gemini-3.6-flash"]["automatic"])
+        self.assertEqual(models["grok-4.6"]["status"], "opt_in")
+        self.assertFalse(models["grok-4.6"]["automatic"])
+        self.assertTrue(models["grok-4.6"]["tool_probe_required"])
+        self.assertNotIn("antigravity/gemini-3.6-flash", models)
+        self.assertEqual(
+            models["gpt-5.6-sol"]["surface_runtime_models"]["app_thread"]["standard"],
+            "gpt-5.6-sol",
+        )
+        self.assertEqual(
+            models["gpt-5.6-sol"]["surface_runtime_models"]["native_subagent"]["standard"],
+            "gpt-5.6-sol-standard",
+        )
         self.assertTrue(
             set(contract["forbidden_worker_thinking"])
             <= set(registry["policy"]["forbidden_thinking"])
@@ -133,7 +143,6 @@ class SkillContractTests(unittest.TestCase):
             "Sol",
             "Terra",
             "Grok",
-            "Gemini",
             "Ultra",
             "UNKNOWN",
             "task_id",
@@ -341,17 +350,25 @@ class SkillContractTests(unittest.TestCase):
         )
 
     def test_preflight_allows_grok_high_and_rejects_ultra(self) -> None:
-        incomplete = self.run_preflight("--model", "xai/grok-4.5", "--thinking", "high")
-        self.assertEqual(incomplete.returncode, 3, incomplete.stderr or incomplete.stdout)
-        self.assertTrue(json.loads(incomplete.stdout)["registry_eligible"])
+        incomplete = self.run_preflight(
+            "--surface", "native_subagent", "--model", "grok-4.6", "--thinking", "high"
+        )
+        self.assertEqual(incomplete.returncode, 2, incomplete.stderr or incomplete.stdout)
+        self.assertFalse(json.loads(incomplete.stdout)["registry_eligible"])
         self.assertFalse(json.loads(incomplete.stdout)["route_eligible"])
 
         allowed = self.run_preflight(
             "--model",
-            "xai/grok-4.5",
+            "grok-4.6",
             "--thinking",
             "high",
+            "--surface",
+            "native_subagent",
+            "--explicit-user-request",
             "--runtime-confirmed",
+            "--tool-probe-confirmed",
+            "--proxy-version",
+            "7.2.130",
             "--host",
             "test-host",
             "--provider-status",
@@ -361,34 +378,18 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(allowed.returncode, 0, allowed.stderr or allowed.stdout)
         self.assertTrue(json.loads(allowed.stdout)["route_eligible"])
 
-        forbidden = self.run_preflight("--model", "xai/grok-4.5", "--thinking", "ultra")
+        forbidden = self.run_preflight(
+            "--surface", "native_subagent", "--model", "grok-4.6", "--thinking", "ultra"
+        )
         self.assertEqual(forbidden.returncode, 2, forbidden.stderr or forbidden.stdout)
         self.assertFalse(json.loads(forbidden.stdout)["route_eligible"])
 
-    def test_preflight_keeps_blocked_gemini_closed_even_when_explicit(self) -> None:
-        implicit = self.run_preflight(
+    def test_preflight_keeps_removed_antigravity_model_closed(self) -> None:
+        result = self.run_preflight(
             "--model", "antigravity/gemini-3.6-flash", "--thinking", "medium"
         )
-        self.assertEqual(implicit.returncode, 2, implicit.stderr or implicit.stdout)
-
-        explicit = self.run_preflight(
-            "--model",
-            "antigravity/gemini-3.6-flash",
-            "--thinking",
-            "medium",
-            "--explicit-user-request",
-            "--risk-acknowledged",
-            "--runtime-confirmed",
-            "--host",
-            "test-host",
-            "--provider-status",
-            "allowed",
-            "--data-allowed",
-        )
-        self.assertEqual(explicit.returncode, 2, explicit.stderr or explicit.stdout)
-        payload = json.loads(explicit.stdout)
-        self.assertFalse(payload["route_eligible"])
-        self.assertIn("cannot be overridden", " ".join(payload["errors"]))
+        self.assertEqual(result.returncode, 2, result.stderr or result.stdout)
+        self.assertIn("not declared", result.stdout)
 
     def test_preflight_enforces_surface_thinking_and_terra_opt_in(self) -> None:
         thread_low = self.run_preflight(
@@ -570,8 +571,11 @@ class SkillContractTests(unittest.TestCase):
         )
         self.assertEqual(sol_fast_explicit.returncode, 0, sol_fast_explicit.stdout)
         self.assertEqual(
-            json.loads(sol_fast_explicit.stdout)["runtime_evidence"]["service_tier"],
-            "priority",
+            json.loads(sol_fast_explicit.stdout)["runtime_evidence"]["runtime_model"],
+            "gpt-5.6-sol-fast",
+        )
+        self.assertIsNone(
+            json.loads(sol_fast_explicit.stdout)["runtime_evidence"]["service_tier"]
         )
 
     def test_preflight_emits_app_speed_evidence_only_when_live_schema_accepts_it(self) -> None:
@@ -601,7 +605,7 @@ class SkillContractTests(unittest.TestCase):
         catalog = {
             "models": [
                 {
-                    "slug": "xai/grok-4.5",
+                    "slug": "gpt-5.6-sol",
                     "supported_reasoning_levels": [{"effort": "medium"}],
                 }
             ]
@@ -611,7 +615,7 @@ class SkillContractTests(unittest.TestCase):
             path.write_text(json.dumps(catalog), encoding="utf-8")
             result = self.run_preflight(
                 "--model",
-                "xai/grok-4.5",
+                "gpt-5.6-sol",
                 "--thinking",
                 "high",
                 "--catalog",
@@ -683,7 +687,7 @@ class SkillContractTests(unittest.TestCase):
         try:
             result = self.run_preflight(
                 "--model",
-                "xai/grok-4.5",
+                "gpt-5.6-sol",
                 "--thinking",
                 "high",
                 "--probe-url",
@@ -696,7 +700,7 @@ class SkillContractTests(unittest.TestCase):
                 "--surface",
                 "native_subagent",
                 "--model",
-                "xai/grok-4.5",
+                "gpt-5.6-sol",
                 "--thinking",
                 "high",
                 "--probe-url",
@@ -723,7 +727,7 @@ class SkillContractTests(unittest.TestCase):
     def test_preflight_rejects_remote_probe_url_before_credential_lookup(self) -> None:
         result = self.run_preflight(
             "--model",
-            "xai/grok-4.5",
+            "gpt-5.6-sol",
             "--thinking",
             "high",
             "--provider-status",
@@ -762,7 +766,7 @@ class SkillContractTests(unittest.TestCase):
         thread.start()
         common = (
             "--model",
-            "xai/grok-4.5",
+            "gpt-5.6-sol",
             "--thinking",
             "high",
             "--provider-status",
@@ -828,10 +832,18 @@ class SkillContractTests(unittest.TestCase):
         speed: str | None = None,
         **overrides: object,
     ) -> dict[str, object]:
+        runtime_model = (
+            "gpt-5.6-sol-fast"
+            if model == "gpt-5.6-sol" and speed == "fast"
+            else "gpt-5.6-sol-standard"
+            if model == "gpt-5.6-sol"
+            else model
+        )
         evidence: dict[str, object] = {
             "kind": "live_spawn_schema",
             "surface": "native_subagent",
             "model": model,
+            "runtime_model": runtime_model,
             "thinking": thinking,
             "accepted": True,
             "host": "test-host",
@@ -839,7 +851,16 @@ class SkillContractTests(unittest.TestCase):
         }
         if speed is not None:
             evidence["speed"] = speed
-            evidence["service_tier"] = "priority" if speed == "fast" else None
+            evidence["service_tier"] = (
+                "priority" if speed == "fast" and runtime_model == model else None
+            )
+        if model == "grok-4.6":
+            evidence["tool_probe"] = {
+                "kind": "codex_tool_sequence",
+                "accepted": True,
+                "proxy_version": "7.2.130",
+                "minimum_proxy_version": "7.2.130",
+            }
         evidence.update(overrides)
         return evidence
 
@@ -872,6 +893,7 @@ class SkillContractTests(unittest.TestCase):
         candidate: dict[str, object] = {
             "surface": "native_subagent",
             "model": model,
+            "runtime_model": self.live_spawn_evidence(model, thinking)["runtime_model"],
             "thinking": thinking,
             "runtime_evidence": self.live_spawn_evidence(model, thinking),
         }
@@ -880,15 +902,15 @@ class SkillContractTests(unittest.TestCase):
 
     def test_route_plan_validator_enforces_order_provider_and_thinking(self) -> None:
         plan = {
-            "task_class": "DEEP_AGENTIC_CODE",
+            "task_class": "DEFAULT_GENERAL",
             "minimum_thinking": "high",
-            "provider_allowlist": ["xai", "openai"],
-            "provider_status": {"xai": "allowed", "openai": "allowed"},
-            "data_allowed_providers": ["xai", "openai"],
+            "provider_allowlist": ["openai"],
+            "provider_status": {"openai": "allowed"},
+            "data_allowed_providers": ["openai"],
             "explicit_user_request": False,
             "risk_acknowledged": False,
             "candidates": [
-                {"model": "xai/grok-4.5", "thinking": "high"},
+                {"model": "gpt-5.6-luna", "thinking": "xhigh"},
                 {"model": "gpt-5.6-sol", "thinking": "high"},
             ],
             "max_worker_threads": 2,
@@ -904,14 +926,14 @@ class SkillContractTests(unittest.TestCase):
 
     def test_route_plan_validator_accepts_one_declared_worker(self) -> None:
         plan = {
-            "task_class": "DEEP_AGENTIC_CODE",
+            "task_class": "DEFAULT_GENERAL",
             "minimum_thinking": "high",
-            "provider_allowlist": ["xai"],
-            "provider_status": {"xai": "allowed"},
-            "data_allowed_providers": ["xai"],
+            "provider_allowlist": ["openai"],
+            "provider_status": {"openai": "allowed"},
+            "data_allowed_providers": ["openai"],
             "explicit_user_request": True,
             "risk_acknowledged": True,
-            "candidates": [{"model": "xai/grok-4.5", "thinking": "high"}],
+            "candidates": [{"model": "gpt-5.6-sol", "thinking": "high"}],
             "max_worker_threads": 1,
             "max_followups_per_thread": 1,
         }
@@ -1314,7 +1336,8 @@ class SkillContractTests(unittest.TestCase):
             "role": "scout",
             "model": "gpt-5.6-sol",
             "requested_model": "gpt-5.6-sol",
-            "platform_accepted_model": "gpt-5.6-sol",
+            "runtime_model": "gpt-5.6-sol-standard",
+            "platform_accepted_model": "gpt-5.6-sol-standard",
             "observed_runtime_model": "unknown",
             "thinking": "high",
             "route_plan": {},
@@ -1702,6 +1725,7 @@ class SkillContractTests(unittest.TestCase):
         for override, message in (
             ({"fork_mode": "inherited"}, "must use fresh context"),
             ({"platform_accepted_model": "gpt-5.6-terra"}, "accepted model mismatch"),
+            ({"runtime_model": "gpt-5.6-terra"}, "runtime model mismatch"),
             ({"observed_runtime_model": "gpt-5.6-terra"}, "observed model mismatch"),
         ):
             with self.subTest(override=override):

@@ -9,12 +9,12 @@ fallback 的目标是让任务可恢复，同时保持模型、数据边界和�
 ```json
 {
   "schema_version": "2.1",
-  "task_class": "DEEP_AGENTIC_CODE",
+  "task_class": "DEFAULT_GENERAL",
   "risk": "medium",
   "minimum_thinking": "high",
-  "provider_allowlist": ["xai", "openai"],
-  "provider_status": {"xai": "allowed", "openai": "allowed"},
-  "data_allowed_providers": ["xai", "openai"],
+  "provider_allowlist": ["openai"],
+  "provider_status": {"openai": "allowed"},
+  "data_allowed_providers": ["openai"],
   "explicit_user_request": false,
   "risk_acknowledged": false,
   "candidates": [
@@ -28,7 +28,7 @@ fallback 的目标是让任务可恢复，同时保持模型、数据边界和�
 
 `max_worker_threads` 必须等于已声明候选数：只有一个候选且失败后由主 Agent 接管时写 `1`；声明一个 fallback 候选时写 `2`。它不能为未来未声明的模型预留空位。旧计划省略版本/`surface/speed` 时兼容解释为 legacy App Thread Standard；新计划必须显式写 `schema_version: "2.1"`、Surface 和 speed。
 
-候选链不能包含循环、Ultra、低于 `minimum_thinking` 的降级，或 Provider 策略不允许的目标。非 blocked 的 manual-only 模型只能出现在用户明确点名的 RoutePlan 首项，不能作为静默 fallback；当前 Gemini Antigravity registry entry 因 terms blocked 会被 validator 拒绝。
+候选链不能包含循环、Ultra、低于 `minimum_thinking` 的降级，或 Provider 策略不允许的目标。opt-in 模型只能出现在用户明确点名的 RoutePlan 首项，不能作为静默 fallback；AntiGravity 已从 registry 删除。
 
 concrete RoutePlan 必须通过 `scripts/validate_route_plan.py`。画像名不是执行依据；真正派遣使用验证后的有序 `candidates` 数组。
 
@@ -48,7 +48,7 @@ App Thread 健康判断分为五层：
 
 成功缓存只参与候选排序，不保证下一次调用成功。建议在当前 run ledger 中对精确 `account-scope/host/surface/model/thinking/speed/tool-signature/App-version` 保存 10 分钟正向证据；不要为此创建新的全局状态事实源。
 
-原生 Subagent 使用更短的控制面：`PLANNED → SPAWN_PENDING → RUNNING → COMPLETED/FAILED → CLOSED`。它只用于显式请求或预声明 fallback，live spawn schema 必须接受精确 `model/reasoning_effort/speed`。当前 Luna 不在官方原生 V2 live schema 中；Sol 必须 High 以上，默认 Standard，用户明确请求 Fast 时还必须有 `service_tier=priority` 的 tuple-bound live 证据。V1 使用 `fork_context=false`，V2 使用 `fork_turns="none"`。返回 agent id 只证明 Worker 已创建；平台未回显实际模型或速度时，对应 observed 字段仍写 `unknown`。详见 [原生 Subagent 生命周期](native-subagent-lifecycle.md)。
+原生 Subagent 使用更短的控制面：`PLANNED → SPAWN_PENDING → RUNNING → COMPLETED/FAILED → CLOSED`。它只用于显式请求或预声明 fallback，live spawn schema 必须接受精确 `runtime_model/reasoning_effort/speed`。当前 Luna 不在官方原生 V2 live schema 中；Sol 必须 High 以上，Standard/Fast 分别使用 registry 的原生别名。Grok 4.6 必须显式请求且通过工具序列门。V1 使用 `fork_context=false`，V2 使用 `fork_turns="none"`。返回 agent id 只证明 Worker 已创建；平台未回显实际模型或速度时，对应 observed 字段仍写 `unknown`。详见 [原生 Subagent 生命周期](native-subagent-lifecycle.md)。
 
 ## 错误分类
 
@@ -60,6 +60,7 @@ App Thread 健康判断分为五层：
 | 创建超时/实体化歧义 | host + App 初始化链 | 用唯一 task id 有界查询；唯一稳定匹配则恢复，零/多匹配则进入 `UNKNOWN` | 两次近期故障后短暂隔离 |
 | MCP 初始化失败 | workspace + tool signature | 必需 MCP 失败时主 Agent 接管或阻塞；可选 MCP 只走预声明无 MCP 路径 | 按工具签名隔离，不归咎全部模型 |
 | 代理协议错误 | host/model/protocol version | 不重打同协议路径；进入预声明下一 provider | 立即隔离该协议组合，版本变化后复验 |
+| 工具参数/类型错误 | host/model/proxy version/tool signature | 先升级或回退代理版本并重跑有序工具探针；仍失败则进入下一候选 | 版本变化或完整工具探针通过后解除 |
 | 语义 canary 不匹配 | provider/model/protocol | 原组合复测一次；第二次仍不匹配才进入下一候选 | 连续两次失败后 10 分钟 |
 | 完整输出质量不足 | model/thinking/task class | 原 Thread 定向追问一次；仍失败才创建第二 Worker | 不触发基础设施熔断，进入任务类质量隔离 |
 
@@ -82,6 +83,7 @@ App Thread 健康判断分为五层：
 ## 禁止行为
 
 - 失败后临时选择“当前看起来最健康”的任意模型。
+- `create_thread` 拒绝显式模型或 thinking 后删掉字段重试；省略会继承用户默认模型，造成不可审计的静默换模。
 - 对同一组合进行无界重试。
 - 静默降低 `thinking` 或扩大 provider allowlist。
 - 绕过 RoutePlan 临时打开 Fast，或把请求/接受的 Fast 冒充 observed Fast。

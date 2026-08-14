@@ -7,6 +7,7 @@
 - 确认 `codex_app__list_projects`、`codex_app__create_thread`、`codex_app__list_threads`、`codex_app__read_thread`、`codex_app__send_message_to_thread` 和 `codex_app__set_thread_archived` 可用。
 - 从 `model-registry.json`、`routing-policy.md` 和 `provider-policy.md` 取得精确 `model`、`thinking`、`speed`、候选链与 Provider 门。
 - live `create_thread` 工具元数据只验证当前 host 接受性，不能覆盖 registry 的 automatic/manual-only 策略。没有显式速度参数时 App Thread 只能按 Standard 路由；Fast 必须有 `speed_evidence`。
+- App `create_thread` 必须使用 registry 的 `surface_runtime_models.app_thread` 精确 ID。Sol 一律传原生 `gpt-5.6-sol`；`gpt-5.6-sol-standard` / `gpt-5.6-sol-fast` 仅属于原生 Subagent Surface。
 - 任务包声明任何工作区输出路径时，先用 `list_projects` 取得匹配 `projectId` 并使用 project local；纯聊天交付才可 projectless。
 - 为每次 creation attempt 生成唯一 `task_id`，写入 ledger 和任务包。
 
@@ -19,10 +20,13 @@ Skill 包提供无依赖静态检查器：
 ```bash
 python3 scripts/model_preflight.py \
   --surface app_thread \
-  --model xai/grok-4.5 \
+  --model grok-4.6 \
   --thinking high \
-  --catalog "${CODEX_HOME:-$HOME/.codex}/cliproxyapi-catalog.json" \
   --runtime-confirmed \
+  --tool-probe-confirmed \
+  --proxy-version 7.2.130 \
+  --explicit-user-request \
+  --host <host> \
   --provider-status allowed \
   --data-allowed
 ```
@@ -38,7 +42,7 @@ python3 scripts/model_preflight.py \
 ```bash
 python3 scripts/model_preflight.py \
   --surface app_thread \
-  --model xai/grok-4.5 \
+  --model grok-4.6 \
   --thinking high \
   --provider-status allowed \
   --data-allowed \
@@ -63,11 +67,12 @@ python3 scripts/validate_route_plan.py /path/to/route-plan.json
 ## 创建与实体化
 
 1. 调用 `create_thread` 前递增 root worker attempt、兼容字段 creation attempt 与 subtask attempt，写入 `surface: app_thread`、`thread_id: null`、`pending_worktree_id: null`、`control_state: PLANNED` 的完整审计记录。
-2. 调用开始时更新为 `CREATION_PENDING`，显式传入任务包、模型、thinking 和目标环境；只有 live schema 已证明速度参数时才传 Fast，否则使用 Standard。
-3. 返回 `threadId`、`pendingWorktreeId`、超时或未知形状时，严格按 `thread-supervision-protocol.md` 分类和恢复。
-4. `pendingWorktreeId` 不是正式 Thread id；只有唯一 task id 查询、正式读取和稳定观察通过后才进入 `CONTROL_READY`。
-5. 当前 turn 出现首个 assistant-originated reasoning/message 或模型工具调用时进入 `DATA_READY`。user message、Thread 元数据、客户端提示和 MCP 初始化错误不计入。
-6. 同组合探针通过后按 TeamPlan 档位新增任务：`standard` 每波最多 3 个，具备扩容理由且 live host 容量允许的 `expanded` 每波最多 6 个，防止新会话同时初始化 MCP 造成拥塞。
+2. 调用开始时更新为 `CREATION_PENDING`，显式传入任务包、runtime model、thinking 和目标环境；只有 live schema 已证明速度参数时才传 Fast，否则使用 Standard。
+3. `create_thread` 若拒绝显式模型或 thinking，把它分类为该精确组合失败；只能进入派遣前声明的下一候选或由主 Agent 接管。绝对不能删掉 `model/thinking` 重试，因为省略字段会继承用户默认模型，可能把 Sol 任务静默变成 DeepSeek。
+4. 返回 `threadId`、`pendingWorktreeId`、超时或未知形状时，严格按 `thread-supervision-protocol.md` 分类和恢复。
+5. `pendingWorktreeId` 不是正式 Thread id；只有唯一 task id 查询、正式读取和稳定观察通过后才进入 `CONTROL_READY`。
+6. 当前 turn 出现首个 assistant-originated reasoning/message 或模型工具调用时进入 `DATA_READY`。user message、Thread 元数据、客户端提示和 MCP 初始化错误不计入。
+7. 同组合探针通过后按 TeamPlan 档位新增任务：`standard` 每波最多 3 个，具备扩容理由且 live host 容量允许的 `expanded` 每波最多 6 个，防止新会话同时初始化 MCP 造成拥塞。
 
 `DATA_READY` 与模型/速度身份分开；没有真实回显时，`observed_runtime_model` 与 `observed_runtime_speed` 保持 `unknown`。
 

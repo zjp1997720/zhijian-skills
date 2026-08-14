@@ -6,11 +6,10 @@
 - “这个 Skill 涉及路由、脚本、评测和文档，直接实现并验证。”
 - “并行检查三个模块的回归，再由主 Agent 修复和验收。”
 - “用 Deep Research 调研四个子主题，研究文件写入 vault，最后串行做引用核查和对抗审查。”
-- “把复杂编码 Worker 优先交给 Grok 4.5，失败时由 Sol 接管。”
+- “明确把复杂编码 Worker 交给 Grok 4.6，失败时由 Sol 接管。”
 - “明确让两个 Sol High 原生 Subagent 分别检查实现和测试，结果回到父任务集成。”
 - “默认用 Luna XHigh App Thread 完成三个边界清晰的实现，高风险任务升 Luna Max。”
 - “把耐久调研放到 App Thread；原生精确组合不可用时按预声明链切换 Surface。”
-- “明确使用 Gemini 3.6 Flash 做多模态扫描，并检查当前接入路径能否合规派遣。”
 
 ## 不应触发
 
@@ -18,7 +17,7 @@
 - “把这个标题改短一点。”
 - “查看当前 Git 状态。”
 - “帮我发布、付款或删除账号。”
-- “没有点名 Gemini，把所有低风险任务自动发给 Antigravity。”
+- “没有点名 Grok，把所有低风险任务自动发给 Grok 4.6。”
 
 ## 最小行为回归
 
@@ -42,9 +41,9 @@ Prompt：CE Plan 已定义 U1/U2、Dependencies、Files 和 Verification，请�
 
 ### Happy path
 
-Prompt：使用 Grok 4.5 实现复杂模块，再让另一个模型独立审查，最后由主 Agent 集成。
+Prompt：明确使用 Grok 4.6 实现复杂模块，再让另一个模型独立审查，最后由主 Agent 集成。
 
-应出现：`DEEP_AGENTIC_CODE`；Grok High → Sol High 的固定候选链；不同 provider 的审查；单写者；默认 6/8/3，满足扩容门时可用 12/16/6；主 Agent 最终验收。
+应出现：`DEEP_AGENTIC_CODE_EXPLICIT`；Grok High → Sol High 的固定候选链；Grok 先通过 CLIProxyAPI 版本、多智能体协议和有序工具序列探针；不同 provider 的审查；单写者；默认 6/8/3，满足扩容门时可用 12/16/6；主 Agent 最终验收。
 
 ### Native exact-model happy path
 
@@ -153,8 +152,8 @@ Prompt：一个 `task_intent=inspect` Worker 想顺手修改源文件，mutation
 - 派遣前显示 Worker 数量、Surface、精确模型、thinking、speed、职责、有序 fallback 和 reserved slots。
 - `governed` App Thread 是自动默认；`native-light` 仅用于显式原生或预声明 fallback，RoutePlan 与 ledger 可从 stdin 校验且不创建 `agent_team/`。
 - registry 决定策略允许范围；live runtime 只验证当前 host 接受性。
-- Gemini Antigravity 未被用户明确点名时不进入自动候选或 fallback；当前第三方登录 terms blocked 时，即使明确点名也不创建。
-- Grok 只在 runtime/provider 门通过后自动使用。
+- AntiGravity 不在 registry，不进入候选或 fallback。
+- Grok 4.6 只在用户明确点名，并通过 runtime/provider/CLIProxyAPI 版本/工具序列门后使用。
 - 每个新 `host/surface/model/thinking/speed/tool-signature` 的首个真实业务 Worker 独立通过对应生命周期健康门；一个组合的健康不外推到另一个组合。
 - 所有提示词含唯一 task id、task intent、mutation authority、完整任务包与禁止下级委派。
 - 两个及以上 Worker 派遣前必须有通过校验的 TeamPlan；每个 Worker 记录 `unit_id/team_plan_revision`，并恰好关联一份 Task Packet 和 RoutePlan。
