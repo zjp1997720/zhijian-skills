@@ -61,7 +61,7 @@
         "commands": [
           "python3 -m unittest tests.skills.test_codex_model_routing_team -v"
         ],
-        "live_smoke": "Validate both a standard two-unit TeamPlan and a justified expanded TeamPlan; run one Luna XHigh App Fast canary with live priority evidence, confirm native V2 rejects or omits Luna, confirm Sol Medium is rejected, and confirm Sol Fast requires explicit request plus tuple-bound live evidence; record TeamPlan profile/unit/revision and requested, accepted, and observed model and speed identity separately"
+        "live_smoke": "Validate both a standard two-unit TeamPlan and a justified expanded TeamPlan; verify App Sol compiles to gpt-5.6-sol without omit-field fallback, verify native Sol compiles to its Standard/Fast alias, and require CLIProxyAPI 7.2.130 plus an ordered tool-sequence probe for explicit Grok 4.6; record TeamPlan profile/unit/revision and requested, runtime, accepted, and observed model and speed identity separately"
       },
       "capabilities": {
         "network": "required",

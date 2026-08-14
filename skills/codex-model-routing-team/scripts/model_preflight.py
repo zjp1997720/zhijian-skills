@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from route_policy import supported_thinking
+from route_policy import runtime_model_id, supported_thinking, version_tuple
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
@@ -231,6 +231,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--catalog", type=Path)
     parser.add_argument("--runtime-confirmed", action="store_true")
     parser.add_argument(
+        "--tool-probe-confirmed",
+        action="store_true",
+        help="Confirm that the current host passed the required Codex tool-sequence probe.",
+    )
+    parser.add_argument(
+        "--proxy-version",
+        help="CLIProxyAPI semantic version reported by the bridge audit.",
+    )
+    parser.add_argument(
         "--service-tier-confirmed",
         action="store_true",
         help="Confirm that the live Surface schema accepted service_tier=priority.",
@@ -262,6 +271,7 @@ def main() -> int:
         "speed": args.speed,
         "service_tier": "priority" if args.speed == "fast" else None,
         "surface": args.surface,
+        "runtime_model": None,
         "registry_eligible": False,
         "runtime_status": "unknown",
         "runtime_evidence": None,
@@ -302,6 +312,10 @@ def main() -> int:
         registry.get("policy", {}).get("app_thread_only_models", [])
     )
     registry_thinking = supported_thinking(entry, args.surface)
+    runtime_model = runtime_model_id(entry, args.surface, args.speed)
+    result["runtime_model"] = runtime_model
+    if runtime_model is None:
+        result["errors"].append("no runtime model is declared for this Surface and speed")
     if args.surface == "native_subagent" and args.model in app_thread_only_models:
         result["errors"].append("model is App Thread only in the current routing policy")
     if args.thinking in forbidden:
@@ -322,10 +336,28 @@ def main() -> int:
         result["errors"].append("--service-tier-confirmed requires --speed fast")
     if args.service_tier_confirmed and not args.runtime_confirmed:
         result["errors"].append("--service-tier-confirmed requires --runtime-confirmed")
-    if args.speed == "fast" and args.runtime_confirmed and not args.service_tier_confirmed:
+    speed_uses_runtime_alias = runtime_model is not None and runtime_model != args.model
+    if (
+        args.speed == "fast"
+        and args.runtime_confirmed
+        and not speed_uses_runtime_alias
+        and not args.service_tier_confirmed
+    ):
         result["errors"].append(
             "Fast runtime confirmation requires --service-tier-confirmed"
         )
+    if entry.get("tool_probe_required") is True and not args.tool_probe_confirmed:
+        result["errors"].append("this model requires a current Codex tool-sequence probe")
+    if args.tool_probe_confirmed and not args.runtime_confirmed:
+        result["errors"].append("--tool-probe-confirmed requires --runtime-confirmed")
+    minimum_proxy_version = entry.get("minimum_proxy_version")
+    if entry.get("tool_probe_required") is True and args.tool_probe_confirmed:
+        actual_version = version_tuple(args.proxy_version)
+        minimum_version = version_tuple(minimum_proxy_version)
+        if actual_version is None:
+            result["errors"].append("tool probe confirmation requires --proxy-version")
+        elif minimum_version is None or actual_version < minimum_version:
+            result["errors"].append("CLIProxyAPI is below the model tool-compatibility floor")
     result["registry_eligible"] = not result["errors"]
     result["checks"]["registry"] = {
         "status": entry.get("status"),
@@ -373,7 +405,7 @@ def main() -> int:
     catalog_declared = False
     if args.catalog and not result["errors"]:
         try:
-            catalog_entry = find_catalog_model(load_json(args.catalog), args.model)
+            catalog_entry = find_catalog_model(load_json(args.catalog), runtime_model or args.model)
         except (OSError, json.JSONDecodeError) as exc:
             result["errors"].append(f"catalog load failed: {exc}")
             catalog_entry = None
@@ -406,13 +438,25 @@ def main() -> int:
                 "kind": "live_spawn_schema",
                 "surface": args.surface,
                 "model": args.model,
+                "runtime_model": runtime_model,
                 "thinking": args.thinking,
                 "speed": args.speed,
-                "service_tier": "priority" if args.speed == "fast" else None,
+                "service_tier": (
+                    "priority"
+                    if args.speed == "fast" and not speed_uses_runtime_alias
+                    else None
+                ),
                 "accepted": True,
                 "host": args.host,
                 "checked_at": result["checked_at"],
             }
+            if entry.get("tool_probe_required") is True:
+                result["runtime_evidence"]["tool_probe"] = {
+                    "kind": "codex_tool_sequence",
+                    "accepted": args.tool_probe_confirmed,
+                    "proxy_version": args.proxy_version,
+                    "minimum_proxy_version": minimum_proxy_version,
+                }
         elif args.speed == "fast":
             result["speed_evidence"] = {
                 "kind": "live_create_schema",

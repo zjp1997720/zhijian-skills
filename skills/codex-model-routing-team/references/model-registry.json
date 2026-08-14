@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.1.0",
-  "updated_at": "2026-08-04",
+  "schema_version": "2.2.0",
+  "updated_at": "2026-08-14",
   "policy": {
     "runtime_metadata_role": "validate_only",
     "unknown_model_action": "reject",
@@ -80,6 +80,16 @@
         "native_subagent": ["high", "xhigh", "max"],
         "app_thread": ["high", "xhigh", "max"]
       },
+      "surface_runtime_models": {
+        "native_subagent": {
+          "standard": "gpt-5.6-sol-standard",
+          "fast": "gpt-5.6-sol-fast"
+        },
+        "app_thread": {
+          "standard": "gpt-5.6-sol",
+          "fast": "gpt-5.6-sol"
+        }
+      },
       "roles": ["native_worker", "native_smart_worker", "architecture", "hard_debugging", "critical_review", "arbitration", "fallback_deep"],
       "provider_policy": "openai_baseline",
       "terms_default": "allowed"
@@ -99,32 +109,25 @@
       "terms_default": "allowed"
     },
     {
-      "id": "xai/grok-4.5",
+      "id": "grok-4.6",
       "provider": "xai",
-      "status": "conditional",
-      "automatic": true,
-      "thinking": ["low", "medium", "high"],
+      "status": "opt_in",
+      "automatic": false,
+      "thinking": ["low", "medium", "high", "xhigh"],
       "surface_thinking": {
-        "native_subagent": ["low", "medium", "high"],
-        "app_thread": ["low", "medium", "high"]
+        "native_subagent": ["low", "medium", "high", "xhigh"],
+        "app_thread": []
       },
-      "roles": ["agentic_code", "terminal_work", "independent_review", "technical_analysis", "cross_provider_challenger"],
+      "surface_runtime_models": {
+        "native_subagent": {
+          "standard": "grok-4.6"
+        }
+      },
+      "tool_probe_required": true,
+      "minimum_proxy_version": "7.2.130",
+      "roles": ["explicit_agentic_code", "explicit_terminal_work", "independent_review", "technical_analysis", "cross_provider_challenger"],
       "provider_policy": "xai_conditional",
       "terms_default": "unknown"
-    },
-    {
-      "id": "antigravity/gemini-3.6-flash",
-      "provider": "google-antigravity",
-      "status": "manual_only",
-      "automatic": false,
-      "thinking": ["low", "medium", "high"],
-      "surface_thinking": {
-        "native_subagent": ["low", "medium", "high"],
-        "app_thread": ["low", "medium", "high"]
-      },
-      "roles": ["fast_breadth", "long_context_scan", "multimodal_analysis", "structured_extraction"],
-      "provider_policy": "google_antigravity_manual_only",
-      "terms_default": "blocked"
     }
   ]
 }

@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from validate_team_plan import validate_team_plan_payload
+from route_policy import runtime_model_id
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
@@ -190,6 +191,11 @@ def main() -> int:
         return 2
 
     policy = registry.get("policy", {}) if isinstance(registry, dict) else {}
+    registry_models = {
+        item["id"]: item
+        for item in registry.get("models", [])
+        if isinstance(item, dict) and isinstance(item.get("id"), str)
+    }
     default_profile = policy.get("default_team_limit_profile", "standard")
     profiles = policy.get("team_limit_profiles", {})
     default_limits = (
@@ -440,15 +446,23 @@ def main() -> int:
             requested_model = record.get("requested_model")
             if not nonempty_string(requested_model) or record.get("model") != requested_model:
                 result["errors"].append(f"{prefix} requested model mismatch")
+            entry = registry_models.get(requested_model, {})
+            expected_runtime_model = runtime_model_id(
+                entry,
+                "native_subagent",
+                record.get("requested_speed", "standard"),
+            )
+            if record.get("runtime_model") != expected_runtime_model:
+                result["errors"].append(f"{prefix} runtime model mismatch")
             accepted_model = record.get("platform_accepted_model")
             if state in {"RUNNING", "COMPLETED", "FAILED", "CLOSED"}:
-                if not nonempty_string(accepted_model) or accepted_model != requested_model:
+                if not nonempty_string(accepted_model) or accepted_model != expected_runtime_model:
                     result["errors"].append(f"{prefix} accepted model mismatch")
             observed_model = record.get("observed_runtime_model")
             if (
                 observed_model is not None
                 and observed_model != "unknown"
-                and observed_model != requested_model
+                and observed_model not in {requested_model, expected_runtime_model}
             ):
                 result["errors"].append(f"{prefix} observed model mismatch")
             validate_speed_identity(

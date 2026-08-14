@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from route_policy import KNOWN_SURFACES, supported_thinking
+from route_policy import KNOWN_SURFACES, runtime_model_id, supported_thinking, version_tuple
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
@@ -42,6 +42,9 @@ def valid_runtime_evidence(
     thinking: str,
     speed: str,
     strict_speed: bool,
+    runtime_model: str,
+    tool_probe_required: bool,
+    minimum_proxy_version: str | None,
     now: datetime,
 ) -> tuple[bool, str | None]:
     if not isinstance(evidence, dict):
@@ -50,11 +53,14 @@ def valid_runtime_evidence(
         "kind": "live_spawn_schema",
         "surface": "native_subagent",
         "model": model,
+        "runtime_model": runtime_model,
         "thinking": thinking,
     }
     if strict_speed or speed == "fast":
         expected["speed"] = speed
-        expected["service_tier"] = "priority" if speed == "fast" else None
+        expected["service_tier"] = None if runtime_model != model else (
+            "priority" if speed == "fast" else None
+        )
     if (
         any(evidence.get(key) != value for key, value in expected.items())
         or evidence.get("accepted") is not True
@@ -77,6 +83,18 @@ def valid_runtime_evidence(
         return False, "native runtime evidence is stale"
     if age < -timedelta(minutes=1):
         return False, "native runtime evidence is dated in the future"
+    if tool_probe_required:
+        tool_probe = evidence.get("tool_probe")
+        if not isinstance(tool_probe, dict) or tool_probe.get("kind") != "codex_tool_sequence":
+            return False, "native runtime evidence lacks the required Codex tool-sequence probe"
+        if tool_probe.get("accepted") is not True:
+            return False, "required Codex tool-sequence probe did not pass"
+        if tool_probe.get("minimum_proxy_version") != minimum_proxy_version:
+            return False, "Codex tool-sequence probe uses the wrong proxy compatibility floor"
+        actual_version = version_tuple(tool_probe.get("proxy_version"))
+        minimum_version = version_tuple(minimum_proxy_version)
+        if actual_version is None or minimum_version is None or actual_version < minimum_version:
+            return False, "Codex tool-sequence probe uses an incompatible proxy version"
     return True, None
 
 
@@ -254,6 +272,14 @@ def main() -> int:
                 "native first candidate requires explicit_user_request; automatic routes default to App Thread"
             )
         entry = models[model_id]
+        runtime_model = runtime_model_id(entry, surface, speed)
+        if runtime_model is None:
+            result["errors"].append(
+                f"candidate {index} has no runtime model for this Surface and speed"
+            )
+            continue
+        if "runtime_model" in candidate and candidate.get("runtime_model") != runtime_model:
+            result["errors"].append(f"candidate {index} declares the wrong runtime model")
         surface_thinking = supported_thinking(entry, surface)
         if not isinstance(thinking, str) or thinking not in surface_thinking:
             result["errors"].append(f"candidate {index} uses unsupported thinking")
@@ -267,6 +293,9 @@ def main() -> int:
                 thinking=thinking,
                 speed=speed,
                 strict_speed=strict_route_plan,
+                runtime_model=runtime_model,
+                tool_probe_required=entry.get("tool_probe_required") is True,
+                minimum_proxy_version=entry.get("minimum_proxy_version"),
                 now=now,
             )
             if not evidence_valid:
@@ -292,6 +321,7 @@ def main() -> int:
             {
                 "surface": surface,
                 "model": model_id,
+                "runtime_model": runtime_model,
                 "thinking": thinking,
                 "speed": speed,
                 "runtime_evidence": runtime_evidence,

@@ -3,22 +3,12 @@
   "evals": [
     {
       "id": "grok-agentic-code",
-      "prompt": "把复杂编码任务优先交给 Grok 4.5；它不可用时由最稳的模型接管。",
-      "expected_output": "选择 DEEP_AGENTIC_CODE，预声明 xai/grok-4.5 high → gpt-5.6-sol high；先过 runtime/provider 门；每子任务最多两个 Worker Thread。"
-    },
-    {
-      "id": "gemini-manual-only",
-      "prompt": "没有指定模型，把所有高速资料扫描任务自动交给 Gemini 3.6 Flash。",
-      "expected_output": "拒绝自动使用 antigravity/gemini-3.6-flash；说明 manual-only 且当前 terms blocked；使用 Luna 基线或主任务。"
-    },
-    {
-      "id": "gemini-explicit",
-      "prompt": "我明确要求 Gemini 3.6 Flash 高速扫描这批公开文档，失败后用 Luna。",
-      "expected_output": "记录显式用户请求、风险确认和 public 数据；识别当前 antigravity 第三方登录 terms blocked；不创建 Gemini Thread；建议配置正式 Gemini API/Vertex registry entry，或从 Luna 开始。"
+      "prompt": "明确把复杂编码任务交给 Grok 4.6；它不可用时由最稳的模型接管。",
+      "expected_output": "选择 DEEP_AGENTIC_CODE_EXPLICIT，预声明 grok-4.6 high → gpt-5.6-sol high；先过 runtime/provider/CLIProxyAPI 版本/工具序列门；每子任务最多两个 Worker。"
     },
     {
       "id": "semantic-canary-transient",
-      "prompt": "Gemini canary 第一次 HTTP 200 但返回了无关答案，第二次精确回显 nonce。",
+      "prompt": "Grok canary 第一次 HTTP 200 但返回了无关答案，第二次精确回显 nonce。",
       "expected_output": "第一次记 transient 并复测一次；第二次通过后可继续但保留异常记录；不因一次语义失败打开熔断。"
     },
     {
@@ -74,7 +64,7 @@
     {
       "id": "sol-fast-explicit-gate",
       "prompt": "让 Sol XHigh 使用原生 Fast。",
-      "expected_output": "自动 RoutePlan 静态拒绝，因为 Sol 默认 Standard；只有用户明确要求且当前原生 live schema 接受 service_tier=priority 时才允许 Sol XHigh Fast。"
+      "expected_output": "自动 RoutePlan 静态拒绝，因为 Sol 默认 Standard；只有用户明确要求且当前原生 live schema 接受 gpt-5.6-sol-fast runtime model 时才允许 Sol XHigh Fast。"
     },
     {
       "id": "native-light-four-short-outputs",

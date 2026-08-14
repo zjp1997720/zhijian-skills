@@ -39,15 +39,14 @@
 | Sol High | `app_thread` | `gpt-5.6-sol` | `high` | Standard / 显式 Fast | 高歧义规划、架构、困难调试、高风险判断、关键审查 |
 | Sol X High | `app_thread` | `gpt-5.6-sol` | `xhigh` | Standard / 显式 Fast | 更深推理的关键审查与方案裁决 |
 | Sol Max | `app_thread` | `gpt-5.6-sol` | `max` | Standard / 显式 Fast | 有明确质量理由的最高强度单任务 |
-| Grok Medium/High | 任一已确认 Surface | `xai/grok-4.5` | `medium` / `high` | Standard | 条件自动的技术分析、Agent 执行与异构复核 |
+| Grok 4.6 High/X High | `native_subagent` | `grok-4.6` | `high` / `xhigh` | Standard | 用户明确点名且工具探针通过后的技术分析、Agent 执行与异构复核 |
 | Terra Opt-in | 任一已确认 Surface | `gpt-5.6-terra` | `low`–`max` | Standard / 显式 Fast | 用户明确点名且 live runtime 接受时的 opt-in Worker |
-| Gemini Low/Medium/High | 任一已确认 Surface | `antigravity/gemini-3.6-flash` | `low` / `medium` / `high` | Standard | blocked manual-review 模板，当前不得创建 |
 
-`gpt-5.6-terra` 默认关闭，只能作为用户明确点名的首项候选，不能静默 fallback。Grok 必须通过 runtime/provider 预检。Gemini Antigravity 当前 `terms_default: blocked`；它出现在表中用于解释显式请求和未来迁移。
+`gpt-5.6-terra` 默认关闭，只能作为用户明确点名的首项候选，不能静默 fallback。Grok 4.6 同样是 opt-in，且必须通过 runtime/provider/工具序列预检。AntiGravity 模型已从 registry 删除。
 
 Ultra 永久禁止。不得把成本比例、订阅额度或 TPS 写成未经当前环境验证的固定事实。
 
-`thinking` 是 RoutePlan 的跨 Surface 规范字段，比较顺序为 `low < medium < high < xhigh < max`。原生 spawn 时映射到 `reasoning_effort`；App Thread 创建时映射到 `thinking`。候选必须同时满足该 Surface 的支持范围和 `minimum_thinking`。Luna 自动路由只允许 XHigh/Max；Sol 无论 Surface 都只允许 High/XHigh/Max，Medium/Low 即使用户点名也拒绝。
+`thinking` 是 RoutePlan 的跨 Surface 规范字段，比较顺序为 `low < medium < high < xhigh < max`。原生 spawn 时映射到 `reasoning_effort`；App Thread 创建时映射到 `thinking`。逻辑模型再通过 `surface_runtime_models` 编译为 Surface 实参：App Sol 始终是原生 `gpt-5.6-sol`，原生 Sol Standard/Fast 才分别使用 `gpt-5.6-sol-standard` / `gpt-5.6-sol-fast`。候选必须同时满足该 Surface 的支持范围和 `minimum_thinking`。Luna 自动路由只允许 XHigh/Max；Sol 无论 Surface 都只允许 High/XHigh/Max，Medium/Low 即使用户点名也拒绝。
 
 `speed` 是与模型、推理强度分离的 RoutePlan 字段，取值为 `standard | fast`。Fast 映射为 `service_tier=priority`；Standard 不传该 tier。registry 的 `fast_routing_models` 表示候选资格，`default_fast_models` 表示默认偏好：Luna 默认 Fast，Sol/Terra 默认 Standard，只有用户明确要求时才允许后两者 Fast。`schema_version: "2.1"` 的 RoutePlan 必须显式填写；旧计划省略版本/速度时兼容解释为 Standard。任何 Surface 缺少 tuple-bound live 速度证据时都不能声称或强制 Fast，必须保持 Standard。
 
@@ -62,12 +61,11 @@ Ultra 永久禁止。不得把成本比例、订阅额度或 TPS 写成未经当
 | `DEFAULT_GENERAL` | high | Luna X High App Fast / Standard → Sol High App Thread | 通用耐久研究、写作、编码与验证；无 live Fast 证据时保持 Standard |
 | `HIGH_RISK_GENERAL` | xhigh | Luna Max App Fast / Standard → Sol X High App Thread | 高风险、高歧义与高难执行默认升 Luna Max |
 | `FAST_MECHANICAL` | xhigh | Luna X High App Fast / Standard → Sol High App | live create schema 接受 priority 才用 Fast，否则首项直接写 Standard |
-| `DEEP_AGENTIC_CODE` | high | Grok High → Sol High App Thread | Grok/provider 通过硬门后用于复杂工程执行 |
-| `REVIEW_OPENAI_PRIMARY` | high | Grok High → Sol X High App Thread | OpenAI 主执行后的异构复核 |
+| `DEEP_AGENTIC_CODE_EXPLICIT` | high | Grok 4.6 High → Sol High App Thread | 仅用户明确点名；Grok/provider/工具探针通过硬门后用于复杂工程执行 |
+| `REVIEW_OPENAI_PRIMARY_EXPLICIT` | high | Grok 4.6 High → Sol X High App Thread | 仅用户明确点名的 OpenAI 主执行后异构复核 |
 | `REVIEW_XAI_PRIMARY` | xhigh | Sol X High App Thread → Luna X High App | xAI 主执行后的 OpenAI 复核 |
 | `CRITICAL_ARBITRATION` | xhigh | Sol X High App Thread → Sol Max App Thread | 关键裁决保持 OpenAI 高强度质量下限 |
 | `TERRA_EXPLICIT` | low | Terra Opt-in → Sol High | 仅显式请求；Terra 不可用时走预声明 Sol High 或主 Agent |
-| `GEMINI_EXPLICIT_FAST_BREADTH` | medium | Gemini Medium → Luna X High App | 当前 Antigravity 条款 blocked，不能执行 |
 
 fallback 必须满足最低 `thinking`。首项被静态门排除时，通知应说明从下一项开始，不能伪称运行时失败。Luna XHigh 是默认质量下限，高难/高风险升 Max；Sol 的最低允许强度固定为 High。
 
@@ -77,12 +75,14 @@ fallback 必须满足最低 `thinking`。首项被静态门排除时，通知应
 {
   "surface": "native_subagent",
   "model": "gpt-5.6-sol",
+  "runtime_model": "gpt-5.6-sol-standard",
   "thinking": "high",
   "speed": "standard",
   "runtime_evidence": {
     "kind": "live_spawn_schema",
     "surface": "native_subagent",
     "model": "gpt-5.6-sol",
+    "runtime_model": "gpt-5.6-sol-standard",
     "thinking": "high",
     "speed": "standard",
     "service_tier": null,
