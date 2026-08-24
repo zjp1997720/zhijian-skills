@@ -197,7 +197,7 @@ async function getSogouCookie() {
  * 发起HTTP GET请求
  * @param {string} url - 请求URL
  * @param {string} cookieStr - cookie字符串（可选）
- * @returns {Promise<string>} 响应HTML内容
+ * @returns {Promise<{statusCode: number, headers: Object, text: string}>} 响应
  */
 async function httpGet(url, cookieStr = '') {
   const headers = {
@@ -208,14 +208,25 @@ async function httpGet(url, cookieStr = '') {
     headers['Cookie'] = cookieStr;
   }
 
-  const resp = await requestText({
+  return requestText({
     url,
     headers,
     timeoutMs: 30000,
     retries: 1,
   });
+}
 
-  return resp.text;
+/**
+ * 搜狗限频时会 302 到 /antispider，响应体里没有任何结果。
+ * 不识别它就会被当成「这个关键词没有文章」，是最容易误判的一种失败。
+ */
+class AntispiderError extends Error {}
+
+function isAntispiderBlocked(resp) {
+  if (resp.statusCode >= 300 && resp.statusCode < 400) {
+    return String(resp.headers.location || '').includes('/antispider');
+  }
+  return resp.statusCode === 200 && resp.text.includes('/antispider/');
 }
 
 /**
@@ -635,10 +646,13 @@ async function searchWechatArticles(query, maxResults = 10, resolveRealUrl = fal
       const encodedQuery = encodeURIComponent(query);
       const url = `https://weixin.sogou.com/weixin?query=${encodedQuery}&s_from=input&_sug_=n&type=2&page=${page}&ie=utf8`;
 
-      const html = await httpGet(url, cookieStr);
+      const resp = await httpGet(url, cookieStr);
+      if (isAntispiderBlocked(resp)) {
+        throw new AntispiderError('被搜狗反爬拦截（302 /antispider），并非没有搜索结果。短时间内请求过多所致，等待数分钟后重试，或减少 -n / 放弃 -r');
+      }
 
       const remaining = maxResults - articles.length;
-      const parsed = parseArticlesFromSearchHtml(html, remaining);
+      const parsed = parseArticlesFromSearchHtml(resp.text, remaining);
       if (parsed.length === 0) break;
       articles.push(...parsed);
 
@@ -649,6 +663,8 @@ async function searchWechatArticles(query, maxResults = 10, resolveRealUrl = fal
         await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
       }
     } catch (error) {
+      // 一条都没拿到就被拦截：必须报错退出，否则调用方会把空结果当成「无此关键词」
+      if (error instanceof AntispiderError && articles.length === 0) throw error;
       console.error(`请求第${page}页失败:`, error.message);
       break;
     }
@@ -722,6 +738,8 @@ async function main() {
 // 导出模块供其他脚本使用
 module.exports = {
   searchWechatArticles,
+  isAntispiderBlocked,
+  AntispiderError,
   parseArticlesFromSearchHtml,
   extractRedirectUrlFromHtml,
   parseCliArgs,

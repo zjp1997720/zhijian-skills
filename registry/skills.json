@@ -394,12 +394,12 @@
     {
       "name": "wechat-article-search",
       "lifecycle": "active",
-      "version": "1.0.2",
+      "version": "1.0.3",
       "path": "skills/wechat-article-search",
       "documentation": "docs/skills/wechat-article-search/README.md",
       "documentation_zh": "docs/skills/wechat-article-search/README.zh-CN.md",
       "changelog": "docs/changelogs/wechat-article-search.md",
-      "canonical_tag": "wechat-article-search/v1.0.2",
+      "canonical_tag": "wechat-article-search/v1.0.3",
       "validation": {
         "commands": [
           "npm test --prefix skills/wechat-article-search"
