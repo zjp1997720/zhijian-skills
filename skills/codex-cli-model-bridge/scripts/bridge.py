@@ -1481,8 +1481,37 @@ def probe_prompt(shell: bool, tool_sequence: bool) -> str:
     return "Reply with exactly: CODEX_BRIDGE_OK"
 
 
+def probe_catalog_path(args: argparse.Namespace) -> Path:
+    if args.catalog:
+        return Path(args.catalog).expanduser()
+    if not args.desktop:
+        return DEFAULT_CODEX_HOME / "model-catalog-cli-proxy.json"
+    config_path = Path(args.config).expanduser()
+    config, config_error = load_config(config_path)
+    if config_error:
+        emit(
+            {
+                "status": "blocked",
+                "error": f"cannot read the desktop Codex config: {config_error}",
+                "config": str(config_path),
+            },
+            2,
+        )
+    catalog = config.get("model_catalog_json")
+    if not isinstance(catalog, str) or not catalog.strip():
+        emit(
+            {
+                "status": "blocked",
+                "error": "desktop Codex config has no model_catalog_json; pass --catalog to override",
+                "config": str(config_path),
+            },
+            2,
+        )
+    return Path(catalog).expanduser()
+
+
 def cmd_probe(args: argparse.Namespace) -> None:
-    target_path = Path(args.catalog).expanduser()
+    target_path = probe_catalog_path(args)
     entries = {entry["slug"]: entry for entry in catalog_models(target_path)}
     models = [item.strip() for item in args.models.split(",") if item.strip()]
     if not models:
@@ -1606,7 +1635,11 @@ def cmd_probe(args: argparse.Namespace) -> None:
                     "error": type(exc).__name__,
                 }
     emit(
-        {"status": "passed" if all(item["ok"] for item in results.values()) else "failed", "results": results},
+        {
+            "status": "passed" if all(item["ok"] for item in results.values()) else "failed",
+            "catalog": str(target_path),
+            "results": results,
+        },
         0 if all(item["ok"] for item in results.values()) else 2,
     )
 
@@ -1697,7 +1730,8 @@ def parser() -> argparse.ArgumentParser:
     sync.set_defaults(func=cmd_sync)
 
     probe = sub.add_parser("probe")
-    probe.add_argument("--catalog", default=str(DEFAULT_CODEX_HOME / "model-catalog-cli-proxy.json"))
+    probe.add_argument("--catalog")
+    probe.add_argument("--config", default=str(DEFAULT_CODEX_HOME / "config.toml"))
     probe.add_argument("--profile", default=DEFAULT_PROFILE_NAME)
     probe.add_argument("--desktop", action="store_true")
     probe.add_argument("--models", required=True)

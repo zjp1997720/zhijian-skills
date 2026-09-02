@@ -1,5 +1,6 @@
-import json
+import argparse
 import hashlib
+import json
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -154,6 +155,111 @@ class BridgeTests(unittest.TestCase):
             self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
             result = json.loads(proc.stdout)["results"]["grok-4.6"]
             self.assertTrue(result["shell_executed"])
+
+    def test_desktop_probe_uses_active_config_catalog_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            config = root / "config.toml"
+            catalog = root / "router-catalog.json"
+            fake_codex = root / "codex"
+            model = "zai-coding/glm-5.3-flash"
+            config.write_text(
+                f"model_catalog_json = {json.dumps(str(catalog))}\n",
+                encoding="utf-8",
+            )
+            catalog.write_text(json.dumps({"models": [{"slug": model}]}), encoding="utf-8")
+            fake_codex.write_text(
+                "#!/usr/bin/env python3\n"
+                "import pathlib, sys\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--output-last-message') + 1])\n"
+                "out.write_text('CODEX_BRIDGE_OK', encoding='utf-8')\n",
+                encoding="utf-8",
+            )
+            fake_codex.chmod(0o700)
+
+            proc = run_bridge(
+                "probe",
+                "--desktop",
+                "--models",
+                model,
+                "--config",
+                str(config),
+                "--codex",
+                str(fake_codex),
+            )
+
+            self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
+            payload = json.loads(proc.stdout)
+            self.assertEqual(payload["catalog"], str(catalog))
+            self.assertTrue(payload["results"][model]["ok"])
+
+    def test_desktop_probe_explicit_catalog_overrides_active_config(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            config = root / "config.toml"
+            catalog = root / "explicit-catalog.json"
+            fake_codex = root / "codex"
+            model = "grok-4.6"
+            config.write_text(
+                'model_catalog_json = "/missing/router-catalog.json"\n',
+                encoding="utf-8",
+            )
+            catalog.write_text(json.dumps({"models": [{"slug": model}]}), encoding="utf-8")
+            fake_codex.write_text(
+                "#!/usr/bin/env python3\n"
+                "import pathlib, sys\n"
+                "out = pathlib.Path(sys.argv[sys.argv.index('--output-last-message') + 1])\n"
+                "out.write_text('CODEX_BRIDGE_OK', encoding='utf-8')\n",
+                encoding="utf-8",
+            )
+            fake_codex.chmod(0o700)
+
+            proc = run_bridge(
+                "probe",
+                "--desktop",
+                "--models",
+                model,
+                "--config",
+                str(config),
+                "--catalog",
+                str(catalog),
+                "--codex",
+                str(fake_codex),
+            )
+
+            self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
+            self.assertEqual(json.loads(proc.stdout)["catalog"], str(catalog))
+
+    def test_desktop_probe_blocks_when_config_has_no_catalog(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            config = Path(raw) / "config.toml"
+            config.write_text('model = "gpt-5.6-sol"\n', encoding="utf-8")
+
+            proc = run_bridge(
+                "probe",
+                "--desktop",
+                "--models",
+                "gpt-5.6-sol",
+                "--config",
+                str(config),
+            )
+
+            self.assertEqual(proc.returncode, 2)
+            self.assertIn("no model_catalog_json", json.loads(proc.stdout)["error"])
+
+    def test_profile_probe_keeps_cli_proxy_catalog_default(self) -> None:
+        module_spec = __import__("importlib.util").util.spec_from_file_location("bridge", SCRIPT)
+        module = __import__("importlib.util").util.module_from_spec(module_spec)
+        module_spec.loader.exec_module(module)
+
+        target = module.probe_catalog_path(
+            argparse.Namespace(catalog=None, desktop=False)
+        )
+
+        self.assertEqual(
+            target,
+            module.DEFAULT_CODEX_HOME / "model-catalog-cli-proxy.json",
+        )
 
     def test_tool_sequence_probe_requires_both_commands_in_order(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
