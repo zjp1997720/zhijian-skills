@@ -178,6 +178,9 @@ python3 <skill-dir>/scripts/bridge.py probe \
   --models grok-4.6,deepseek-v4-pro,deepseek-v4-flash,gpt-5.6-sol
 ```
 
+With `--desktop`, the probe reads the active root `model_catalog_json` from
+`~/.codex/config.toml`; use `--catalog` only as an explicit override.
+
 Direct HTTP probes can diagnose the proxy, but they do not prove that Codex consumed the Provider and model catalog. Completion requires the Codex-level probe.
 
 When a model can chat but Codex reports an empty or incompatible Shell payload, require an actual read-only command event:

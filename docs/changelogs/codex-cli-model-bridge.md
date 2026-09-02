@@ -1,5 +1,11 @@
 # codex-cli-model-bridge Changelog
 
+## 1.0.1 — 2026-09-02
+
+- Support automatic resolution of active desktop model catalog from `~/.codex/config.toml` during `--desktop` probes.
+- Expand test suite with desktop probe catalog resolution and explicit override verification.
+- Update documentation for desktop probe catalog ergonomics.
+
 ## 1.0.0 — 2026-08-22
 
 - Publish the Codex CLIProxyAPI bridge: audit, restore the dominant history Provider, isolated profile, catalog sync, and `codex exec` probes.

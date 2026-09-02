@@ -5,12 +5,12 @@
     {
       "name": "codex-cli-model-bridge",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "path": "skills/codex-cli-model-bridge",
       "documentation": "docs/skills/codex-cli-model-bridge/README.md",
       "documentation_zh": "docs/skills/codex-cli-model-bridge/README.zh-CN.md",
       "changelog": "docs/changelogs/codex-cli-model-bridge.md",
-      "canonical_tag": "codex-cli-model-bridge/v1.0.0",
+      "canonical_tag": "codex-cli-model-bridge/v1.0.1",
       "validation": {
         "commands": [
           "python3 -m unittest discover -s skills/codex-cli-model-bridge/tests -v"
