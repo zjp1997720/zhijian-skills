@@ -1,5 +1,9 @@
 # codex-cli-model-bridge Changelog
 
+## Unreleased
+
+- Add bundled model manifest for Moonshot Kimi K3 (`kimi-k3`) with 256K context window and reasoning effort support.
+
 ## 1.0.1 — 2026-09-02
 
 - Support automatic resolution of active desktop model catalog from `~/.codex/config.toml` during `--desktop` probes.

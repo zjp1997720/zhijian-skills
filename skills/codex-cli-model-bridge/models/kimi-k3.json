@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "slug": "kimi-k3",
+  "display_name": "Kimi K3",
+  "description": "Moonshot Kimi K3 with 256K context window, fast reasoning, and multimodal support through the local Responses bridge.",
+  "template_slug": "gpt-5.6-sol",
+  "context_window": 256000,
+  "effective_context_window_percent": 95,
+  "default_reasoning_level": "medium",
+  "reasoning_efforts": [
+    "low",
+    "medium",
+    "high"
+  ],
+  "input_modalities": [
+    "text",
+    "image"
+  ],
+  "supports_search_tool": false,
+  "priority": 74
+}
