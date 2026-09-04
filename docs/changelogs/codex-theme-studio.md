@@ -1,5 +1,13 @@
 # codex-theme-studio Changelog
 
+## 1.2.0 — 2026-09-04
+
+- Separate the public `graphite-paper` default from the opt-in `zhijian-ai` preset, preserving the confirmed original control-lever artwork and its narrower redistribution notice.
+- Expand the validated theme schema with independent UI/code font stacks, body/emphasis/code weights, control/card/hero/composer radii, and homepage density controls.
+- Add explicit design, apply, verify/repair, and pause/restore modes; keep advanced layout changes behind live compatibility diagnosis and normal-window/full-screen verification.
+- Harden conversation typography against renderer-level font overrides by anchoring to stable semantic attributes while preserving monospace code and terminal descendants.
+- Add preset import/list commands, governed output assertions, public payload auditing, dynamic verification thresholds, and clearer missing-evidence reporting.
+
 ## 1.0.5 — 2026-07-27
 
 - Tighten home/task/degraded-state verification, keyboard visibility, overflow, and task-art contracts.

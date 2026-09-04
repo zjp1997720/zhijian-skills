@@ -1,13 +1,26 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { colorsMatch, evaluateSnapshot } from "./verification-contract.mjs";
+import { evaluateSnapshot, isCodexRendererProbe } from "./verification-contract.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, "..");
-const SKIN_VERSION = "1.0.4";
+const SKIN_VERSION = "1.2.0";
 const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 const MAX_ART_BYTES = 16 * 1024 * 1024;
+
+function sameColor(left, right) {
+  const parse = (value) => {
+    if (typeof value !== "string") return null;
+    const hex = value.trim().match(/^#([0-9a-f]{6})$/i)?.[1];
+    if (hex) return [0, 2, 4].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16));
+    const functional = value.match(/rgba?\(\s*([\d.]+)[, ]+\s*([\d.]+)[, ]+\s*([\d.]+)/i);
+    return functional ? functional.slice(1).map(Number) : null;
+  };
+  const a = parse(left);
+  const b = parse(right);
+  return Boolean(a && b && a.every((channel, index) => Math.abs(channel - b[index]) <= 2));
+}
 
 function parseArgs(argv) {
   const options = {
@@ -211,20 +224,24 @@ async function listAppTargets(port) {
 }
 
 async function probeSession(session) {
-  return session.evaluate(`(() => {
+  const probe = await session.evaluate(`(() => {
+    const primaryRoute = location.protocol === 'app:' && location.pathname === '/index.html' &&
+      !new URLSearchParams(location.search).has('initialRoute');
     const markers = {
-      shell: Boolean(document.querySelector('main.main-surface')),
+      shell: Boolean(document.querySelector('main.main-surface, main')),
       sidebar: Boolean(document.querySelector('aside.app-shell-left-panel')),
-      composer: Boolean(document.querySelector('.composer-surface-chrome')),
-      main: Boolean(document.querySelector('[role="main"]')),
+      composer: Boolean(document.querySelector('.composer-surface-chrome, .dream-skin-composer, .ProseMirror[contenteditable="true"][role="textbox"]')),
+      main: Boolean(document.querySelector('main, [role="main"]')),
+      root: Boolean(document.querySelector('#root')),
     };
     return {
       title: document.title,
       href: location.href,
+      primaryRoute,
       markers,
-      codex: markers.shell && markers.sidebar && (markers.composer || markers.main),
     };
   })()`);
+  return { ...probe, codex: isCodexRendererProbe(probe) };
 }
 
 async function connectTarget(target, port) {
@@ -265,10 +282,6 @@ async function loadTheme(themeDir) {
   const configPath = path.join(assetsRoot, "theme.json");
   let config;
   try {
-    const rootStat = await fs.lstat(assetsRoot);
-    const configStat = await fs.lstat(configPath);
-    if (rootStat.isSymbolicLink() || !rootStat.isDirectory()) throw new Error("Theme root must be a real directory");
-    if (configStat.isSymbolicLink() || !configStat.isFile()) throw new Error("theme.json must be a regular file");
     config = await fs.readFile(configPath, "utf8");
   } catch (error) {
     if (themeDir && error.code === "ENOENT") {
@@ -290,72 +303,73 @@ async function loadTheme(themeDir) {
       ? normalized
       : fallback;
   };
-  const fontStack = (value, fallback) => {
+  const fontFamily = (value, fallback) => {
     if (typeof value !== "string") return fallback;
-    const normalized = value.trim().slice(0, 180);
-    return normalized && !/[;{}<>]/.test(normalized) ? normalized : fallback;
+    const normalized = value.trim().slice(0, 240);
+    return normalized && !/[;{}<>\r\n]/.test(normalized) ? normalized : fallback;
   };
-  const optionalFilename = (value, field) => {
-    if (typeof value !== "string" || !value.trim()) return "";
-    const normalized = value.trim();
-    if (path.basename(normalized) !== normalized) throw new Error(`${field} must stay inside its theme directory`);
-    if (!/\.(?:png|jpe?g|webp)$/i.test(normalized)) throw new Error(`${field} must be PNG, JPEG, or WebP`);
-    return normalized;
+  const integer = (value, fallback, minimum, maximum) => {
+    const parsed = Number(value);
+    return Number.isInteger(parsed) && parsed >= minimum && parsed <= maximum ? parsed : fallback;
   };
   const theme = {
     schemaVersion: 1,
     id: text(raw.id, "custom", 80),
-    name: text(raw.name, "Codex Theme Studio", 80),
-    brandLabel: text(raw.brandLabel, "THEME STUDIO", 80),
-    brandImage: optionalFilename(raw.brandImage, "Theme brand image"),
-    showBrand: raw.showBrand !== false,
+    name: text(raw.name, "Codex Dream Skin", 80),
+    brandSubtitle: text(raw.brandSubtitle, "CODEX DREAM SKIN", 80),
     tagline: text(raw.tagline, "Make something wonderful.", 160),
     projectPrefix: text(raw.projectPrefix, "选择项目 · ", 80),
     projectLabel: text(raw.projectLabel, "◉  选择项目", 80),
     statusText: text(raw.statusText, "DREAM SKIN ONLINE", 80),
     quote: text(raw.quote, "MAKE SOMETHING WONDERFUL", 80),
     image: raw.image,
-    artPlacement: raw.artPlacement === "all" ? "all" : "hero",
-    fonts: {
-      ui: fontStack(raw.fonts?.ui, '"Source Han Serif SC", "Songti SC", ui-serif, Georgia, serif'),
-      code: fontStack(raw.fonts?.code, '"SF Mono", ui-monospace, Menlo, monospace'),
+    typography: {
+      uiFamily: fontFamily(
+        raw.typography?.uiFamily,
+        '"思源宋体 VF", "Source Han Serif SC VF", "Source Han Serif SC", serif',
+      ),
+      codeFamily: fontFamily(raw.typography?.codeFamily, '"SF Mono", ui-monospace, monospace'),
+      bodyWeight: integer(raw.typography?.bodyWeight, 500, 300, 700),
+      emphasisWeight: integer(raw.typography?.emphasisWeight, 600, 400, 800),
+      codeWeight: integer(raw.typography?.codeWeight, 400, 300, 700),
+    },
+    shape: {
+      controlRadius: integer(raw.shape?.controlRadius, 6, 0, 24),
+      cardRadius: integer(raw.shape?.cardRadius, 8, 0, 32),
+      heroRadius: integer(raw.shape?.heroRadius, 16, 0, 40),
+      composerRadius: integer(raw.shape?.composerRadius, 14, 0, 32),
+    },
+    density: {
+      homeGap: integer(raw.density?.homeGap, 24, 12, 40),
+      suggestionMinHeight: integer(raw.density?.suggestionMinHeight, 112, 80, 160),
     },
     colors: {
-      background: color(raw.colors?.background, "#F5F3EE"),
-      panel: color(raw.colors?.panel, "#FAF9F6"),
-      panelAlt: color(raw.colors?.panelAlt, "#EEECE6"),
-      accent: color(raw.colors?.accent, "#DA7756"),
-      accentAlt: color(raw.colors?.accentAlt, "#CC7D5E"),
+      background: color(raw.colors?.background, "#F5F4ED"),
+      panel: color(raw.colors?.panel, "#FAF9F5"),
+      panelAlt: color(raw.colors?.panelAlt, "#E8E6DC"),
+      accent: color(raw.colors?.accent, "#B85235"),
+      accentAlt: color(raw.colors?.accentAlt, "#C96442"),
       secondary: color(raw.colors?.secondary, "#1B365D"),
       highlight: color(raw.colors?.highlight, "#1B365D"),
-      text: color(raw.colors?.text, "#1D1B16"),
-      muted: color(raw.colors?.muted, "#69675F"),
+      text: color(raw.colors?.text, "#141413"),
+      muted: color(raw.colors?.muted, "#6B6A64"),
       line: color(raw.colors?.line, "rgba(20, 20, 19, .12)"),
-      sidebar: color(raw.colors?.sidebar, "#F1F0EC"),
-      selected: color(raw.colors?.selected, "#E8E6DC"),
-      border: color(raw.colors?.border, "#E4E1DA"),
-      paperBlue: color(raw.colors?.paperBlue, "#E7EDF2"),
+      sidebar: color(raw.colors?.sidebar, "#F5F4ED"),
+      selected: color(raw.colors?.selected, "#EEECE6"),
+      border: color(raw.colors?.border, "#E5E3D8"),
+      paperBlue: color(raw.colors?.paperBlue, "#EEF2F7"),
     },
   };
   const imagePath = path.join(assetsRoot, theme.image);
-  const imageStat = await fs.lstat(imagePath);
-  if (imageStat.isSymbolicLink() || !imageStat.isFile() || imageStat.size < 1 || imageStat.size > MAX_ART_BYTES) {
+  const imageStat = await fs.stat(imagePath);
+  if (!imageStat.isFile() || imageStat.size < 1 || imageStat.size > MAX_ART_BYTES) {
     throw new Error(`Theme image must be a non-empty file no larger than ${MAX_ART_BYTES} bytes`);
   }
   const extension = path.extname(theme.image).toLowerCase();
   if (![".png", ".jpg", ".jpeg", ".webp"].includes(extension)) {
     throw new Error(`Unsupported theme image format: ${extension || "missing"}`);
   }
-  let brandImagePath = "";
-  let brandImageStat = null;
-  if (theme.brandImage) {
-    brandImagePath = path.join(assetsRoot, theme.brandImage);
-    brandImageStat = await fs.lstat(brandImagePath);
-    if (brandImageStat.isSymbolicLink() || !brandImageStat.isFile() || brandImageStat.size < 1 || brandImageStat.size > 4 * 1024 * 1024) {
-      throw new Error("Theme brand image must be a non-empty file no larger than 4 MB");
-    }
-  }
-  return { assetsRoot, imagePath, imageStat, brandImagePath, brandImageStat, theme };
+  return { assetsRoot, imagePath, imageStat, theme };
 }
 
 function buildPrepaintBootstrap(css, theme) {
@@ -375,6 +389,17 @@ function buildPrepaintBootstrap(css, theme) {
     "--ds-text": colors.text,
     "--ds-muted": colors.muted,
     "--ds-line": colors.line,
+    "--ds-font-ui": theme.typography?.uiFamily,
+    "--ds-font-code": theme.typography?.codeFamily,
+    "--ds-weight-body": String(theme.typography?.bodyWeight ?? 500),
+    "--ds-weight-emphasis": String(theme.typography?.emphasisWeight ?? 600),
+    "--ds-weight-code": String(theme.typography?.codeWeight ?? 400),
+    "--ds-radius-control": `${theme.shape?.controlRadius ?? 6}px`,
+    "--ds-radius-card": `${theme.shape?.cardRadius ?? 8}px`,
+    "--ds-radius-hero": `${theme.shape?.heroRadius ?? 16}px`,
+    "--ds-radius-composer": `${theme.shape?.composerRadius ?? 14}px`,
+    "--ds-home-gap": `${theme.density?.homeGap ?? 24}px`,
+    "--ds-suggestion-min-height": `${theme.density?.suggestionMinHeight ?? 112}px`,
   };
   return `((cssText, variables, version) => {
     const install = () => {
@@ -401,7 +426,7 @@ function buildPrepaintBootstrap(css, theme) {
             at,
             capturedAt: Date.now(),
             deltaMs: Number.isFinite(clickedAt) && clickedAt > 0 ? Date.now() - clickedAt : null,
-            background: getComputedStyle(document.querySelector('main.main-surface') || document.body || root).backgroundColor,
+            background: getComputedStyle(document.querySelector('main.main-surface') || document.querySelector('main') || document.body || root).backgroundColor,
           });
           window.__DREAM_SKIN_FIRST_FRAME__ = sample(performance.now());
           requestAnimationFrame((at) => {
@@ -423,24 +448,15 @@ async function loadPayload(themeDir) {
     fs.readFile(path.join(root, "assets", "renderer-inject.js"), "utf8"),
     loadTheme(themeDir),
   ]);
-  const { imagePath, brandImagePath, theme } = loaded;
+  const { imagePath, theme } = loaded;
   const art = await fs.readFile(imagePath);
   const extension = path.extname(imagePath).toLowerCase();
   const mime = extension === ".jpg" || extension === ".jpeg" ? "image/jpeg"
     : extension === ".webp" ? "image/webp" : "image/png";
   const artDataUrl = `data:${mime};base64,${art.toString("base64")}`;
-  let brandImageDataUrl = "";
-  if (brandImagePath) {
-    const brand = await fs.readFile(brandImagePath);
-    const brandExtension = path.extname(brandImagePath).toLowerCase();
-    const brandMime = brandExtension === ".jpg" || brandExtension === ".jpeg" ? "image/jpeg"
-      : brandExtension === ".webp" ? "image/webp" : "image/png";
-    brandImageDataUrl = `data:${brandMime};base64,${brand.toString("base64")}`;
-  }
   const payload = template
     .replace("__DREAM_SKIN_CSS_JSON__", JSON.stringify(css))
     .replace("__DREAM_SKIN_ART_JSON__", JSON.stringify(artDataUrl))
-    .replace("__DREAM_SKIN_BRAND_IMAGE_JSON__", JSON.stringify(brandImageDataUrl))
     .replace("__DREAM_SKIN_THEME_JSON__", JSON.stringify(theme))
     .replace("__DREAM_SKIN_VERSION_JSON__", JSON.stringify(SKIN_VERSION));
   const prepaint = buildPrepaintBootstrap(css, theme);
@@ -469,7 +485,6 @@ async function removeFromSession(session) {
     if (state?.cleanup) return state.cleanup();
     document.documentElement?.classList.remove('codex-dream-skin', 'dream-skin-home', 'dream-skin-home-shell');
     document.documentElement?.removeAttribute('data-dream-shell');
-    document.documentElement?.removeAttribute('data-dream-art-placement');
     document.documentElement?.style.removeProperty('--dream-skin-art');
     for (const name of ['--ds-bg', '--ds-panel', '--ds-panel-2', '--ds-sidebar', '--ds-selected',
       '--ds-border', '--ds-paper-blue', '--ds-green', '--ds-lime', '--ds-cyan', '--ds-purple',
@@ -512,6 +527,15 @@ async function collectSessionSnapshot(session) {
       return boxFromRect(node, r);
     };
     const styleOf = (node) => node ? getComputedStyle(node) : null;
+    const fontWeightOf = (node) => {
+      const value = styleOf(node)?.fontWeight;
+      if (value === 'normal') return 400;
+      if (value === 'bold') return 700;
+      const parsed = Number.parseInt(value || '', 10);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+    const fontFamilyOf = (node) => styleOf(node)?.fontFamily ?? '';
+    const usesSerifFamily = (node) => /(?:思源宋体|Source Han Serif|\\bserif\\b)/i.test(fontFamilyOf(node));
     const paintVisible = (node) => {
       if (!node) return false;
       const own = node.getBoundingClientRect();
@@ -549,8 +573,14 @@ async function collectSessionSnapshot(session) {
       }
       return false;
     };
-    const mainSurface = document.querySelector('main.main-surface') || document.querySelector('main');
-    const header = mainSurface?.querySelector(':scope > header.app-header-tint') || null;
+    const mainCandidates = [...new Set(document.querySelectorAll('main.main-surface, main'))];
+    const mainSurface = mainCandidates
+      .map((node) => ({ node, geometry: box(node) }))
+      .filter((item) => item.geometry?.visible)
+      .sort((left, right) =>
+        (right.geometry.width * right.geometry.height) - (left.geometry.width * left.geometry.height))[0]?.node ||
+      document.querySelector('main.main-surface') || document.querySelector('main');
+    const header = mainSurface?.querySelector(':scope > header.app-header-tint, :scope > header') || null;
     const headerTabs = [...document.querySelectorAll('[class~="group/tab"]')].map((tab) => {
       const titleButton = tab.querySelector('button:not([aria-label^="Close "])');
       const titleStyle = styleOf(titleButton);
@@ -570,7 +600,78 @@ async function collectSessionSnapshot(session) {
     const workspaceTabCount = [...document.querySelectorAll('[role="tablist"] [role="tab"]')]
       .filter((tab) => box(tab)?.visible).length;
     const sidebarNode = document.querySelector('aside.app-shell-left-panel');
-    const composerNode = document.querySelector('.composer-surface-chrome');
+    const sidebarControlNode = [...document.querySelectorAll(
+      'aside.app-shell-left-panel button, aside.app-shell-left-panel a, aside.app-shell-left-panel [data-app-action-sidebar-thread-row]'
+    )].find((candidate) => box(candidate)?.visible) || null;
+    const composerEditor = [...document.querySelectorAll('.ProseMirror[contenteditable="true"][role="textbox"]')]
+      .find((candidate) => !candidate.closest('.cm-editor')) || null;
+    const composerNode = document.querySelector('.composer-surface-chrome, .dream-skin-composer') ||
+      composerEditor?.closest('[class*="ComposerLayoutRoot_"]') || composerEditor;
+    const composerLayer = (node) => {
+      if (!node) return null;
+      const style = styleOf(node);
+      const pseudo = (selector) => {
+        const value = getComputedStyle(node, selector);
+        return {
+          content: value.content,
+          left: value.left,
+          top: value.top,
+          right: value.right,
+          bottom: value.bottom,
+          width: value.width,
+          height: value.height,
+          backgroundColor: value.backgroundColor,
+          backgroundImage: value.backgroundImage,
+          borderColor: value.borderColor,
+          borderStyle: value.borderStyle,
+          borderWidth: value.borderWidth,
+          borderRadius: value.borderRadius,
+          boxShadow: value.boxShadow,
+          position: value.position,
+        };
+      };
+      return {
+        ...box(node),
+        tagName: node.tagName,
+        className: typeof node.className === 'string' ? node.className : '',
+        backgroundColor: style?.backgroundColor ?? null,
+        backgroundImage: style?.backgroundImage ?? null,
+        borderColor: style?.borderColor ?? null,
+        borderWidth: style?.borderWidth ?? null,
+        borderRadius: style?.borderRadius ?? null,
+        boxShadow: style?.boxShadow ?? null,
+        overflowX: style?.overflowX ?? null,
+        overflowY: style?.overflowY ?? null,
+        position: style?.position ?? null,
+        focusWithin: node.matches(':focus-within'),
+        before: pseudo('::before'),
+        after: pseudo('::after'),
+      };
+    };
+    const compactComposerLayer = (layer) => layer ? {
+      x: layer.x, y: layer.y, width: layer.width, height: layer.height,
+      visible: layer.visible, inViewport: layer.inViewport,
+      className: layer.className,
+      backgroundColor: layer.backgroundColor,
+      backgroundImage: layer.backgroundImage,
+      borderColor: layer.borderColor,
+      borderWidth: layer.borderWidth,
+      borderRadius: layer.borderRadius,
+      boxShadow: layer.boxShadow,
+      position: layer.position,
+      focusWithin: layer.focusWithin,
+      before: layer.before?.content && !['none', 'normal'].includes(layer.before.content) ? layer.before : null,
+      after: layer.after?.content && !['none', 'normal'].includes(layer.after.content) ? layer.after : null,
+    } : null;
+    const composerFooter = composerNode?.closest('[data-thread-scroll-footer]') ?? null;
+    const composerBackdrops = composerFooter
+      ? [...composerFooter.querySelectorAll('[class*="bg-gradient-to-t"][class*="from-token-main-surface-primary"]')]
+      : [];
+    const structuralSurfaceNodes = [...new Set(document.querySelectorAll('[class~="bg-token-main-surface-primary"]'))];
+    const structuralSurfaces = structuralSurfaceNodes
+      .map((node) => compactComposerLayer(composerLayer(node)))
+      .filter((layer) => layer?.visible && layer.inViewport !== false &&
+        layer.width * layer.height >= innerWidth * innerHeight * 0.02);
     const roleMains = [...document.querySelectorAll('[role="main"]')];
     const home = roleMains.find((candidate) =>
       candidate.querySelector('[data-testid="home-icon"], [data-feature="game-source"], .group\\\\/home-suggestions')) ?? null;
@@ -607,15 +708,31 @@ async function collectSessionSnapshot(session) {
     const cardColumns = cardRows.length ? Math.ceil(cards.filter((card) => card.visible).length / cardRows.length) : null;
     const heroBox = box(heroNode);
     const selectedSession = document.querySelector('aside.app-shell-left-panel [data-app-action-sidebar-thread-active="true"]');
+    const mainTextNode = [...document.querySelectorAll(
+      'main p, main li, main blockquote, main [class~="font-normal"]'
+    )].find((candidate) => box(candidate)?.visible) || mainSurface;
+    const conversationHanTextNodes = [...document.querySelectorAll(
+      '[data-thread-find-target="conversation"] [data-markdown-han-text="true"]'
+    )].filter((candidate) => !candidate.closest('code, pre, kbd, samp, .font-mono, [class*="font-mono"]'));
+    const conversationNonSerifHanTextNodes = conversationHanTextNodes.filter(
+      (candidate) => !usesSerifFamily(candidate)
+    );
+    const emphasisNodes = [...new Set([
+      ...document.querySelectorAll('aside.app-shell-left-panel [data-app-action-sidebar-thread-active="true"]'),
+      ...document.querySelectorAll('[class~="group/tab"] [class~="italic"]'),
+      ...document.querySelectorAll('[class~="group/tab"] button[role="tab"][aria-selected="true"]'),
+      ...document.querySelectorAll('[class~="group/home-suggestions"] button'),
+    ])].filter((candidate) => box(candidate)?.visible);
     const selectedStyle = styleOf(selectedSession);
     const chrome = document.getElementById('codex-dream-skin-chrome');
     const brand = chrome?.querySelector('.dream-skin-brand') ?? null;
     const mainStyle = styleOf(mainSurface);
     const sidebarStyle = styleOf(sidebarNode);
     const headerStyle = styleOf(header);
+    const mode = home ? 'home' : composerNode ? 'task' : 'system';
     return {
       schemaVersion: 1,
-      mode: home ? 'home' : 'task',
+      mode,
       installed: document.documentElement.classList.contains('codex-dream-skin'),
       version: window.__CODEX_DREAM_SKIN_STATE__?.version ?? null,
       stylePresent: Boolean(document.getElementById('codex-dream-skin-style')),
@@ -630,12 +747,29 @@ async function collectSessionSnapshot(session) {
         main: box(mainSurface),
         sidebar: box(sidebarNode),
         composer: box(composerNode),
+        composerVisual: {
+          surface: compactComposerLayer(composerLayer(composerNode)),
+          editor: compactComposerLayer(composerLayer(composerEditor)),
+          body: compactComposerLayer(composerLayer(composerNode?.querySelector('[class*="ComposerLayoutBody_"]'))),
+          backdrops: composerBackdrops.map((node) => compactComposerLayer(composerLayer(node))),
+        },
+        structuralSurfaces,
         mainBackground: mainStyle?.backgroundColor ?? null,
         sidebarBackground: sidebarStyle?.backgroundColor ?? null,
         topBorderBottomWidth: Number.parseFloat(headerStyle?.borderBottomWidth || '0'),
         topHeaderBackground: headerStyle?.backgroundColor ?? null,
         workspaceTabCount,
         headerTabs,
+        typography: {
+          bodyWeight: fontWeightOf(document.body),
+          sidebarWeight: fontWeightOf(sidebarNode),
+          sidebarControlWeight: fontWeightOf(sidebarControlNode),
+          mainTextWeight: fontWeightOf(mainTextNode),
+          composerWeight: fontWeightOf(composerEditor || composerNode),
+          conversationHanTextCount: conversationHanTextNodes.length,
+          conversationNonSerifHanTextCount: conversationNonSerifHanTextNodes.length,
+          emphasisWeights: emphasisNodes.map((node) => fontWeightOf(node)).filter((value) => value !== null),
+        },
       },
       home: home ? {
         enhancementHookPresent,
@@ -652,24 +786,21 @@ async function collectSessionSnapshot(session) {
           borderLeftWidth: Number.parseFloat(selectedStyle?.borderLeftWidth || '0'),
         } : null,
       } : null,
-      task: home ? null : {
+      task: mode === 'task' ? {
         backgroundImage: mainStyle?.backgroundImage ?? 'none',
         brandVisible: Boolean(box(brand)?.visible),
-      },
+      } : null,
+      system: mode === 'system' ? {
+        backgroundImage: mainStyle?.backgroundImage ?? 'none',
+        brandVisible: Boolean(box(brand)?.visible),
+      } : null,
     };
   })()`);
 }
 
 async function verifySession(session, theme) {
   const snapshot = await collectSessionSnapshot(session);
-  return {
-    ...snapshot,
-    ...evaluateSnapshot(snapshot, {
-      expectedVersion: SKIN_VERSION,
-      expectedColors: theme?.colors,
-      expectedArtPlacement: theme?.artPlacement,
-    }),
-  };
+  return { ...snapshot, ...evaluateSnapshot(snapshot, { expectedVersion: SKIN_VERSION, theme }) };
 }
 
 async function waitForVerifiedSession(session, timeoutMs, strictVisual = false, theme = null) {
@@ -737,7 +868,7 @@ async function sampleNewTaskTransition(session, outputDir, theme) {
           at,
           capturedAt: Date.now(),
           deltaMs: at - probe.clickAt,
-          background: getComputedStyle(document.querySelector('main.main-surface') || document.body).backgroundColor,
+          background: getComputedStyle(document.querySelector('main.main-surface') || document.querySelector('main') || document.body).backgroundColor,
         };
       });
     };
@@ -747,7 +878,7 @@ async function sampleNewTaskTransition(session, outputDir, theme) {
     return { x, y, clickable: true };
   })()`);
   if (!target) return { pass: false, reasons: ["new-task-control-missing"], samples: [] };
-  if (!target.clickable) return { pass: false, reasons: ["new-task-control-not-clickable"], samples: [] };
+  if (!target.clickable) return { pass: false, reasons: ["new-chat-control-not-clickable"], samples: [] };
 
   try {
     const clickWallAt = Date.now();
@@ -759,7 +890,7 @@ async function sampleNewTaskTransition(session, outputDir, theme) {
       captureBeyondViewport: false,
     });
     await fs.writeFile(
-      path.join(outputDir, "new-task-first-frame.png"),
+      path.join(outputDir, "v3-new-task-first-frame.png"),
       Buffer.from(compositorFrame.data, "base64"),
     );
     const firstFrameDeadline = Date.now() + 3000;
@@ -771,7 +902,7 @@ async function sampleNewTaskTransition(session, outputDir, theme) {
             at: performance.now(),
             capturedAt: Date.now(),
             deltaMs: Date.now() - ${clickWallAt},
-            background: getComputedStyle(document.querySelector('main.main-surface') || document.body || document.documentElement).backgroundColor,
+            background: getComputedStyle(document.querySelector('main.main-surface') || document.querySelector('main') || document.body || document.documentElement).backgroundColor,
             source: "post-click-compositor"
           })`,
         );
@@ -788,19 +919,17 @@ async function sampleNewTaskTransition(session, outputDir, theme) {
     let settledCardCount = null;
     const reasons = [];
     let homeObserved = false;
-    if (before.mode !== "task") reasons.push("new-task-precondition-not-task");
-    if (!colorsMatch(firstFrame.background, theme.colors.background)) reasons.push("new-task-first-frame-background-mismatch");
+    if (before.mode !== "task") reasons.push("new-chat-precondition-not-task");
+    if (!sameColor(firstFrame.background, theme?.colors?.background || "#F5F4ED")) {
+      reasons.push("new-chat-first-frame-not-warm-paper");
+    }
     for (const offset of [0, 50, 150, 500]) {
       const waitMs = offset - (Date.now() - sampleStarted);
       if (waitMs > 0) await new Promise((resolve) => setTimeout(resolve, waitMs));
       const snapshot = await collectSessionSnapshot(session);
       if (snapshot.mode === "home") homeObserved = true;
-      const verdict = evaluateSnapshot(snapshot, {
-        expectedVersion: SKIN_VERSION,
-        expectedColors: theme.colors,
-        expectedArtPlacement: theme.artPlacement,
-      });
-      if (!snapshot.installed || !snapshot.stylePresent || verdict.reasons.includes("main-background-mismatch")) {
+      const verdict = evaluateSnapshot(snapshot, { expectedVersion: SKIN_VERSION, theme });
+      if (!snapshot.installed || !snapshot.stylePresent || verdict.reasons.includes("main-not-warm-paper")) {
         reasons.push(`new-task-prepaint-missing:${offset}ms`);
       }
       const cardCount = snapshot.home?.cards?.filter((card) => card.visible).length ?? 0;
@@ -809,7 +938,7 @@ async function sampleNewTaskTransition(session, outputDir, theme) {
       }
       if (offset >= 150) settledCardCount = cardCount;
       const label = String(offset).padStart(3, "0");
-      const screenshot = path.join(outputDir, `new-task-${label}ms.png`);
+      const screenshot = path.join(outputDir, `v3-new-task-${label}ms.png`);
       await capture(session, screenshot, { settleMs: 0, parkPointer: false });
       samples.push({ offsetMs: offset, observedAtMs: Date.now() - sampleStarted, snapshot, verdict, screenshot });
     }
@@ -830,7 +959,10 @@ async function sampleNewTaskTransition(session, outputDir, theme) {
 
 async function runOneShot(options) {
   const connected = await connectCodexTargets(options.port, options.timeoutMs);
-  const loaded = options.mode === "remove" ? null : await loadPayload(options.themeDir);
+  const loaded = (options.mode === "once" || options.reload) ? await loadPayload(options.themeDir) : null;
+  const activeTheme = options.mode === "remove"
+    ? null
+    : loaded?.theme || (await loadTheme(options.themeDir)).theme;
   const payload = loaded?.payload ?? null;
   const results = [];
   let screenshotCaptured = false;
@@ -870,9 +1002,9 @@ async function runOneShot(options) {
 
         const result = options.mode === "remove"
           ? await verifyRemovedSession(session)
-          : await waitForVerifiedSession(session, options.timeoutMs, options.strictVisual, loaded.theme);
+          : await waitForVerifiedSession(session, options.timeoutMs, options.strictVisual, activeTheme);
         const transition = options.sampleNewTaskDir && options.mode !== "remove"
-          ? await sampleNewTaskTransition(session, options.sampleNewTaskDir, loaded.theme)
+          ? await sampleNewTaskTransition(session, options.sampleNewTaskDir, activeTheme)
           : null;
         results.push({ targetId: target.id, title: target.title, url: target.url, probe, result, transition });
 
@@ -998,5 +1130,8 @@ try {
   }
 } catch (error) {
   console.error(`[dream-skin] ${error.stack || error.message}`);
-  process.exitCode = 1;
+  // A failed CDP probe may leave WebSocket handles open. Exit explicitly so
+  // the resident manager can apply its bounded retry policy instead of
+  // accumulating stuck verifier processes after an app update.
+  process.exit(1);
 }

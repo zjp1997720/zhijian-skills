@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "mode": "home",
   "installed": true,
-  "version": "1.0.4",
+  "version": "1.2.0",
   "stylePresent": true,
-  "chromePresent": true,
+  "chromePresent": false,
   "chromePointerEvents": "none",
   "viewport": { "width": 1440, "height": 900 },
   "documentOverflow": { "x": false, "y": false },
@@ -12,9 +12,20 @@
     "main": { "width": 1120, "height": 900, "visible": true },
     "sidebar": { "width": 320, "height": 900, "visible": true },
     "composer": { "width": 720, "height": 112, "visible": true },
-    "mainBackground": "#F5F3EE",
-    "sidebarBackground": "#F1F0EC",
-    "topBorderBottomWidth": 0
+    "structuralSurfaces": [
+      { "backgroundColor": "#F5F4ED", "width": 1120, "height": 900, "visible": true }
+    ],
+    "mainBackground": "#F5F4ED",
+    "sidebarBackground": "#F5F4ED",
+    "topBorderBottomWidth": 0,
+    "typography": {
+      "bodyWeight": 500,
+      "sidebarWeight": 500,
+      "sidebarControlWeight": 500,
+      "mainTextWeight": 500,
+      "composerWeight": 500,
+      "emphasisWeights": [600]
+    }
   },
   "home": {
     "enhancementHookPresent": false,
@@ -27,6 +38,6 @@
       { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "width": 252, "height": 112, "visible": true },
       { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "width": 252, "height": 112, "visible": true }
     ],
-    "selectedSession": { "backgroundColor": "#E8E6DC", "borderLeftWidth": 0 }
+    "selectedSession": { "backgroundColor": "#EEECE6", "borderLeftWidth": 0 }
   }
 }

@@ -25,7 +25,7 @@ SRC="$THEMES_ROOT/$THEME_ID"
 
 progress() {
   printf '%s\n' "$*" >&2
-  /usr/bin/osascript -e "display notification \"$*\" with title \"Codex Theme Studio\"" >/dev/null 2>&1 || true
+  /usr/bin/osascript -e "display notification \"$*\" with title \"Codex Dream Skin\"" >/dev/null 2>&1 || true
 }
 
 progress "Switching..."
@@ -63,5 +63,5 @@ if "$SCRIPT_DIR/start-dream-skin-macos.sh" --port "$PORT" --restart-existing; th
   exit 0
 fi
 
-/usr/bin/osascript -e 'display alert "Codex Theme Studio" message "Theme switched but inject failed. Click Apply Skin."' >/dev/null 2>&1 || true
+/usr/bin/osascript -e 'display alert "Codex Dream Skin" message "Theme switched but inject failed. Click Apply Skin."' >/dev/null 2>&1 || true
 exit 1

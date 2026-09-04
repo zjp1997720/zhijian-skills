@@ -123,7 +123,7 @@ async function validateBaselineInstall(installRoot, baseline) {
       failures.push(`VERSION: ${error.code === "ENOENT" ? "missing" : error.message}`);
     }
   }
-  if (failures.length) throw new Error(`Version baseline fingerprint mismatch: ${failures.join("; ")}`);
+  if (failures.length) throw new Error(`V2 baseline fingerprint mismatch: ${failures.join("; ")}`);
 }
 
 async function walkRegularFiles(root) {
@@ -238,11 +238,11 @@ async function snapshot() {
   const installRoot = pathValueFor("install-root");
   const themeDir = pathValueFor("theme-dir");
   const baselinePath = pathValueFor("baseline");
-  if (!stateRoot || !installRoot || !themeDir || (!baselinePath && !rawValueFor("label"))) {
-    throw new Error("Usage: version-backup-state.mjs snapshot --state-root <dir> --install-root <dir> --theme-dir <dir> (--label <label> | --baseline <file>)");
+  if (!stateRoot || !installRoot || !themeDir || !baselinePath) {
+    throw new Error("Usage: version-backup-state.mjs snapshot --state-root <dir> --install-root <dir> --theme-dir <dir> --baseline <file>");
   }
-  const baseline = baselinePath ? await readBaseline(baselinePath) : null;
-  const label = baseline ? baseline.label : validateLabel(rawValueFor("label"));
+  const baseline = await readBaseline(baselinePath);
+  const label = baseline.label;
   const backupsRoot = path.join(stateRoot, "version-backups");
   const backupRoot = path.join(backupsRoot, label);
   try {
@@ -260,7 +260,7 @@ async function snapshot() {
     if (error.code !== "ENOENT") throw error;
   }
 
-  if (baseline) await validateBaselineInstall(installRoot, baseline);
+  await validateBaselineInstall(installRoot, baseline);
   await fs.mkdir(backupsRoot, { recursive: true, mode: 0o700 });
   await fs.chmod(stateRoot, 0o700);
   await fs.chmod(backupsRoot, 0o700);
@@ -276,8 +276,8 @@ async function snapshot() {
     const manifest = {
       schemaVersion: 1,
       label,
-      sourceCommit: baseline?.commit || "",
-      sourceVersion: baseline?.version || (await fs.readFile(path.join(installRoot, "VERSION"), "utf8").catch(() => "unknown")).trim(),
+      sourceCommit: baseline.commit || "",
+      sourceVersion: baseline.version || "",
       createdAt: new Date().toISOString(),
       immutable: true,
       files,
@@ -395,6 +395,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`Codex Theme Studio: ${error.message}`);
+  console.error(`Codex Dream Skin Studio: ${error.message}`);
   process.exitCode = 1;
 });

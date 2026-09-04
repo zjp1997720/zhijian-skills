@@ -1,16 +1,14 @@
 # Codex Theme Studio
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Codex Theme Studio 设计、安装、验证并恢复可逆的 Codex Desktop 主题">
+  <img src="./assets/readme/hero.svg" width="100%" alt="两套 Codex 预设经过受约束的主题变量工作台，进入可验证、可恢复的 macOS Codex 会话">
 </p>
 
-<p align="center"><strong>把品牌系统和可选的 ImageGen 视觉资产，变成一套可还原、可验证的 macOS Codex Desktop 主题。</strong></p>
+<p align="center"><strong>不修改签名应用包，也能设计、应用、验证并恢复 macOS Codex 自定义皮肤。</strong></p>
 
 <p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-theme-studio">统一源码</a></p>
 
-当需求已经超出原生配色导出，涉及品牌化皮肤、响应式首页 Banner、任务页背景、注入后视觉修复或完整回退链路时，使用这个 Skill。
-
-这个项目的灵感来源于 [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin)。它在上游思路之上，把真实换肤过程沉淀成了可复用的设计、ImageGen、注入、验证与回滚工作流。
+Codex Theme Studio 把颜色、字体、本地图片、间距和品牌规范编译成一套可移植主题，并保留经过测试的恢复链路。它提供中性公开默认预设，也把“智见 AI”作为独立可选预设；会改变结构的布局调整则放在明确触发的高级模式中。
 
 ## 安装
 
@@ -19,57 +17,78 @@ npx skills add zjp1997720/zhijian-skills \
   -g -a codex --skill codex-theme-studio --copy -y
 ```
 
-安装后调用 `$codex-theme-studio`，并提供现有的品牌规范、`codex-theme-v1:` 导出、标注截图和视觉资产。
+安装后可以这样说：
 
-## 交付内容
-
-- 一份自包含主题目录：图片全部本地化，`theme.json` 经过校验。
-- 完整品牌 Token：背景、面板、文字、强调色、选中态、边框、字体和图片位置。
-- 可选调用 Codex 内置 `$imagegen`，创作 Banner 或整页背景。
-- 只通过本机回环 CDP 注入 CSS 和渲染辅助脚本，不修改签名应用包与 `app.asar`。
-- 不可变的原始主题快照和升级前快照，以及暂停、恢复和版本回退命令。
-- 可选的重启续载：仅在明确授权后安装用户级常驻管理器；Codex 关闭时它保持空闲。
-- 对首页、任务页、New Task 瞬时路由、顶部标签、四张功能卡、控件、横向溢出和背景图的严格验证。
-
-ImageGen 不可用时，Skill 会使用随包附带的中性暖纸 Banner。图片生成属于可选宿主能力，不构成安装依赖，也不会静默切换到需要 API Key 的备用通道。
-
-## 工作流程
-
-1. 读取品牌单一事实源，区分 Codex 原生交互与主题自有视觉。
-2. 只有设计确实需要时才生成或编辑图片；最终图片必须进入主题目录。
-3. 在已安装 Skill 之外组装主题，并完成载荷检查与确定性测试。
-4. 默认只安装、不启动；重启正在运行的 Codex 前单独取得明确授权。只有用户同时授权普通启动后的持续受管重启，才启用常驻管理器。
-5. 验证首页、任务页和 New Task 瞬时状态；一次只修一类缺陷。
-6. 交付主题源码、图片来源或提示词、验证证据、备份位置和精确恢复命令。
-
-## 安全机制
-
-运行时只支持官方 macOS Codex（`com.openai.codex`）。它会验证应用身份，把 Chrome DevTools Protocol 限制在 `127.0.0.1`，拒绝外部目标，校验图片路径与大小，保留原生主题键，并通过原子交换安装运行时和主题。
-
-它不会修改应用包、认证信息、代码仓库或对话数据。设计和安装授权不等于停止正在运行应用的授权。
-
-完整边界见[安全与回滚契约](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/safety-and-rollback.md)和[验证契约](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md)。
+```text
+使用 $codex-theme-studio 为官方 macOS Codex 设计一套暖纸主题。先生成并验证主题，不要重启 Codex。
+```
 
 ## 环境要求
 
-- macOS 与官方 Codex Desktop
-- Node.js 20+
+- macOS 与官方 Codex Desktop（`com.openai.codex`）
+- Codex 或兼容 Agent Skills 的宿主
 - Bash 和 macOS 标准命令行工具
-- 新建位图时可选使用内置 ImageGen 能力
+- 需要新建位图时，可选使用 Codex 内置 `$imagegen`
 
-主题运行时不需要 API Key，也不会发起外网请求；唯一实时网络面是本机 DevTools 端点。
+运行时会验证并使用 Codex 应用内已签名的 Node.js；开发测试要求 Node.js 20 或更高版本。
+
+## 能做什么
+
+- 校验颜色、UI 与代码字体、正文/重点/代码字重、本地图片、圆角、密度和选中态。
+- 内置无品牌默认预设 `graphite-paper`，使用抽象工作流图片。
+- 将 `zhijian-ai` 作为独立可选预设，并使用单独的图片授权；它不会混进通用默认主题。
+- 从用户明确提供的图片创建新主题，不覆盖 Skill 自带资产。
+- 只通过本机回环 Chrome DevTools Protocol 注入 CSS 和渲染辅助代码，不修改 `app.asar`。
+- 保留原生交互、焦点、滚动、键盘路径和点击区域。
+- 保存不可变的原始主题与升级前备份，提供暂停、恢复和上一版本回退命令。
+- 在报告成功前检查首页、任务页、New Task 瞬时状态、普通窗口和全屏状态。
+
+## 工作原理
+
+1. 先把任务判断为设计、应用、验证/修复或暂停/恢复。
+2. 默认只进入安全主题层。只有用户明确要求调整宽度、位置、排列或响应式结构时，才进入高级布局和兼容性诊断。
+3. 修改已安装运行时前，先校验主题目录并运行确定性测试。
+4. 默认只安装、不启动。停止并重启正在运行的 Codex 需要单独授权；常驻续载需要再次明确授权。
+5. 应用后运行 Doctor 和实时 Verify，检查页面截图；验证合同失败时先恢复再报告。
+
+主题工作台只接受经过约束的主题变量与本地位图，不执行任意用户 JavaScript，也不会用截图覆盖真实界面。
+
+## 示例请求
+
+```text
+使用 $codex-theme-studio 列出内置预设并准备 graphite-paper，不应用，也不重启。
+```
+
+```text
+使用 $codex-theme-studio 导入 zhijian-ai 预设，只安装不启动，然后等待我明确授权重启。
+```
+
+```text
+使用 $codex-theme-studio 排查 Codex 更新后对话字体失效的问题。核验稳定语义标记，实时检查失败时恢复官方外观。
+```
+
+## 安全与限制
+
+- 只支持官方 macOS Codex。Windows、Linux、ChatGPT 网页版、ZCode、豆包工作、非官方包和其他 Electron 应用不在范围内。
+- 不修改应用包、`app.asar`、代码签名、账号、对话、项目和认证数据。
+- CDP 只监听 `127.0.0.1`；修改前校验应用身份、renderer 身份、端口归属、图片路径、文件大小和备份。
+- 设计或安装授权不等于停止 Codex 的授权。常驻管理器默认关闭，也不能重新打开用户主动退出的 Codex。
+- 兼容性只按证据声明，不承诺“所有版本通用”。第二台全新 Mac 的端到端验收和未来 Codex 版本仍属于明确缺失的证据。
+
+完整说明见[能力边界](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/capability-boundary.md)、[验证合同](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md)与[信任报告](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/reports/trust-report.md)。
 
 ## 开发验证
 
 ```bash
 bash skills/codex-theme-studio/tests/run-tests.sh
-node skills/codex-theme-studio/scripts/injector.mjs --check-payload
+/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node \
+  skills/codex-theme-studio/scripts/injector.mjs --check-payload
 ```
 
-实机 Doctor 检查依赖本机 Codex 安装，因此与跨平台确定性测试分开执行。
+实时 Doctor 和截图检查需要本机已安装且获得授权的 Codex 会话，因此与跨平台确定性测试分开执行。
 
-## 来源与协议
+## 协议
 
-本项目的灵感来源于 MIT 协议的 [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin)，注入架构也基于该项目演进而来。本 Skill 增加了通用主题契约、可选 ImageGen 资产、签名与回环校验、不可变备份、响应式路由修复和公开打包。详情见随包提供的 `NOTICE.md`、`UPSTREAM_COMMIT` 和 `LICENSE`。
+软件采用 MIT 协议，并保留对 MIT 项目 [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin) 的署名；本实现的注入架构受该项目启发并在其基础上演进。
 
-Codex 与 OpenAI 是其各自权利人的商标。本项目是非官方社区项目，未获得 OpenAI 或上游项目背书。
+`zhijian-ai` 图片使用 `NOTICE.md` 中的单独限制性授权：允许作为本 Skill 的 Codex 预设使用，不允许拆出转售、换牌、冒充原创或用于无关商业产品。Codex 与 OpenAI 是其各自权利人的商标。本项目是非官方社区项目，未获得 OpenAI 背书。

@@ -76,9 +76,9 @@ async function snapshot() {
   const themeExportPath = valueFor("theme-export");
   const configPath = valueFor("config");
   const globalStatePath = valueFor("global-state");
-  if (!stateRoot || !configPath) {
+  if (!stateRoot || !themeExportPath || !configPath) {
     throw new Error(
-      "Usage: base-theme-state.mjs snapshot --state-root <dir> --config <file> [--theme-export <file>] [--global-state <file>]",
+      "Usage: base-theme-state.mjs snapshot --state-root <dir> --theme-export <file> --config <file> [--global-state <file>]",
     );
   }
 
@@ -99,16 +99,14 @@ async function snapshot() {
     if (error.code !== "ENOENT") throw error;
   }
 
-  if (themeExportPath) {
-    const exportValue = (await fs.readFile(themeExportPath, "utf8")).trim();
-    if (!exportValue.startsWith("codex-theme-v1:")) {
-      throw new Error("Base theme export must start with codex-theme-v1:.");
-    }
-    try {
-      JSON.parse(exportValue.slice("codex-theme-v1:".length));
-    } catch (error) {
-      throw new Error(`Base theme export JSON is invalid: ${error.message}`);
-    }
+  const exportValue = (await fs.readFile(themeExportPath, "utf8")).trim();
+  if (!exportValue.startsWith("codex-theme-v1:")) {
+    throw new Error("Base theme export must start with codex-theme-v1:.");
+  }
+  try {
+    JSON.parse(exportValue.slice("codex-theme-v1:".length));
+  } catch (error) {
+    throw new Error(`Base theme export JSON is invalid: ${error.message}`);
   }
   await fs.access(configPath);
 
@@ -118,8 +116,10 @@ async function snapshot() {
   await fs.rm(temporary, { recursive: true, force: true });
   await fs.mkdir(temporary, { mode: 0o700 });
 
-  const sources = [{ name: "config.toml.snapshot", source: configPath }];
-  if (themeExportPath) sources.unshift({ name: "codex-theme-v1.txt", source: themeExportPath });
+  const sources = [
+    { name: "codex-theme-v1.txt", source: themeExportPath },
+    { name: "config.toml.snapshot", source: configPath },
+  ];
   if (globalStatePath) {
     try {
       const globalState = JSON.parse(await fs.readFile(globalStatePath, "utf8"));
@@ -173,6 +173,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error(`Codex Theme Studio: ${error.message}`);
+  console.error(`Codex Dream Skin Studio: ${error.message}`);
   process.exitCode = 1;
 });

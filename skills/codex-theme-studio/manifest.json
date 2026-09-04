@@ -1,27 +1,27 @@
 {
   "name": "codex-theme-studio",
-  "version": "1.0.4",
+  "version": "1.2.0",
   "owner": "Zhijian AI",
-  "updated_at": "2026-07-17",
+  "updated_at": "2026-09-04",
   "status": "active",
   "maturity_tier": "governed",
   "lifecycle_stage": "governed",
-  "context_budget_tier": "governed",
-  "review_cadence": "monthly",
-  "review_due": "2026-08-17",
-  "skill_archetype": "governed",
-  "target_platforms": [
-    "openai",
-    "claude",
-    "generic",
-    "agent-skills-compatible"
-  ],
-  "factory_components": [
-    "references",
-    "scripts",
-    "assets",
-    "evals",
-    "security",
-    "skill-ir"
+  "context_budget_tier": "medium",
+  "review_cadence": "per-release",
+  "skill_archetype": "safety-critical-local-customization",
+  "target_platforms": ["openai", "agent-skills-compatible"],
+  "factory_components": ["references", "scripts", "assets", "presets", "evals", "reports", "tests"],
+  "input_files": {
+    "type": "file-backed fixture",
+    "allowed": ["png", "jpg", "jpeg", "webp", "theme.json", "screenshots"],
+    "network_upload": false
+  },
+  "output_contract": "reports/trust-report.md",
+  "rollback_boundary": "Only project-owned runtime, state, launchers, and managed loopback CDP sessions.",
+  "trust_report": "reports/trust-report.md",
+  "output_quality_scorecard": "reports/output_quality_scorecard.md",
+  "missing_evidence": [
+    "Fresh-machine acceptance on a second supported Mac",
+    "Live acceptance against future Codex versions not listed in the trust report"
   ]
 }

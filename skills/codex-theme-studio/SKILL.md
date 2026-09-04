@@ -1,44 +1,61 @@
 ---
 name: codex-theme-studio
-description: Design, generate visual assets for, safely install, verify, iterate, and restore custom themes for the official Codex Desktop app on macOS. Use when a user asks to redesign Codex UI, create/apply/inject/replace a Codex skin or theme, adapt Codex to a brand system, generate a Codex banner or page background, repair defects in an injected theme, or roll back a custom theme. Do not use for general Codex health/config debugging, ordinary website theming, Windows/Linux, or direct app.asar modification.
+description: Design, install, switch, verify, repair, pause, or restore reversible themes for the official Codex Desktop app on macOS. Use when a user asks to change Codex fonts, colors, artwork, homepage banners, radii, density, selection states, or advanced layout; reuse a bundled preset; diagnose a failed skin injection; or return to the official appearance. Do not use for Windows, Linux, ChatGPT web, ZCode, Doubao Work, third-party Codex builds, or direct app.asar modification.
 ---
 
 # Codex Theme Studio
 
-Turn a brand system and optional artwork into a reversible Codex Desktop theme through loopback-only Chrome DevTools injection.
+Turn a visual direction, brand system, or supplied image into a reversible Codex Desktop theme through loopback-only Chrome DevTools injection.
 
-## Boundaries
+## Modes
 
-- Support the official macOS app (`com.openai.codex`) only.
-- Never modify, unpack, replace, re-sign, or patch `app.asar` or the app bundle.
-- Keep CDP on `127.0.0.1` and reject foreign targets.
-- Preserve any supplied `codex-theme-v1:` export and native appearance keys.
-- Treat theme JSON and images as untrusted input; reject unsafe paths, symlinks, formats, and sizes.
-- Require explicit restart authorization before stopping a running Codex app.
-- Enable the resident manager only after explicit persistence authorization. Its recorded contract may restart a normally launched Codex once, but it must never launch an app the user has quit.
+- **Design**: prepare a portable theme directory and validate it without installing or restarting Codex.
+- **Apply**: run the safety preflight, install the runtime, and import or create a theme. Obtain explicit authorization before restarting a running Codex app.
+- **Verify or repair**: reproduce the affected route, run deterministic tests, Doctor, and live Verify, then repair only selector or layout failures supported by evidence.
+- **Pause or restore**: Pause removes the active styling. Restore also stops the managed CDP session and returns Codex to the official appearance.
 
 ## Workflow
 
-1. Collect the brand source of truth, current theme export, annotated screenshots, viewport, optional logo/IP, and image placement (`hero` or `all`). Read [design-workflow.md](references/design-workflow.md). Preserve native navigation, tabs, suggestion cards, composer controls, focus states, and hit targets.
-2. If a new raster Banner, texture, illustration, or page background is required, invoke `$imagegen` when available and follow [imagegen-assets.md](references/imagegen-assets.md). Keep logos and vector systems native. Copy every accepted project-bound image from `$CODEX_HOME/generated_images` into the prepared theme directory. If ImageGen is unavailable, use a supplied asset or the neutral fallback and record `missing evidence`.
-3. Build outside the installed Skill. Use `artPlacement=hero` by default; use `all` only for an intentional, readable task-page background. Follow [operator-runbook.md](references/operator-runbook.md) to write `theme.json`, check the payload, and test before live changes.
-4. Read [safety-and-rollback.md](references/safety-and-rollback.md). Install without launching. Apply only within the restart authorization boundary; never infer restart permission from design or installation permission. If the user explicitly requests restart persistence, install the opt-in resident manager after the runtime is installed.
-5. Follow [verification-contract.md](references/verification-contract.md). Verify home and task routes, sample the New Task transition, and inspect screenshots. Fix one defect class at a time and rerun the affected contract. Use [troubleshooting.md](references/troubleshooting.md) for selector drift, missing native UI, route races, crop problems, and CDP failures.
-6. Hand off the theme source, active name and placement, asset source or ImageGen prompt, backup location, screenshots, verification result, resident-manager status, and exact pause, disable, and restore commands.
+1. Read [capability-boundary.md](references/capability-boundary.md). Confirm the official macOS host, authorization boundary, and excluded targets.
+2. For design work, read [design-workflow.md](references/design-workflow.md), [theme-schema.md](references/theme-schema.md), and [preset-policy.md](references/preset-policy.md). For layout changes, also read [compatibility-policy.md](references/compatibility-policy.md).
+3. Run `./tests/run-tests.sh`. Repair failures before proceeding.
+4. For design-only work, build outside the installed Skill and validate the prepared directory with `./scripts/injector.mjs --check-payload --theme-dir <theme-directory>`.
+5. For installation, read [safety-and-rollback.md](references/safety-and-rollback.md), then run `./scripts/install-dream-skin-macos.sh --no-launch`.
+6. For a bundled preset, run `./scripts/list-presets.mjs`, then import it without applying: `./scripts/import-preset-macos.sh --id <preset-id> --no-apply`.
+7. For user-supplied artwork, use `./scripts/customize-theme-macos.sh`; never overwrite bundled Skill assets. If new raster artwork is required, invoke `$imagegen` when available and follow [imagegen-assets.md](references/imagegen-assets.md).
+8. Restart only with explicit authorization by running the installed `scripts/start-dream-skin-macos.sh --prompt-restart`. Persistence through the resident manager requires separate explicit authorization.
+9. Follow [verification-contract.md](references/verification-contract.md). Verify the home route, task route, New Task transition, normal window, and full screen. Inspect screenshots for overlap, overflow, weak contrast, crop errors, and missing native controls.
+10. If verification fails, use [troubleshooting.md](references/troubleshooting.md), repair one defect class at a time, and restore before reporting a failed outcome.
 
-## Output contract
+## Safe theme layer
 
-A complete result contains:
+Use this layer by default. It exposes validated colors, UI and code fonts, body/emphasis/code weights, local artwork, radii, density, and selection states. Prefer stable semantic markers and the native DOM. Decorative layers must use `pointer-events: none`.
 
-- one portable theme directory with local assets and valid `theme.json`
-- dry-check and deterministic test results
-- live route evidence when Codex access and restart authorization exist
-- immutable backup and an explicit rollback boundary
-- exact pause, restore, and previous-version recovery commands
-- resident-manager approval and disable command when persistence is enabled
+Bundled presets:
 
-Stop before mutation when app identity, loopback ownership, input safety, payload validation, or backup creation fails. A live verification failure leaves the prepared theme and backups intact for diagnosis.
+- `graphite-paper`: neutral, unbranded default with system fonts and abstract workflow artwork.
+- `zhijian-ai`: optional ZhiJian AI warm-paper preset with its separately licensed original control-lever banner.
 
-## Governed evidence
+## Advanced layout layer
 
-Implementation lives in `scripts/`; fixtures live in `evals/`. Every release declares a `file-backed fixture`, `input_files`, a testable `output contract`, an explicit `rollback boundary`, and a current `trust report`. Ship [output-eval-baseline.md](references/output-eval-baseline.md) and [trust-baseline.md](security/trust-baseline.md); generate run evidence locally at ignored `reports/output_quality_scorecard.md`. Treat unobserved Codex, ImageGen, human, or viewport coverage as `missing evidence`.
+Enter this layer only when the user explicitly asks to change component width, placement, arrangement, or responsive behavior. Every layout change must preserve native interaction, focus, scrolling, keyboard paths, and hit targets; use live semantic markers; cover every affected route; pass normal-window and full-screen checks; and add a deterministic regression assertion or verification probe.
+
+## output contract
+
+Report the mode, Skill version, Codex version, theme or preset ID, files and surfaces changed, deterministic test result, Doctor result, whether live Verify returned `pass: true`, screenshot paths, installation directory, restore entrypoint, official signature status, resident-manager status, and every unverified route or viewport.
+
+## Input files
+
+Treat supplied images, fonts, theme JSON, and screenshots as file-backed fixtures. Read only files the user explicitly provides. Do not search personal directories, upload artwork, or write local absolute paths into a distributable theme.
+
+## rollback boundary
+
+Rollback may touch only this project's runtime, state, launchers, and managed loopback CDP session. Never delete tasks, conversations, projects, or unrelated configuration. Never modify the official `.app`, `app.asar`, code signature, macOS security settings, or another application.
+
+## trust report
+
+Read [trust-report.md](reports/trust-report.md) before release, upgrade, or third-party delivery. Missing live, viewport, host, or future-version evidence must remain explicit `missing evidence`; do not claim universal or cross-version compatibility.
+
+## Do not use
+
+Do not use this Skill for Windows, Linux, ChatGPT web, unofficial Codex packages, ZCode, Doubao Work, other Electron applications, models, accounts, permissions, conversation content, arbitrary user JavaScript, screenshot overlays that replace real UI, unsigned app mutation, disabled signature checks, unauthorized persistence, or unauthorized restart.

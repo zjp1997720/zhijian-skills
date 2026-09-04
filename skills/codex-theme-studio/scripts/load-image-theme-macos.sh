@@ -46,13 +46,13 @@ if [ -z "$THEME_NAME" ]; then
   THEME_NAME="${base%.*}"
 fi
 THEME_NAME="$(printf '%s' "$THEME_NAME" | /usr/bin/tr -d '\n' | /usr/bin/cut -c1-80)"
-[ -n "$THEME_NAME" ] || THEME_NAME="Custom Theme"
+[ -n "$THEME_NAME" ] || THEME_NAME="我的主题"
 
 theme_id="img-$(/bin/date '+%Y%m%d%H%M%S')-$$"
 
 progress() {
   printf '%s\n' "$*" >&2
-  /usr/bin/osascript -e "display notification \"$*\" with title \"Codex Theme Studio\"" >/dev/null 2>&1 || true
+  /usr/bin/osascript -e "display notification \"$*\" with title \"Codex Dream Skin\"" >/dev/null 2>&1 || true
 }
 
 progress "Loading image..."
@@ -86,10 +86,9 @@ esac
 "$NODE" "$SCRIPT_DIR/write-theme.mjs" custom \
   --output-dir "$THEME_DIR" --image "$image_name" \
   --name "$THEME_NAME" \
-  --brand-label "$THEME_NAME" \
-  --tagline "Design quietly. Build clearly." \
-  --quote "DESIGN · APPLY · VERIFY · RESTORE" \
-  --accent "#DA7756" --secondary "#1B365D" --highlight "#1B365D" >/dev/null
+  --tagline "A focused workspace for serious work." \
+  --quote "MAKE SOMETHING USEFUL" \
+  --accent "#536272" --secondary "#273746" --highlight "#536272" >/dev/null
 
 lib_dir="$THEMES_ROOT/$theme_id"
 /bin/mkdir -p "$lib_dir"
@@ -126,5 +125,5 @@ if "$SCRIPT_DIR/start-dream-skin-macos.sh" --port "$PORT" --restart-existing; th
   exit 0
 fi
 
-/usr/bin/osascript -e 'display alert "Codex Theme Studio" message "Image saved but inject failed. Click Apply Skin."' >/dev/null 2>&1 || true
+/usr/bin/osascript -e 'display alert "Codex Dream Skin" message "Image saved but inject failed. Click Apply Skin."' >/dev/null 2>&1 || true
 exit 1

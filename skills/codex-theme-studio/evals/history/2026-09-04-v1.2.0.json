@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "version": "1.2.0",
+  "evaluatedAt": "2026-09-04",
+  "results": {
+    "staticSuite": "pass",
+    "outputAssertions": {
+      "baseline": "0/11",
+      "withSkill": "11/11"
+    },
+    "officialSkillValidator": "pass",
+    "governanceCheck": "pass",
+    "releaseScan": {
+      "status": "clear",
+      "blockers": 0,
+      "warnings": 3,
+      "warningPolicy": "Expected licensed PNG assets only"
+    },
+    "npxDiscovery": "pass",
+    "isolatedCopyInstall": "pass",
+    "isolatedInstalledSuite": "pass",
+    "liveVisualAfterUpgrade": "not-run"
+  },
+  "missingEvidence": [
+    "No Codex restart was authorized for this package-design task, so version 1.2.0 live visual verification was not run.",
+    "Second-Mac clean installation remains pending."
+  ]
+}

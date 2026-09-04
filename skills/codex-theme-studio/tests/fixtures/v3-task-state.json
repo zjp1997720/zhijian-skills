@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "mode": "task",
+  "installed": true,
+  "version": "1.2.0",
+  "stylePresent": true,
+  "chromePresent": false,
+  "chromePointerEvents": "none",
+  "viewport": { "width": 1920, "height": 1080 },
+  "documentOverflow": { "x": false, "y": true },
+  "shell": {
+    "main": { "width": 1580, "height": 1080, "visible": true },
+    "sidebar": { "width": 340, "height": 1080, "visible": true },
+    "composer": { "width": 760, "height": 112, "visible": true },
+    "composerVisual": {
+      "surface": {
+        "backgroundColor": "#FAF9F5",
+        "borderWidth": "0px",
+        "borderRadius": "14px",
+        "boxShadow": "none",
+        "position": "relative",
+        "focusWithin": false,
+        "before": null,
+        "after": {
+          "position": "absolute",
+          "left": "0px",
+          "top": "0px",
+          "right": "0px",
+          "bottom": "0px",
+          "borderWidth": "1px",
+          "borderRadius": "14px",
+          "borderColor": "#E5E3D8"
+        }
+      },
+      "body": {
+        "backgroundColor": "#FAF9F5",
+        "borderRadius": "13px",
+        "boxShadow": "none"
+      },
+      "backdrops": [
+        {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none"
+        },
+        {
+          "backgroundColor": "rgba(0, 0, 0, 0)",
+          "backgroundImage": "none"
+        }
+      ]
+    },
+    "structuralSurfaces": [
+      { "backgroundColor": "#F5F4ED", "width": 1580, "height": 1080, "visible": true },
+      { "backgroundColor": "rgb(245, 244, 237)", "width": 1580, "height": 72, "visible": true }
+    ],
+    "mainBackground": "#F5F4ED",
+    "sidebarBackground": "#F5F4ED",
+    "topBorderBottomWidth": 0,
+    "typography": {
+      "bodyWeight": 500,
+      "sidebarWeight": 500,
+      "sidebarControlWeight": 500,
+      "mainTextWeight": 500,
+      "composerWeight": 500,
+      "conversationHanTextCount": 6,
+      "conversationNonSerifHanTextCount": 0,
+      "emphasisWeights": [600]
+    },
+    "topHeaderBackground": "rgba(0, 0, 0, 0)",
+    "workspaceTabCount": 1,
+    "headerTabs": [
+      { "title": "README.md", "width": 184, "height": 28, "visible": true, "titleVisible": true, "titleLayerVisible": true, "titleOpacity": 1, "pointerEvents": "auto" }
+    ]
+  },
+  "task": { "backgroundImage": "none", "brandVisible": false }
+}
