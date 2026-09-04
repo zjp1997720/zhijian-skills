@@ -34,7 +34,7 @@ python3 "$SKILL_OPEN_SOURCER_DIR/scripts/scan_skill_release.py" \
 4. Inspect `SKILL.md` and directly referenced `agents/`, `references/`, `scripts/`, and `assets/`. Copy only the complete, sanitized install payload into `skills/<name>/`; preserve required license and third-party notices.
 5. Write the eight-field release story from [README design](references/readme-design.md), choose `clean-doc` or `proof-led`, then create or update bilingual docs, Changelog, Registry record, Portfolio catalog, and project-native visuals. A proof-led Hero must use a composition derived from the Skill's real mechanism or output; changing only the title and motif inside a shared layout fails review. Never expose a root-level `SKILL.md` or add human README files inside the Skill payload.
 6. Choose the version with [version-contract.md](references/version-contract.md). Use only the canonical Tag `<skill>/v<version>`.
-7. Freeze a release plan with the narrowest selector. Use `--skill <name>` for one Skill; reserve `--all` and optional `--exclude` for an intentional multi-Skill wave:
+7. Freeze a release plan with the narrowest selector. For a governed Skill, its `manifest.json` must declare `trust_report` and `output_quality_scorecard` as files inside the install payload; both files must exist and be tracked at `HEAD`. Planning fails before candidate refs are created when either baseline is undeclared, missing, untracked, or escapes the payload. Use `--skill <name>` for one Skill; reserve `--all` and optional `--exclude` for an intentional multi-Skill wave:
 
 ```bash
 python3 "$SKILL_OPEN_SOURCER_DIR/scripts/release_portfolio.py" plan \
@@ -110,6 +110,7 @@ Hard stop on:
 - a dirty or unverified canonical repository that cannot be reconciled safely
 - a `release-in-progress` or `needs-sync` checkout marker
 - remote `main` changing after the release plan is frozen
+- a governed `trust_report` or `output_quality_scorecard` that is undeclared, missing, outside the payload, or not tracked at `HEAD`
 
 Literal credential assignments are blockers. Runtime transformations such as URL-encoding a token variable are not literal secrets and must not be blocked by the generic assignment detector; high-confidence provider key patterns remain blocking.
 

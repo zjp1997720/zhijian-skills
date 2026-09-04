@@ -147,6 +147,115 @@ class ReleaseSelectionTests(unittest.TestCase):
             self.assertEqual(result.returncode, 2)
             self.assertIn("plan.selector_conflict", result.stderr)
 
+    def test_governed_skill_rejects_existing_but_untracked_baselines(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            self.make_repo(repo)
+            skill = repo / "skills" / "demo-one"
+            (repo / ".gitignore").write_text("reports/\n", encoding="utf-8")
+            (skill / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "maturity_tier": "governed",
+                        "lifecycle_stage": "governed",
+                        "trust_report": "reports/trust-report.md",
+                        "output_quality_scorecard": "reports/output_quality_scorecard.md",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.git(repo, "add", ".gitignore", "skills/demo-one/manifest.json")
+            self.git(repo, "commit", "-m", "declare ignored baselines")
+            self.git(repo, "push", "origin", "main")
+            reports = skill / "reports"
+            reports.mkdir()
+            (reports / "trust-report.md").write_text("trusted\n", encoding="utf-8")
+            (reports / "output_quality_scorecard.md").write_text("passed\n", encoding="utf-8")
+
+            plan_path = Path(tmp) / "plan.json"
+            result = self.run_plan(repo, plan_path, "--skill", "demo-one")
+
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("plan.baseline_untracked", result.stderr)
+            self.assertIn("reports/trust-report.md", result.stderr)
+            self.assertFalse(plan_path.exists())
+            refs = self.git(
+                repo,
+                "for-each-ref",
+                "--format=%(refname)",
+                "refs/zhijian-candidates",
+            )
+            self.assertEqual(refs, "")
+
+    def test_governed_skill_freezes_tracked_baseline_hashes(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            self.make_repo(repo)
+            skill = repo / "skills" / "demo-one"
+            (skill / "security").mkdir()
+            (skill / "references").mkdir()
+            (skill / "security" / "trust-baseline.md").write_text("trusted\n", encoding="utf-8")
+            (skill / "references" / "output-eval-baseline.md").write_text(
+                "passed\n", encoding="utf-8"
+            )
+            (skill / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "maturity_tier": "governed",
+                        "lifecycle_stage": "governed",
+                        "trust_report": "security/trust-baseline.md",
+                        "output_quality_scorecard": "references/output-eval-baseline.md",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.git(repo, "add", "skills/demo-one")
+            self.git(repo, "commit", "-m", "track governed baselines")
+            self.git(repo, "push", "origin", "main")
+
+            plan_path = Path(tmp) / "plan.json"
+            result = self.run_plan(repo, plan_path, "--skill", "demo-one")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            plan = json.loads(plan_path.read_text(encoding="utf-8"))
+            baselines = plan["releases"][0]["governance_baselines"]
+            self.assertEqual(
+                baselines["trust_report"]["path"],
+                "skills/demo-one/security/trust-baseline.md",
+            )
+            self.assertEqual(len(baselines["trust_report"]["sha256"]), 64)
+            self.assertEqual(
+                baselines["output_quality_scorecard"]["path"],
+                "skills/demo-one/references/output-eval-baseline.md",
+            )
+
+    def test_governed_skill_requires_both_baseline_declarations(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            self.make_repo(repo)
+            skill = repo / "skills" / "demo-one"
+            (skill / "manifest.json").write_text(
+                json.dumps(
+                    {
+                        "maturity_tier": "governed",
+                        "lifecycle_stage": "governed",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            self.git(repo, "add", "skills/demo-one/manifest.json")
+            self.git(repo, "commit", "-m", "declare governed skill")
+            self.git(repo, "push", "origin", "main")
+
+            result = self.run_plan(repo, Path(tmp) / "plan.json", "--skill", "demo-one")
+
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("plan.baseline_undeclared", result.stderr)
+            self.assertIn("manifest.trust_report", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()
