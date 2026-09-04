@@ -1,31 +1,29 @@
 # Output evaluation baseline
 
-Reviewed: 2026-07-17
+Reviewed: 2026-09-04
 
-Method: static Yao assertion grading over the checked-in cases and file-backed fixtures
+Method: deterministic assertion grading over the checked-in output cases
 
 ## Result
 
 | Metric | Value |
 | --- | ---: |
-| Cases | 6 |
-| File-backed cases | 3 |
-| Baseline pass rate | 0% |
-| With-Skill pass rate | 100% |
-| Delta | 100 points |
+| Cases | 3 |
+| Assertions | 11 |
+| Baseline assertions passed | 0 / 11 |
+| With-Skill assertions passed | 11 / 11 |
 | Regressions | 0 |
 | Static gate | Pass |
 
-All six with-Skill outputs satisfied their declared assertions: brand-to-reversible-theme, imagegen-banner-path, intentional-full-page-art, reject-app-bundle-patch, annotated-theme-repair, and governed-handoff-evidence.
+The cases cover safe installation, refusal to reuse Codex selectors in ZCode or Doubao Work, and design-only preparation without installation or restart. With-Skill outputs preserve official-app identity, loopback CDP, explicit authorization, verification, rollback, target boundaries, payload validation, and no-install behavior.
 
 ## Evidence boundary
 
-This baseline proves deterministic assertion coverage for the committed fixtures. It does not prove provider-backed behavior or visual quality on every Codex release.
+This baseline proves deterministic output-contract coverage for the committed cases. It does not prove provider-backed behavior, universal compatibility, or visual quality on every Codex release.
 
 - Independent blind human adjudication: missing evidence.
 - Provider-backed holdout execution: missing evidence.
-- Clean-account macOS installation: missing evidence.
-- Live ImageGen execution across supported hosts: missing evidence.
-- Multi-viewport live Codex screenshots for the public neutral theme: missing evidence.
+- Fresh second-Mac installation: missing evidence.
+- Live multi-viewport screenshots for the public `graphite-paper` preset: missing evidence.
 
-Generated scorecards stay local and ignored at `reports/output_quality_scorecard.md`. The release carries the source cases, assertions, fixtures, and this reproducible baseline.
+Generated scorecards remain local ignored evidence. The release carries the source cases and this reproducible baseline.

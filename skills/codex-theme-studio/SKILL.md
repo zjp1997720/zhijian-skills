@@ -54,7 +54,7 @@ Rollback may touch only this project's runtime, state, launchers, and managed lo
 
 ## trust report
 
-Read [trust-report.md](reports/trust-report.md) before release, upgrade, or third-party delivery. Missing live, viewport, host, or future-version evidence must remain explicit `missing evidence`; do not claim universal or cross-version compatibility.
+Read [trust-baseline.md](security/trust-baseline.md) before release, upgrade, or third-party delivery. Missing live, viewport, host, or future-version evidence must remain explicit `missing evidence`; do not claim universal or cross-version compatibility.
 
 ## Do not use
 

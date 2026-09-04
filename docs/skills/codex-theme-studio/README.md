@@ -75,7 +75,7 @@ Use $codex-theme-studio to diagnose why the conversation typography stopped appl
 - Design or installation permission does not authorize stopping Codex. The resident manager is opt-in and must not relaunch an app the user intentionally quit.
 - Compatibility is evidence-based, not universal. A fresh second-Mac end-to-end run and future Codex versions remain explicit missing evidence until tested.
 
-See the [capability boundary](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/capability-boundary.md), [verification contract](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md), and [trust report](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/reports/trust-report.md).
+See the [capability boundary](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/capability-boundary.md), [verification contract](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md), and [trust baseline](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/security/trust-baseline.md).
 
 ## Validation
 

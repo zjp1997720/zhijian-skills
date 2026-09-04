@@ -75,7 +75,7 @@ npx skills add zjp1997720/zhijian-skills \
 - 设计或安装授权不等于停止 Codex 的授权。常驻管理器默认关闭，也不能重新打开用户主动退出的 Codex。
 - 兼容性只按证据声明，不承诺“所有版本通用”。第二台全新 Mac 的端到端验收和未来 Codex 版本仍属于明确缺失的证据。
 
-完整说明见[能力边界](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/capability-boundary.md)、[验证合同](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md)与[信任报告](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/reports/trust-report.md)。
+完整说明见[能力边界](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/capability-boundary.md)、[验证合同](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md)与[信任基线](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/security/trust-baseline.md)。
 
 ## 开发验证
 
