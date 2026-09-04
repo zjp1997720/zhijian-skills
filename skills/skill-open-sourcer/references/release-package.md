@@ -35,6 +35,18 @@ Every Skill uses the nested install-payload layout. The Portfolio root must not 
 6. Add a canonical-only Registry record with version, paths, validation, capabilities, and Harnesses.
 7. Update root catalogs and deterministic README assets.
 
+For governed packages, keep reusable release evidence inside the install payload and declare it in `manifest.json`:
+
+```json
+{
+  "maturity_tier": "governed",
+  "trust_report": "security/trust-baseline.md",
+  "output_quality_scorecard": "references/output-eval-baseline.md"
+}
+```
+
+Both paths must remain inside the Skill directory and be tracked at `HEAD`. A locally generated or ignored `reports/` file does not count as public release evidence.
+
 Do not create `SOURCE.json`, redirect workflows, repository-specific release roots, standalone Tags, or mirror metadata.
 
 ## Documentation contract

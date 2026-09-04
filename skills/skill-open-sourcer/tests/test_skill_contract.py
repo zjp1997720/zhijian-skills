@@ -53,6 +53,16 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("ls-remote", guard)
         self.assertIn("pre-commit", guard)
 
+    def test_release_plan_requires_committed_governance_baselines(self) -> None:
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        contract = (ROOT / "references" / "release-contract.md").read_text(
+            encoding="utf-8"
+        )
+        for text in (skill, contract):
+            self.assertIn("trust_report", text)
+            self.assertIn("output_quality_scorecard", text)
+            self.assertIn("tracked at `HEAD`", text)
+
 
 if __name__ == "__main__":
     unittest.main()

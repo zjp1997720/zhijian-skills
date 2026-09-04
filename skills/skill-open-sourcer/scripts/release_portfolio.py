@@ -52,6 +52,11 @@ IGNORED_PARTS = {
     "reports",
 }
 
+GOVERNANCE_BASELINE_FIELDS = (
+    "trust_report",
+    "output_quality_scorecard",
+)
+
 
 def file_manifest(root: Path) -> dict[str, str]:
     result: dict[str, str] = {}
@@ -99,6 +104,87 @@ def path_digest(path: Path) -> str:
 
 def file_digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else "missing"
+
+
+def governance_baselines(repo: Path, record: dict[str, Any]) -> dict[str, dict[str, str]]:
+    """Resolve and freeze committed governance evidence declared by a Skill."""
+    skill_root = (repo / record["path"]).resolve()
+    manifest_path = skill_root / "manifest.json"
+    if not manifest_path.exists():
+        return {}
+    if not manifest_path.is_file():
+        raise ReleaseError(f"plan.manifest_invalid: {record['name']}: manifest.json is not a file")
+
+    manifest_relative = manifest_path.relative_to(repo).as_posix()
+    tracked_manifest = git(
+        repo,
+        "cat-file",
+        "-e",
+        f"HEAD:{manifest_relative}",
+        check=False,
+    )
+    if tracked_manifest.returncode != 0:
+        raise ReleaseError(
+            f"plan.manifest_untracked: {record['name']}: {manifest_relative} is not tracked at HEAD"
+        )
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ReleaseError(
+            f"plan.manifest_invalid: {record['name']}: cannot read manifest.json"
+        ) from exc
+    if not isinstance(manifest, dict):
+        raise ReleaseError(
+            f"plan.manifest_invalid: {record['name']}: manifest.json must contain an object"
+        )
+    governed = (
+        manifest.get("maturity_tier") == "governed"
+        or manifest.get("lifecycle_stage") == "governed"
+    )
+    baselines: dict[str, dict[str, str]] = {}
+    for field in GOVERNANCE_BASELINE_FIELDS:
+        declared = manifest.get(field)
+        if declared is None:
+            if governed:
+                raise ReleaseError(
+                    f"plan.baseline_undeclared: {record['name']}: manifest.{field} is required"
+                )
+            continue
+        if not isinstance(declared, str) or not declared.strip():
+            raise ReleaseError(
+                f"plan.baseline_invalid: {record['name']}: manifest.{field} must be a relative file path"
+            )
+
+        baseline_path = (skill_root / declared).resolve()
+        try:
+            baseline_path.relative_to(skill_root)
+            baseline_relative = baseline_path.relative_to(repo).as_posix()
+        except ValueError as exc:
+            raise ReleaseError(
+                f"plan.baseline_unsafe: {record['name']}: manifest.{field} escapes the Skill payload"
+            ) from exc
+        if not baseline_path.is_file():
+            raise ReleaseError(
+                f"plan.baseline_missing: {record['name']}: manifest.{field} -> {baseline_relative}"
+            )
+        tracked = git(
+            repo,
+            "cat-file",
+            "-e",
+            f"HEAD:{baseline_relative}",
+            check=False,
+        )
+        if tracked.returncode != 0:
+            raise ReleaseError(
+                f"plan.baseline_untracked: {record['name']}: manifest.{field} -> "
+                f"{baseline_relative} is not tracked at HEAD"
+            )
+        baselines[field] = {
+            "path": baseline_relative,
+            "sha256": file_digest(baseline_path),
+        }
+    return baselines
 
 
 def pinned_skills_version(repo: Path) -> str:
@@ -234,6 +320,7 @@ def build_release_plan(
         changed, reason = record_changed(repo, record)
         if not changed:
             continue
+        baselines = governance_baselines(repo, record)
         payload = {
             "skill": record["name"],
             "version": record["version"],
@@ -249,6 +336,7 @@ def build_release_plan(
             ),
             "semver_reason": reason,
             "validation_commands": record.get("validation", {}).get("commands", []),
+            "governance_baselines": baselines,
             "status": "prepared",
         }
         releases.append(payload)
@@ -302,6 +390,8 @@ def verify_plan(plan: dict[str, Any], *, check_remote: bool = True) -> None:
         record = records.get(release["skill"])
         if not record or path_digest(repo / record["path"]) != release["content_digest"]:
             raise ReleaseError(f"plan.stale: payload changed for {release['skill']}")
+        if governance_baselines(repo, record) != release.get("governance_baselines", {}):
+            raise ReleaseError(f"plan.stale: governance baselines changed for {release['skill']}")
         current_docs = digest_json(
             {
                 "en": file_digest(repo / record["documentation"]),

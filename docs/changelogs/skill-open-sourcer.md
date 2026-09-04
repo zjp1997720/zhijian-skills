@@ -1,5 +1,11 @@
 # skill-open-sourcer Changelog
 
+## 2.4.2 — 2026-09-04
+
+- Fail release planning before candidate creation when a governed Skill does not declare both `trust_report` and `output_quality_scorecard`.
+- Require each declared governance baseline to stay inside the Skill payload, exist as a file, and be tracked at `HEAD`.
+- Freeze verified baseline paths and SHA-256 digests into the immutable release plan so ignored local reports cannot satisfy public release evidence.
+
 ## 2.4.1 — 2026-07-27
 
 - Exclude generated `dist`, `coverage`, and `reports` directories from isolated-install payload manifests, matching the canonical release manifest and preventing local test artifacts from causing false remote mismatches.

@@ -41,7 +41,7 @@ npx skills add zjp1997720/zhijian-skills \
 
 ## 原理
 
-这个 Skill 把“开源一个 Skill”定义为向统一 Portfolio 导入。直接提供 `SKILL.md` 只用于识别导入对象，不再触发新建仓库模式。README 会先锁定受众、重复问题、价值、证据、首次动作、安全边界、原生素材和呈现层级；采用 `proof-led` 时，再从 Skill 的真实机制或输出中推导独立构图。`verify_isolated_install.py` 会在临时 HOME 与工作区中以 copy 模式安装单个 Skill，并与统一源码逐文件比较。发布计划绑定实时远端 SHA；临时集成 clone 会冻结原 checkout，直到它完成同步。统一远端、代码归属、安全扫描、载荷完整性、README 证据、安装证明或远端历史连续性任何一项失败，发布都会停止。
+这个 Skill 把“开源一个 Skill”定义为向统一 Portfolio 导入。直接提供 `SKILL.md` 只用于识别导入对象，不再触发新建仓库模式。README 会先锁定受众、重复问题、价值、证据、首次动作、安全边界、原生素材和呈现层级；采用 `proof-led` 时，再从 Skill 的真实机制或输出中推导独立构图。`verify_isolated_install.py` 会在临时 HOME 与工作区中以 copy 模式安装单个 Skill，并与统一源码逐文件比较。发布计划绑定实时远端 SHA；临时集成 clone 会冻结原 checkout，直到它完成同步。受治理的 Skill 必须提交 manifest 声明的 `trust_report` 与 `output_quality_scorecard`，被忽略的本地报告不能充当发布证据。统一远端、代码归属、安全扫描、载荷完整性、治理基线、README 证据、安装证明或远端历史连续性任何一项失败，发布都会停止。
 
 ## 示例请求
 
