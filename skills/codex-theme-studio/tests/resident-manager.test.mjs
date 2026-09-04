@@ -5,12 +5,13 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (file) => fs.readFile(path.join(root, file), "utf8");
-const [common, manager, installer, pause, restore] = await Promise.all([
+const [common, manager, installer, pause, restore, injector] = await Promise.all([
   read("scripts/common-macos.sh"),
   read("scripts/resident-manager-macos.sh"),
   read("scripts/install-resident-manager-macos.sh"),
   read("scripts/pause-dream-skin-macos.sh"),
   read("scripts/restore-dream-skin-macos.sh"),
+  read("scripts/injector.mjs"),
 ]);
 
 assert.match(manager, /codex_is_running/);
@@ -19,7 +20,15 @@ assert.match(manager, /recorded_injector_is_running/);
 assert.match(manager, /--restart-existing/);
 assert.match(manager, /now - last_restart/);
 assert.match(manager, /-lt 45/);
+assert.match(manager, /last_injector_repair/);
+assert.match(manager, /-lt 300/);
 assert.doesNotMatch(manager, /launch_codex_(?:normally|with_cdp)/);
+
+assert.match(injector, /location\.pathname === '\/index\.html'/);
+assert.match(injector, /isCodexRendererProbe\(probe\)/);
+assert.doesNotMatch(injector, /document\.title === 'Codex'/);
+assert.match(injector, /querySelector\('main, \[role="main"\]'/);
+assert.match(injector, /process\.exit\(1\)/);
 
 assert.match(installer, /autoRestartNormalLaunch:\s*true/);
 assert.match(installer, /<key>RunAtLoad<\/key><true\/>/);

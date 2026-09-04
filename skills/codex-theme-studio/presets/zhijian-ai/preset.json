@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "zhijian-ai",
+  "name": "智见 AI 暖纸工作台",
+  "kind": "branded",
+  "license": "ZhiJian preset license; see NOTICE.md",
+  "description": "智见 AI 公开演示预设。允许随本 Skill 在官方 macOS Codex 中使用；禁止拆包转售、冒充原创或用于其他品牌。",
+  "assetSha256": "85801eb03c46daed14c4f4df43139e02f5b06dd79a781f1c1d801f96f11d1999"
+}

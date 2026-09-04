@@ -146,21 +146,36 @@ def skill_admin() -> str:
 
 
 def theme_studio() -> str:
-    bg, ink, purple, coral, mint, paper = "#EEE9FF", "#24213A", "#6C4CF5", "#FF6B6B", "#59C9A5", "#FFFDF8"
+    bg, paper, ink, clay, navy, muted = "#F5F4ED", "#FAF9F5", "#141413", "#B85235", "#1B365D", "#77766F"
     body = [
-        text(54, 52, "CODEX EXPERIENCE / REVERSIBLE", 15, purple, 750, family=MONO, letter_spacing="1.8"),
-        text(54, 116, "Theme", 54, ink, 760), text(54, 172, "Studio", 54, ink, 760),
-        text(54, 216, "Brand the app. Verify every route.", 22, "#5F5874", 500),
-        rect(54, 257, 46, 46, purple, 8), rect(112, 257, 46, 46, coral, 8), rect(170, 257, 46, 46, mint, 8), rect(228, 257, 46, 46, ink, 8),
-        text(300, 286, "APPLY  •  PAUSE  •  RESTORE", 16, ink, 700, family=MONO),
-        rect(520, 42, 620, 276, paper, 14, ink, 2),
-        rect(520, 42, 620, 38, ink, 12), circle(545, 61, 5, coral), circle(562, 61, 5, "#FFD166"), circle(579, 61, 5, mint),
-        rect(544, 100, 138, 194, "#E6E0F6", 10),
+        text(48, 45, "CODEX THEME STUDIO", 15, clay, 800, family=MONO, letter_spacing="1.8"),
+        text(48, 84, "Preset", 42, ink, 760), text(48, 126, "workbench", 42, ink, 760),
+        text(48, 157, "Safe variables in. Verified UI out.", 18, muted, 520),
+        rect(48, 184, 304, 58, paper, 12, navy, 2),
+        circle(76, 213, 12, navy), text(100, 208, "GRAPHITE PAPER", 15, ink, 760, family=MONO),
+        text(100, 228, "neutral default", 13, muted, 520, family=MONO),
+        rect(48, 252, 304, 58, "#F2E9DE", 12, clay, 2),
+        circle(76, 281, 12, clay), text(100, 276, "ZHIJIAN AI", 15, ink, 760, family=MONO),
+        text(100, 296, "optional preset", 13, muted, 520, family=MONO),
+        rect(388, 38, 344, 280, paper, 16, "#D8D4C9", 2),
+        text(414, 70, "SAFE THEME LAYER", 14, navy, 800, family=MONO),
+        text(414, 101, "COLORS", 12, muted, 700, family=MONO),
+        circle(489, 97, 8, clay), circle(513, 97, 8, navy), circle(537, 97, 8, ink),
+        line(414, 116, 706, 116, "#DDD9CF", 1),
+        text(414, 145, "UI WEIGHT", 12, muted, 700, family=MONO), text(608, 145, "500", 16, ink, 800, family=MONO),
+        text(414, 177, "EMPHASIS", 12, muted, 700, family=MONO), text(608, 177, "600", 16, ink, 800, family=MONO),
+        text(414, 209, "RADIUS", 12, muted, 700, family=MONO), text(608, 209, "14", 16, ink, 800, family=MONO),
+        text(414, 241, "DENSITY", 12, muted, 700, family=MONO), text(608, 241, "CALM", 16, ink, 800, family=MONO),
+        rect(414, 269, 292, 28, "#EEECE6", 14), text(560, 288, "VALIDATED THEME.JSON", 12, navy, 800, family=MONO, text_anchor="middle"),
+        line(732, 178, 786, 178, navy, 2), circle(759, 178, 5, clay),
+        rect(786, 54, 366, 248, ink, 16),
+        text(812, 86, "OFFICIAL macOS CODEX", 14, paper, 800, family=MONO),
+        rect(812, 108, 314, 44, navy, 9), text(969, 136, "127.0.0.1  /  CDP", 14, paper, 750, family=MONO, text_anchor="middle"),
+        rect(812, 166, 146, 76, "#F4EFE5", 10), text(885, 194, "HOME", 13, ink, 800, family=MONO, text_anchor="middle"), text(885, 220, "PASS ✓", 14, clay, 800, family=MONO, text_anchor="middle"),
+        rect(980, 166, 146, 76, "#F4EFE5", 10), text(1053, 194, "TASK", 13, ink, 800, family=MONO, text_anchor="middle"), text(1053, 220, "PASS ✓", 14, clay, 800, family=MONO, text_anchor="middle"),
+        text(812, 275, "PAUSE  •  VERIFY  •  RESTORE", 13, "#D9D5CA", 700, family=MONO),
     ]
-    for index, width in enumerate((82, 104, 65, 98, 76)):
-        body += [rect(564, 126 + index * 31, width, 7, "#8B83A3", 3)]
-    body += [rect(706, 100, 408, 82, bg, 10), text(730, 132, "WELCOME BACK", 15, purple, 750, family=MONO), text(730, 160, "Codex, in your visual language.", 22, ink, 700), rect(706, 202, 194, 92, ink, 10), rect(920, 202, 194, 92, "#F6EFE7", 10), circle(758, 247, 18, coral), circle(972, 247, 18, mint), text(808, 252, "task route", 16, paper, 650), text(1024, 252, "home route", 16, ink, 650), text(1094, 310, "VERIFY ✓", 14, mint, 800, family=MONO, text_anchor="end")]
-    return svg("Codex Theme Studio", "A reversible Codex Desktop theme shown as a branded interface with verified routes.", bg, "theme-artboards", body)
+    return svg("Codex Theme Studio", "Two bundled presets flow through a constrained theme-variable workbench into a verified loopback Codex session with pause and restore controls.", bg, "preset-guardrail-console", body)
 
 
 def enterprise_clone() -> str:

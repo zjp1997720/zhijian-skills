@@ -1,4 +1,4 @@
 interface:
   display_name: "Codex Theme Studio"
-  short_description: "Design and safely apply reversible Codex themes"
-  default_prompt: "Use $codex-theme-studio to design, install, verify, and preserve rollback for a custom Codex Desktop theme."
+  short_description: "安全设计、安装、验证并恢复 macOS Codex 皮肤"
+  default_prompt: "Use $codex-theme-studio to design or apply a reversible theme to my official macOS Codex app, verify it live, and preserve a safe restore path."

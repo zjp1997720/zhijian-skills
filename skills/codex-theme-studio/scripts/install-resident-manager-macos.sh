@@ -16,7 +16,7 @@ done
 ensure_state_root
 if [ "$DISABLE" = "true" ]; then
   disable_resident_manager
-  printf 'Codex Theme Studio resident manager disabled.\n'
+  printf 'Codex Dream Skin resident manager disabled.\n'
   exit 0
 fi
 
@@ -74,4 +74,4 @@ if ! /bin/launchctl bootstrap "$domain" "$RESIDENT_MANAGER_PLIST"; then
 fi
 /bin/launchctl kickstart -k "$domain/$RESIDENT_MANAGER_JOB_LABEL" >/dev/null 2>&1 || true
 
-printf 'Codex Theme Studio resident manager enabled on loopback port %s. Normal Codex launches will be restarted once to restore the theme.\n' "$PORT"
+printf 'Codex Dream Skin resident manager enabled on loopback port %s. Normal Codex launches will be restarted once to restore the theme.\n' "$PORT"

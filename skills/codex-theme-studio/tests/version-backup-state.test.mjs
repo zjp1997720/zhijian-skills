@@ -61,10 +61,14 @@ try {
 
   const installerSource = await fs.readFile(path.join(root, "scripts/install-dream-skin-macos.sh"), "utf8");
   assert.match(installerSource, /validate_port "\$PORT"/);
+  assert.match(installerSource, /INSTALLED_VERSION=/, "installer must identify the existing engine version");
+  assert.match(installerSource, /BASELINE_VERSION=/, "installer must read the immutable snapshot version");
+  const baselineGuard = installerSource.indexOf('if [ "$INSTALLED_VERSION" = "$BASELINE_VERSION" ]; then');
   const startSource = await fs.readFile(path.join(root, "scripts/start-dream-skin-macos.sh"), "utf8");
   assert.match(startSource, /validate_port "\$PORT"/);
   const snapshotCall = installerSource.indexOf("version-backup-state.mjs\" snapshot");
   const deployCall = installerSource.indexOf("\n  deploy_project\n");
+  assert.ok(baselineGuard >= 0 && snapshotCall > baselineGuard, "only the immutable V2 baseline may be snapshotted");
   assert.ok(snapshotCall >= 0 && deployCall > snapshotCall, "V2 snapshot must run before deploy_project");
   assert.match(installerSource, /rsync -a --checksum/, "deploy must compare content after timestamp-preserving restores");
 
@@ -124,22 +128,6 @@ try {
   assert.equal(JSON.parse(await fs.readFile(path.join(fixture.themeDir, "theme.json"))).id, "v2");
   await assert.rejects(fs.access(path.join(fixture.themeDir, "v3.png")));
   assert.equal((await fs.stat(path.join(fixture.installRoot, "scripts/start.sh"))).mode & 0o777, 0o700);
-
-  const generic = await createFixture("generic-label");
-  const genericSnapshot = JSON.parse((await invoke(
-    "snapshot",
-    "--state-root", generic.stateRoot,
-    "--install-root", generic.installRoot,
-    "--theme-dir", generic.themeDir,
-    "--label", "pre-upgrade-1.1.2",
-  )).stdout);
-  assert.equal(genericSnapshot.pass, true);
-  assert.equal(genericSnapshot.label, "pre-upgrade-1.1.2");
-  const genericManifest = JSON.parse(await fs.readFile(
-    path.join(generic.stateRoot, "version-backups/pre-upgrade-1.1.2/manifest.json"),
-    "utf8",
-  ));
-  assert.equal(genericManifest.sourceVersion, "1.1.2");
 
   const zeroMode = await createFixture("zero-mode");
   await invoke(

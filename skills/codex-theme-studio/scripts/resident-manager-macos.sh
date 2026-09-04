@@ -16,6 +16,7 @@ resident_log() {
 }
 
 last_restart=0
+last_injector_repair=0
 while resident_manager_enabled; do
   if ! codex_is_running; then
     /bin/sleep 2
@@ -33,6 +34,12 @@ while resident_manager_enabled; do
 
   if verified_cdp_endpoint "$port" 2>/dev/null; then
     if ! recorded_injector_is_running; then
+      now="$(/bin/date +%s)"
+      if [ $((now - last_injector_repair)) -lt 300 ]; then
+        /bin/sleep 2
+        continue
+      fi
+      last_injector_repair="$now"
       resident_log "repairing injector on verified port $port"
       if ! "$SCRIPT_DIR/start-dream-skin-macos.sh" --port "$port" >>"$RESIDENT_MANAGER_LOG" 2>>"$RESIDENT_MANAGER_ERROR_LOG"; then
         resident_log "injector repair failed"
@@ -42,6 +49,7 @@ while resident_manager_enabled; do
     continue
   fi
 
+  # Give a normal app launch time to finish before the one authorized restart.
   /bin/sleep 2
   codex_is_running || continue
   verified_cdp_endpoint "$port" 2>/dev/null && continue

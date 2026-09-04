@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "zhijian-warm-paper-os",
+  "name": "智见 AI 工作台",
+  "brandSubtitle": "",
+  "tagline": "",
+  "projectPrefix": "",
+  "projectLabel": "工作区",
+  "statusText": "",
+  "quote": "",
+  "image": "portal-hero-v2.png",
+  "typography": {
+    "uiFamily": "思源宋体 VF, Source Han Serif SC VF, Source Han Serif SC, serif",
+    "codeFamily": "SF Mono, ui-monospace, monospace",
+    "bodyWeight": 500,
+    "emphasisWeight": 600,
+    "codeWeight": 400
+  },
+  "shape": {
+    "controlRadius": 6,
+    "cardRadius": 8,
+    "heroRadius": 16,
+    "composerRadius": 14
+  },
+  "density": {
+    "homeGap": 24,
+    "suggestionMinHeight": 112
+  },
+  "colors": {
+    "background": "#F5F4ED",
+    "panel": "#FAF9F5",
+    "panelAlt": "#E8E6DC",
+    "sidebar": "#F5F4ED",
+    "selected": "#EEECE6",
+    "border": "#E5E3D8",
+    "paperBlue": "#EEF2F7",
+    "accent": "#B85235",
+    "accentAlt": "#C96442",
+    "secondary": "#1B365D",
+    "highlight": "#1B365D",
+    "text": "#141413",
+    "muted": "#6B6A64",
+    "line": "rgba(20, 20, 19, .12)"
+  }
+}

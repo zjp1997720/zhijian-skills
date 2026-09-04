@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "mode": "home",
+  "installed": true,
+  "version": "1.2.0",
+  "stylePresent": true,
+  "chromePresent": false,
+  "chromePointerEvents": "none",
+  "viewport": { "width": 1440, "height": 900 },
+  "documentOverflow": { "x": false, "y": false },
+  "shell": {
+    "main": { "width": 1120, "height": 900, "visible": true },
+    "sidebar": { "width": 320, "height": 900, "visible": true },
+    "composer": { "width": 720, "height": 112, "visible": true },
+    "composerVisual": {
+      "surface": {
+        "backgroundColor": "#FAF9F5",
+        "borderWidth": "0px",
+        "borderRadius": "14px",
+        "boxShadow": "none",
+        "position": "relative",
+        "focusWithin": true,
+        "before": {
+          "position": "absolute",
+          "left": "0px",
+          "top": "14px",
+          "width": "3px",
+          "height": "20px",
+          "backgroundColor": "#B85235"
+        },
+        "after": {
+          "position": "absolute",
+          "left": "0px",
+          "top": "0px",
+          "right": "0px",
+          "bottom": "0px",
+          "borderWidth": "1px",
+          "borderRadius": "14px",
+          "borderColor": "#E5E3D8"
+        }
+      },
+      "body": {
+        "backgroundColor": "#FAF9F5",
+        "borderRadius": "13px",
+        "boxShadow": "none"
+      },
+      "backdrops": []
+    },
+    "structuralSurfaces": [
+      { "backgroundColor": "#F5F4ED", "width": 1120, "height": 900, "visible": true },
+      { "backgroundColor": "rgb(245, 244, 237)", "width": 1120, "height": 60, "visible": true }
+    ],
+    "mainBackground": "rgb(245, 244, 237)",
+    "sidebarBackground": "rgb(245, 244, 237)",
+    "topBorderBottomWidth": 0,
+    "typography": {
+      "bodyWeight": 500,
+      "sidebarWeight": 500,
+      "sidebarControlWeight": 500,
+      "mainTextWeight": 500,
+      "composerWeight": 500,
+      "emphasisWeights": [600]
+    }
+  },
+  "home": {
+    "enhancementHookPresent": true,
+    "suggestionsPresent": true,
+    "hero": { "width": 1080, "height": 224, "visible": true, "backgroundImage": "url(blob:hero)", "backgroundSize": "cover" },
+    "cardColumns": 4,
+    "cards": [
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true },
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true },
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true },
+      { "tagName": "BUTTON", "role": "button", "focusable": true, "clipped": false, "iconOffset": { "x": 0, "y": 0 }, "width": 252, "height": 112, "visible": true }
+    ],
+    "selectedSession": { "backgroundColor": "rgb(238, 236, 230)", "borderLeftWidth": 0 }
+  }
+}

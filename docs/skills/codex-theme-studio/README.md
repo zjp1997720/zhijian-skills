@@ -1,16 +1,14 @@
 # Codex Theme Studio
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Codex Theme Studio designs, installs, verifies, and restores reversible Codex Desktop themes">
+  <img src="./assets/readme/hero.svg" width="100%" alt="Two Codex presets pass through validated theme controls into a verified, reversible macOS Codex session">
 </p>
 
-<p align="center"><strong>Turn a brand system and optional ImageGen artwork into a reversible, verified theme for Codex Desktop on macOS.</strong></p>
+<p align="center"><strong>Design, apply, verify, and restore a custom macOS Codex theme without modifying the signed app bundle.</strong></p>
 
 <p align="center"><a href="./README.zh-CN.md">简体中文</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-theme-studio">Canonical source</a></p>
 
-Use it when you want more than a palette export: a branded Codex skin, a responsive homepage Banner, an intentional task-page background, repairs to an injected theme, or a reliable path back to the original appearance.
-
-This project is inspired by [Fei-Away/Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin). It turns that upstream idea into a reusable workflow for design, ImageGen artwork, injection, verification, and rollback.
+Codex Theme Studio turns colors, fonts, local artwork, spacing, and an optional brand system into a portable theme with a tested rollback path. It includes a neutral public default and an optional ZhiJian AI preset, while keeping structural layout work behind an explicit advanced mode.
 
 ## Install
 
@@ -19,57 +17,78 @@ npx skills add zjp1997720/zhijian-skills \
   -g -a codex --skill codex-theme-studio --copy -y
 ```
 
-Then invoke `$codex-theme-studio` and provide the best available brand guide, current `codex-theme-v1:` export, annotated screenshots, and visual assets.
+Then ask:
 
-## What It Delivers
-
-- A self-contained theme directory with local assets and validated `theme.json`.
-- Brand tokens for surfaces, text, accent, selection, borders, typography, and art placement.
-- Optional Banner or background creation through Codex's built-in `$imagegen` Skill.
-- Loopback-only CSS and renderer injection without changing the signed app bundle or `app.asar`.
-- Immutable base-theme and pre-upgrade backups, plus pause, restore, and version-rollback commands.
-- Optional restart persistence through an explicitly authorized, user-level resident manager that stays idle while Codex is closed.
-- Strict checks for home, task, New Task transition, native tabs, suggestion cards, controls, overflow, and expected artwork.
-
-The bundled neutral warm-paper Banner keeps the workflow usable when ImageGen is unavailable. Image generation is an optional host capability, not an installation dependency and never an excuse to switch silently to an API-key-based fallback.
-
-## How the Workflow Runs
-
-1. Read the brand source and separate native Codex behavior from theme-owned styling.
-2. Generate or prepare artwork only when the design needs it; keep accepted images inside the theme package.
-3. Build and dry-check the theme outside the installed Skill.
-4. Install without launching. Restart an already-running Codex app only after explicit authorization. Enable the resident manager only when the user also authorizes recurring managed restarts after normal launches.
-5. Verify the homepage, task route, and transient New Task state; repair one defect class at a time.
-6. Hand off source assets, evidence, backup location, and exact recovery commands.
-
-## Safety Model
-
-The runtime supports the official macOS Codex app (`com.openai.codex`) only. It verifies app identity, binds Chrome DevTools Protocol to `127.0.0.1`, rejects foreign targets, validates asset paths and sizes, preserves native theme keys, and performs atomic runtime/theme exchanges.
-
-It does not modify the application bundle, authentication, repositories, or conversations. Design and installation permission do not grant permission to stop a running app.
-
-See the [safety and rollback contract](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/safety-and-rollback.md) and [verification contract](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md).
+```text
+Use $codex-theme-studio to design a warm-paper theme for my official macOS Codex app. Prepare and validate it first; do not restart Codex yet.
+```
 
 ## Requirements
 
-- macOS with the official Codex Desktop app
-- Node.js 20+
+- macOS with the official Codex Desktop app (`com.openai.codex`)
+- A Codex or Agent Skills-compatible harness
 - Bash and standard macOS command-line tools
-- Optional built-in ImageGen capability for new raster artwork
+- Optional built-in `$imagegen` capability when new raster artwork is needed
 
-The theme runtime requires no API key and makes no outbound internet request. Its only live network surface is the local DevTools endpoint.
+The runtime validates and uses the Node.js executable already signed inside Codex. Development tests expect Node.js 20 or newer.
 
-## Development
+## What It Does
+
+- Validates colors, UI and code fonts, body/emphasis/code weights, local artwork, radii, density, and selection states.
+- Ships `graphite-paper`, an unbranded default with abstract workflow artwork.
+- Ships `zhijian-ai` as a separate optional preset with its own artwork license; it is never mixed into the default theme.
+- Creates a custom theme from a user-supplied image without overwriting bundled assets.
+- Applies CSS and renderer helpers through loopback-only Chrome DevTools Protocol instead of editing `app.asar`.
+- Preserves native interactions, focus, scrolling, keyboard paths, and hit targets.
+- Keeps immutable base-theme and pre-upgrade backups, with pause, restore, and previous-version recovery commands.
+- Verifies home, task, transient New Task, normal-window, and full-screen behavior before claiming success.
+
+## How It Works
+
+1. Classify the request as design, apply, verify/repair, or pause/restore.
+2. Start with the safe theme layer. Advanced width, placement, arrangement, or responsive changes require an explicit layout request and compatibility diagnosis.
+3. Validate the theme directory and run deterministic tests before touching the installed runtime.
+4. Install without launching. Restart a running Codex app only after separate, explicit authorization; persistence requires another explicit authorization.
+5. Run Doctor and live Verify, inspect captured routes, and restore if the verification contract fails.
+
+The bundled workbench accepts theme variables and local raster assets only. It does not execute arbitrary user JavaScript or replace the real interface with a screenshot.
+
+## Example Requests
+
+```text
+Use $codex-theme-studio to list the bundled presets and prepare graphite-paper. Do not apply or restart anything.
+```
+
+```text
+Use $codex-theme-studio to import the zhijian-ai preset, install it without launching, then wait for explicit restart authorization.
+```
+
+```text
+Use $codex-theme-studio to diagnose why the conversation typography stopped applying after a Codex update. Verify stable semantic markers and restore if the live checks fail.
+```
+
+## Safety or Limitations
+
+- Official macOS Codex only. Windows, Linux, ChatGPT web, ZCode, Doubao Work, unofficial builds, and other Electron apps are outside scope.
+- The app bundle, `app.asar`, code signature, accounts, conversations, projects, and authentication data are never modified.
+- CDP binds to `127.0.0.1`; the runtime verifies app identity, renderer identity, port ownership, image paths, file sizes, and backups before mutation.
+- Design or installation permission does not authorize stopping Codex. The resident manager is opt-in and must not relaunch an app the user intentionally quit.
+- Compatibility is evidence-based, not universal. A fresh second-Mac end-to-end run and future Codex versions remain explicit missing evidence until tested.
+
+See the [capability boundary](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/capability-boundary.md), [verification contract](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/references/verification-contract.md), and [trust baseline](https://github.com/zjp1997720/zhijian-skills/blob/main/skills/codex-theme-studio/security/trust-baseline.md).
+
+## Validation
 
 ```bash
 bash skills/codex-theme-studio/tests/run-tests.sh
-node skills/codex-theme-studio/scripts/injector.mjs --check-payload
+/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node \
+  skills/codex-theme-studio/scripts/injector.mjs --check-payload
 ```
 
-Live doctor checks are intentionally separate because they depend on a local Codex installation.
+Live Doctor and screenshot checks remain separate because they require an installed, authorized Codex session.
 
-## Provenance and License
+## License
 
-The project is inspired by the MIT-licensed [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin), and its injection architecture evolved from that project. The Skill adds generalized theme contracts, optional ImageGen assets, signature and loopback validation, immutable backups, responsive route repair, and public packaging. See the bundled `NOTICE.md`, `UPSTREAM_COMMIT`, and `LICENSE`.
+The software is MIT-licensed and retains attribution to the MIT-licensed [`Fei-Away/Codex-Dream-Skin`](https://github.com/Fei-Away/Codex-Dream-Skin) project whose injection architecture inspired this implementation.
 
-Codex and OpenAI are trademarks of their respective owners. This community project is unofficial and is not endorsed by OpenAI or the upstream project.
+The `zhijian-ai` artwork is bundled under the narrower permissions in `NOTICE.md`: it may be used as this Skill's Codex preset, but may not be extracted, resold, rebranded, or claimed as original work. Codex and OpenAI are trademarks of their respective owners. This project is unofficial and is not endorsed by OpenAI.

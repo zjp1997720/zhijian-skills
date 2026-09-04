@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "mode": "system",
+  "installed": true,
+  "version": "1.2.0",
+  "stylePresent": true,
+  "chromePresent": false,
+  "chromePointerEvents": "auto",
+  "viewport": { "width": 1600, "height": 960 },
+  "documentOverflow": { "x": false, "y": false },
+  "shell": {
+    "main": { "width": 1325, "height": 960, "visible": true },
+    "sidebar": { "width": 275, "height": 960, "visible": true },
+    "composer": null,
+    "composerVisual": {
+      "surface": null,
+      "body": null,
+      "backdrops": []
+    },
+    "structuralSurfaces": [
+      { "backgroundColor": "#F5F4ED", "width": 1600, "height": 914, "visible": true },
+      { "backgroundColor": "rgb(245, 244, 237)", "width": 1325, "height": 60, "visible": true }
+    ],
+    "mainBackground": "#F5F4ED",
+    "sidebarBackground": "#F5F4ED",
+    "topBorderBottomWidth": 0,
+    "typography": {
+      "bodyWeight": 500,
+      "sidebarWeight": 500,
+      "sidebarControlWeight": 500,
+      "mainTextWeight": 500,
+      "composerWeight": null,
+      "emphasisWeights": [600]
+    },
+    "topHeaderBackground": "rgba(0, 0, 0, 0)",
+    "workspaceTabCount": 0,
+    "headerTabs": []
+  },
+  "home": null,
+  "task": null,
+  "system": { "backgroundImage": "none", "brandVisible": false }
+}

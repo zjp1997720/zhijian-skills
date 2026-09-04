@@ -69,15 +69,6 @@ try {
     "--global-state", path.join(temporary, "missing.json"),
   )).stdout);
   assert.deepEqual(noGlobal.files.sort(), ["codex-theme-v1.txt", "config.toml.snapshot"]);
-
-  const noExportRoot = path.join(temporary, "state-without-export");
-  const noExport = JSON.parse((await invoke(
-    "snapshot",
-    "--state-root", noExportRoot,
-    "--config", config,
-    "--global-state", globalState,
-  )).stdout);
-  assert.deepEqual(noExport.files.sort(), ["codex-global-state.json.snapshot", "config.toml.snapshot"]);
 } finally {
   await fs.rm(temporary, { recursive: true, force: true });
 }

@@ -21,7 +21,8 @@ for required in \
   "$PROJECT_ROOT/assets/renderer-inject.js" \
   "$PROJECT_ROOT/assets/theme.json" \
   "$PROJECT_ROOT/scripts/injector.mjs" \
-  "$PROJECT_ROOT/scripts/version-backup-state.mjs"; do
+  "$PROJECT_ROOT/scripts/version-backup-state.mjs" \
+  "$VERSION_BASELINE_PATH"; do
   [ -s "$required" ] || fail "Required project file is missing or empty: $required"
 done
 
@@ -45,16 +46,12 @@ if [ -f "$STATE_PATH" ] && verified_cdp_endpoint "$PORT"; then
 fi
 [ "$REQUIRE_LIVE" = "false" ] || [ "$LIVE" = "true" ] || fail "No verified live Dream Skin session is active."
 
-VERSION_BACKUP_LABEL=""
-if [ -s "$VERSION_BACKUP_LABEL_PATH" ]; then
-  VERSION_BACKUP_LABEL="$(/bin/cat "$VERSION_BACKUP_LABEL_PATH")"
-fi
-VERSION_BACKUP_ROOT="${STATE_ROOT}/version-backups/${VERSION_BACKUP_LABEL}"
-if [ -n "$VERSION_BACKUP_LABEL" ] && [ -e "$VERSION_BACKUP_ROOT" ]; then
+VERSION_BACKUP_ROOT="$STATE_ROOT/version-backups/$VERSION_BACKUP_LABEL"
+if [ -e "$VERSION_BACKUP_ROOT" ]; then
   VERSION_BACKUP_JSON="$("$NODE" "$SCRIPT_DIR/version-backup-state.mjs" verify \
     --state-root "$STATE_ROOT" --label "$VERSION_BACKUP_LABEL")"
 else
-  [ "$REQUIRE_VERSION_BACKUP" = "false" ] || fail "Required previous-version backup is missing."
+  [ "$REQUIRE_VERSION_BACKUP" = "false" ] || fail "Required V2 version backup is missing: $VERSION_BACKUP_ROOT"
   VERSION_BACKUP_JSON='{"pass":false,"present":false}'
 fi
 
@@ -63,7 +60,7 @@ fi
   const versionBackup = JSON.parse(process.argv[10]);
   const result = {
     pass: true,
-    product: "Codex Theme Studio",
+    product: "Codex Dream Skin Studio",
     version: process.argv[2],
     platform: `darwin-${process.argv[3]}`,
     codexVersion: process.argv[4],

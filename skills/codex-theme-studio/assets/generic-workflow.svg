@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1985" height="794" viewBox="0 0 1985 794" role="img" aria-label="Neutral workflow illustration">
+  <defs>
+    <pattern id="paper" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="5" r="0.8" fill="#273746" opacity="0.035"/>
+      <circle cx="18" cy="21" r="0.65" fill="#273746" opacity="0.025"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="7" stdDeviation="11" flood-color="#1e2d38" flood-opacity="0.08"/>
+    </filter>
+  </defs>
+  <rect width="1985" height="794" fill="#F6F5F0"/>
+  <rect width="1985" height="794" fill="url(#paper)"/>
+  <g transform="translate(1160 178)" fill="none" stroke="#273746" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M96 205H620" opacity="0.48"/>
+    <g filter="url(#shadow)">
+      <rect x="0" y="94" width="236" height="236" rx="38" fill="#FBFAF7" stroke="#273746"/>
+      <path d="M67 158h76l31 31v78H67z" fill="#F6F5F0"/>
+      <path d="M143 158v31h31"/>
+      <path d="M91 222h58M91 247h42" stroke-width="7" opacity="0.66"/>
+    </g>
+    <circle cx="281" cy="205" r="19" fill="#6E7F8E" stroke="none"/>
+    <g filter="url(#shadow)">
+      <rect x="326" y="124" width="196" height="196" rx="32" fill="#FBFAF7" stroke="#273746"/>
+      <rect x="406" y="167" width="35" height="35" rx="7" fill="#6E7F8E" stroke="none"/>
+      <path d="M423 204v35M368 239h110M368 239v32M478 239v32"/>
+      <rect x="348" y="271" width="40" height="34" rx="7" fill="#F6F5F0"/>
+      <rect x="458" y="271" width="40" height="34" rx="7" fill="#F6F5F0"/>
+    </g>
+    <circle cx="567" cy="205" r="19" fill="#6E7F8E" stroke="none"/>
+    <g filter="url(#shadow)">
+      <rect x="612" y="94" width="236" height="236" rx="38" fill="#FBFAF7" stroke="#273746"/>
+      <circle cx="730" cy="212" r="61" fill="#F6F5F0"/>
+      <path d="m694 212 24 25 50-58" stroke="#536272" stroke-width="12"/>
+    </g>
+    <circle cx="850" cy="205" r="14" fill="#536272" stroke="none"/>
+  </g>
+  <path d="M1114 593c236 30 510 28 754-12" fill="none" stroke="#273746" stroke-width="3" stroke-dasharray="3 13" opacity="0.13"/>
+</svg>

@@ -48,7 +48,7 @@ npx skills add zjp1997720/zhijian-skills \
 | 图像生成 | [`codex-image-gen`](docs/skills/codex-image-gen/README.zh-CN.md) | 复用已登录 Codex CLI 的 OAuth 登录态，无 API Key 生成与编辑图片 | [文档](docs/skills/codex-image-gen/README.zh-CN.md) |
 | Codex 管理 | [`codex-model-routing-team`](docs/skills/codex-model-routing-team/README.zh-CN.md) | 把并行工作编译成 TeamPlan，并将 Worker 路由到明确模型 | [文档](docs/skills/codex-model-routing-team/README.zh-CN.md) |
 | Codex 管理 | [`codex-skill-admin`](docs/skills/codex-skill-admin/README.zh-CN.md) | 审计、关闭、恢复并验证本地 Codex Skill | [文档](docs/skills/codex-skill-admin/README.zh-CN.md) |
-| Codex 体验 | [`codex-theme-studio`](docs/skills/codex-theme-studio/README.zh-CN.md) | 设计、注入、验证并恢复可逆的 Codex Desktop 主题 | [文档](docs/skills/codex-theme-studio/README.zh-CN.md) |
+| Codex 体验 | [`codex-theme-studio`](docs/skills/codex-theme-studio/README.zh-CN.md) | 用安全主题变量、自定义图片或内置预设构建可恢复的 macOS Codex 皮肤 | [文档](docs/skills/codex-theme-studio/README.zh-CN.md) |
 | 知识系统 | [`enterprise-clone-builder`](docs/skills/enterprise-clone-builder/README.zh-CN.md) | 从企业证据构建结构化数字分身仓库 | [文档](docs/skills/enterprise-clone-builder/README.zh-CN.md) |
 | 模型推理 | [`gpt56-sol-pro-consult`](docs/skills/gpt56-sol-pro-consult/README.zh-CN.md) | 通过 Codex Chrome 获得有文件依据、完成模型核验的 GPT 5.6 Sol Pro 二次判断 | [文档](docs/skills/gpt56-sol-pro-consult/README.zh-CN.md) |
 | 信息设计 | [`html-express`](docs/skills/html-express/README.zh-CN.md) | 把高密度材料做成自包含 HTML 报告 | [文档](docs/skills/html-express/README.zh-CN.md) |

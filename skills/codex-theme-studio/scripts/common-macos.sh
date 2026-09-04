@@ -5,22 +5,24 @@ set -euo pipefail
 if [ -z "${HOME:-}" ]; then
   CURRENT_USER="$(/usr/bin/id -un)"
   HOME="$(/usr/bin/dscl . -read "/Users/$CURRENT_USER" NFSHomeDirectory 2>/dev/null | /usr/bin/awk '{print $2}')"
-  [ -n "$HOME" ] || { printf 'Codex Theme Studio: could not resolve the current macOS home directory.\n' >&2; exit 1; }
+  [ -n "$HOME" ] || { printf 'Codex Dream Skin Studio: could not resolve the current macOS home directory.\n' >&2; exit 1; }
   export HOME
 fi
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
 INJECTOR="$SCRIPT_DIR/injector.mjs"
-INSTALL_ROOT="$HOME/.codex/codex-theme-studio"
-STATE_ROOT="$HOME/Library/Application Support/CodexThemeStudio"
+INSTALL_ROOT="$HOME/.codex/codex-dream-skin-studio"
+STATE_ROOT="$HOME/Library/Application Support/CodexDreamSkinStudio"
 STATE_PATH="$STATE_ROOT/state.json"
 THEME_BACKUP_PATH="$STATE_ROOT/theme-backup.json"
 BASE_THEME_BACKUP_ROOT="$STATE_ROOT/base-theme-backup"
-VERSION_BACKUP_LABEL_PATH="$STATE_ROOT/latest-version-backup-label"
+VERSION_BACKUP_LABEL="v2-076903eec"
+VERSION_BASELINE_PATH="$PROJECT_ROOT/references/v2-076903eec-baseline.json"
 THEME_DIR="$STATE_ROOT/theme"
 CONFIG_PATH="$HOME/.codex/config.toml"
 GLOBAL_STATE_PATH="$HOME/.codex/.codex-global-state.json"
+BASE_THEME_EXPORT="$PROJECT_ROOT/assets/base-codex-theme.txt"
 INJECTOR_LOG="$STATE_ROOT/injector.log"
 INJECTOR_ERROR_LOG="$STATE_ROOT/injector-error.log"
 APP_LOG="$STATE_ROOT/codex-launch.log"
@@ -29,12 +31,12 @@ START_ERROR_LOG="$STATE_ROOT/start-error.log"
 RESIDENT_MANAGER_LOG="$STATE_ROOT/resident-manager.log"
 RESIDENT_MANAGER_ERROR_LOG="$STATE_ROOT/resident-manager-error.log"
 RESIDENT_MANAGER_CONFIG="$STATE_ROOT/resident-manager.json"
-RESIDENT_MANAGER_PLIST="$HOME/Library/LaunchAgents/com.zhijian.codex-theme-studio.resident.plist"
-RESIDENT_MANAGER_JOB_LABEL="com.zhijian.codex-theme-studio.resident"
-CODEX_APP_JOB_LABEL="com.openai.codex-theme-studio.app"
-INJECTOR_JOB_LABEL="com.openai.codex-theme-studio.injector"
+RESIDENT_MANAGER_PLIST="$HOME/Library/LaunchAgents/com.zhijian.codex-dream-skin-studio.resident.plist"
+RESIDENT_MANAGER_JOB_LABEL="com.zhijian.codex-dream-skin-studio.resident"
+CODEX_APP_JOB_LABEL="com.openai.codex-dream-skin-studio.app"
+INJECTOR_JOB_LABEL="com.openai.codex-dream-skin-studio.injector"
 EXPECTED_CODEX_TEAM_ID="${CODEX_EXPECTED_TEAM_ID:-2DC432GLL2}"
-SKIN_VERSION="1.0.4"
+SKIN_VERSION="1.2.0"
 
 fail() {
   local message="$*"
@@ -42,7 +44,7 @@ fail() {
     /bin/mkdir -p "$STATE_ROOT" 2>/dev/null || true
     printf '%s %s\n' "$(/bin/date -u '+%Y-%m-%dT%H:%M:%SZ')" "$message" >> "$START_ERROR_LOG" 2>/dev/null || true
   fi
-  printf 'Codex Theme Studio: %s\n' "$message" >&2
+  printf 'Codex Dream Skin Studio: %s\n' "$message" >&2
   exit 1
 }
 
@@ -263,7 +265,15 @@ wait_for_cdp() {
   local deadline=$((SECONDS + 45))
   local last_note=0
   while [ "$SECONDS" -lt "$deadline" ]; do
-    verified_cdp_endpoint "$port" && return 0
+    # Fast path: HTTP up is enough to proceed once process identity is soft-ok.
+    if cdp_http_ready "$port"; then
+      if verified_cdp_endpoint "$port" || cdp_http_ready "$port"; then
+        # If HTTP is up and ChatGPT is running, accept.
+        if codex_is_running || verified_cdp_endpoint "$port"; then
+          return 0
+        fi
+      fi
+    fi
     if [ $((SECONDS - last_note)) -ge 8 ]; then
       last_note=$SECONDS
       printf 'Waiting for Codex debug port %s… (%ss)\n' "$port" "$SECONDS" >&2
@@ -357,7 +367,7 @@ stop_recorded_injector() {
   saved_start="$(state_field injectorStartedAt 2>/dev/null || true)"
   saved_node="$(state_field nodePath 2>/dev/null || true)"
   saved_injector="$(state_field injectorPath 2>/dev/null || true)"
-  # Soft identity check (macOS path case: path-case differences)
+  # Soft identity check for case-insensitive macOS paths.
   local node_ok="true" inj_ok="true"
   if [ -n "$saved_node" ] && [ -n "${NODE:-}" ]; then
     [ "$(printf '%s' "$saved_node" | /usr/bin/tr '[:upper:]' '[:lower:]')" = "$(printf '%s' "$NODE" | /usr/bin/tr '[:upper:]' '[:lower:]')" ] || node_ok="false"

@@ -17,7 +17,7 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-STATE_ROOT="${HOME}/Library/Application Support/CodexThemeStudio"
+STATE_ROOT="${HOME}/Library/Application Support/CodexDreamSkinStudio"
 STATE_PATH="${STATE_ROOT}/state.json"
 THEME_DIR="${STATE_ROOT}/theme"
 
@@ -27,29 +27,25 @@ INJECTOR_ALIVE="false"
 CDP_OK="false"
 THEME_NAME=""
 CODEX_RUNNING="false"
-NODE="${NODE:-}"
-if [ -z "$NODE" ]; then
-  for candidate in \
-    "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node" \
-    "/Applications/Codex.app/Contents/Resources/cua_node/bin/node" \
-    "$HOME/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node" \
-    "$(command -v node 2>/dev/null)"; do
-    if [ -n "$candidate" ] && [ -x "$candidate" ]; then NODE="$candidate"; break; fi
-  done
-fi
 
 read_json_field() {
-  [ -n "$NODE" ] || return 0
-  "$NODE" -e '
-    try {
-      const value = JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"))[process.argv[2]];
-      if (value !== undefined && value !== null) process.stdout.write(String(value));
-    } catch {}
-  ' "$1" "$2" 2>/dev/null || true
+  /usr/bin/python3 - "$1" "$2" 2>/dev/null <<'PY' || true
+import json, sys
+try:
+    with open(sys.argv[1], encoding="utf-8") as f:
+        data = json.load(f)
+    v = data.get(sys.argv[2])
+    if v is not None:
+        print(v, end="")
+except Exception:
+    pass
+PY
 }
 
-# Codex process: cheap name match only
-if /usr/bin/pgrep -x ChatGPT >/dev/null 2>&1; then
+# Codex process: the unified desktop app keeps the Codex bundle/runtime but
+# macOS may expose a truncated executable name, so match the signed app path.
+if /bin/ps -axo args= 2>/dev/null \
+  | /usr/bin/grep -Eq '^/Applications/(ChatGPT|Codex)\.app/Contents/MacOS/(ChatGPT|Codex)( |$)'; then
   CODEX_RUNNING="true"
 fi
 
@@ -95,18 +91,17 @@ if [ "$SHORT" = "true" ]; then
 fi
 
 if [ "$JSON" = "true" ]; then
-  [ -n "$NODE" ] || { printf '{"error":"Node.js unavailable"}\n'; exit 1; }
-  "$NODE" -e '
-    const [session, port, injector, cdp, codex, themeName] = process.argv.slice(1);
-    console.log(JSON.stringify({
-      session,
-      port: /^\d+$/.test(port) ? Number(port) : port,
-      injectorAlive: injector === "true",
-      cdpOk: cdp === "true",
-      codexRunning: codex === "true",
-      themeName,
-    }));
-  ' "$SESSION" "$PORT" "$INJECTOR_ALIVE" "$CDP_OK" "$CODEX_RUNNING" "$THEME_NAME"
+  /usr/bin/python3 - "$SESSION" "$PORT" "$INJECTOR_ALIVE" "$CDP_OK" "$CODEX_RUNNING" "$THEME_NAME" <<'PY'
+import json, sys
+print(json.dumps({
+    "session": sys.argv[1],
+    "port": int(sys.argv[2]) if str(sys.argv[2]).isdigit() else sys.argv[2],
+    "injectorAlive": sys.argv[3] == "true",
+    "cdpOk": sys.argv[4] == "true",
+    "codexRunning": sys.argv[5] == "true",
+    "themeName": sys.argv[6] or "",
+}))
+PY
   exit 0
 fi
 
