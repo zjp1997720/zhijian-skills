@@ -3,6 +3,8 @@
 ## Unreleased
 
 - Add bundled model manifest for Moonshot Kimi K3 (`kimi-k3`) with 256K context window and reasoning effort support.
+- Add bundled model manifest for Google Gemini 3.8 Flash (`gemini-3.8-flash`) with 1M context window and vision support.
+- Support optional `auto_compact_token_limit` and `truncation_token_limit` in model manifests and preserve them through `build_entry`.
 
 ## 1.0.1 — 2026-09-02
 

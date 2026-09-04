@@ -531,7 +531,7 @@ class BridgeTests(unittest.TestCase):
             slugs = {item["slug"] for item in json.loads(target.read_text())["models"]}
             self.assertEqual(
                 slugs,
-                {"gpt-5.6-sol", "grok-4.6", "deepseek-v4-pro", "deepseek-v4-flash", "kimi-k3"},
+                {"gpt-5.6-sol", "grok-4.6", "deepseek-v4-pro", "deepseek-v4-flash", "kimi-k3", "gemini-3.8-flash"},
             )
             again = run_bridge(*base, "--apply")
             self.assertEqual(again.returncode, 0, again.stderr or again.stdout)
