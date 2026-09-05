@@ -4,7 +4,7 @@
     {
       "id": "small-net-positive-team",
       "prompt": "同时核对三个独立来源并汇总，任务不大，但并行更快且每份都有独立验收。",
-      "expected_output": "自动使用 Skill；主 Agent 生成 3-unit 微型 TeamPlan，从 stdin 校验后按单波派遣 Native Luna XHigh leaf Worker；不创建 Planner、CE Plan 或持久文件。",
+      "expected_output": "自动使用 Skill；主 Agent 生成 3-unit 微型 TeamPlan，从 stdin 校验后按单波派遣 registry 默认的 Native Sol Medium Worker；不创建 Planner、CE Plan 或持久文件。",
       "failure_signals": ["任务不够复杂", "创建 Planner", "调用 ce-plan", "没有 TeamPlan"]
     },
     {

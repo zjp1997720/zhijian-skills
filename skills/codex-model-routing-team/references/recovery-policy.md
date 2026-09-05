@@ -10,16 +10,16 @@ fallback 的目标是让任务可恢复，同时保持模型、数据边界和�
 {
   "schema_version": "3.0",
   "surface_intent": "parent_integrated",
-  "task_class": "DEEP_AGENTIC_CODE",
-  "risk": "medium",
-  "minimum_thinking": "high",
-  "provider_allowlist": ["xai", "openai"],
-  "provider_status": {"xai": "allowed", "openai": "allowed"},
-  "data_allowed_providers": ["xai", "openai"],
+  "task_class": "DEFAULT_GENERAL",
+  "risk": "normal",
+  "minimum_thinking": "medium",
+  "provider_allowlist": ["openai"],
+  "provider_status": {"openai": "allowed"},
+  "data_allowed_providers": ["openai"],
   "explicit_user_request": false,
   "risk_acknowledged": false,
   "candidates": [
-    {"surface": "native_subagent", "model": "gpt-5.6-luna", "thinking": "xhigh", "speed": "standard", "fork_turns": "none"},
+    {"surface": "native_subagent", "model": "gpt-5.6-sol", "thinking": "medium", "speed": "standard", "fork_turns": "none"},
     {"surface": "native_subagent", "model": "gpt-5.6-sol", "thinking": "high", "speed": "standard", "fork_turns": "none"}
   ],
   "max_worker_threads": 2,

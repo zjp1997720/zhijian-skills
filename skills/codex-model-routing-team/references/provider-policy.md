@@ -24,7 +24,7 @@
 
 ## OpenAI 基线
 
-`gpt-5.6-luna` 与 `gpt-5.6-sol` 使用当前 Codex 已配置的 OpenAI 路径。自动路由默认创建 Native Luna XHigh leaf Worker，高难/高风险升 Max；worktree、侧栏、跨任务恢复和耐久监督使用 App Thread。当前 live Surface 没有 `service_tier=priority` 字段时保持 Standard；Sol/Terra 只有用户明确要求且精确 live tuple 通过时才使用 Fast。当前项目若有更窄的数据规则，以项目规则为准。
+`gpt-5.6-luna` 与 `gpt-5.6-sol` 使用当前 Codex 已配置的 OpenAI 路径。自动路由按 registry 画像选择，常规默认 Sol Medium，复杂/高风险升 Sol High/XHigh；规则明确、可机械验收的批量任务使用 Luna XHigh。当前 live Surface 没有 `service_tier=priority` 字段时保持 Standard；Sol/Terra 只有用户明确要求且精确 live tuple 通过时才使用 Fast。没有同任务速度或成本实验时，不宣称某路线更快或更省。当前项目若有更窄的数据规则，以项目规则为准。
 
 ## xAI / Grok 4.5
 

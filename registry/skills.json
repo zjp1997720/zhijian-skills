@@ -136,21 +136,21 @@
     {
       "name": "codex-model-routing-team",
       "lifecycle": "active",
-      "version": "3.0.0",
+      "version": "3.1.0",
       "path": "skills/codex-model-routing-team",
       "documentation": "docs/skills/codex-model-routing-team/README.md",
       "documentation_zh": "docs/skills/codex-model-routing-team/README.zh-CN.md",
       "changelog": "docs/changelogs/codex-model-routing-team.md",
-      "canonical_tag": "codex-model-routing-team/v3.0.0",
+      "canonical_tag": "codex-model-routing-team/v3.1.0",
       "validation": {
         "commands": [
           "python3 -m unittest tests.skills.test_codex_model_routing_team -v"
         ],
-        "live_smoke": "Validate a standard TeamPlan; use the live spawn schema to confirm native gpt-5.6-luna with xhigh or max and fork_turns=none; keep Standard when service_tier is absent; confirm Luna is a leaf Worker, Sol Medium is rejected, durable_app stays on App Thread, and adopted native output reaches RELEASED through close or completed_idle; record requested, accepted, and observed identity separately"
+        "live_smoke": "Validate a standard TeamPlan and compile a native Sol Medium execution route; reject Sol Low and risk-inappropriate Medium; reserve Luna XHigh for mechanically verifiable batch work; require live model/effort/fork evidence and keep Standard without a tier field; respect host authorization for App tasks and verify RELEASED lifecycle with separate requested, accepted, observed identity"
       },
       "capabilities": {
         "network": "required",
-        "subprocess": "none",
+        "subprocess": "required",
         "filesystem": "write",
         "credentials": "required"
       },

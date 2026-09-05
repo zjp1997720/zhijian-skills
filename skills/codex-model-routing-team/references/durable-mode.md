@@ -4,7 +4,7 @@
 
 只有任务需要独立 worktree、侧栏可见、跨任务恢复、长期监督、项目级 Thread 历史，或严格 App Thread 审计时，才选择 `surface_intent=durable_app`。外部/生产/账户/成本审批仍由主 Agent 执行，不能因为风险高就下放给 Worker。
 
-预计超过 30 分钟、四个以上 Worker 或四个以上正式交付物只是耐久信号，不单独触发状态目录。短时、回到父任务集成的工作默认使用原生 V2 Luna leaf Worker，TeamPlan/RoutePlan/ledger 从 stdin 校验。
+预计超过 30 分钟、四个以上 Worker 或四个以上正式交付物只是耐久信号，不单独触发状态目录。短时、回到父任务集成的工作按 registry 画像走原生 Worker，TeamPlan/RoutePlan/ledger 从 stdin 校验。
 
 ## 状态目录
 

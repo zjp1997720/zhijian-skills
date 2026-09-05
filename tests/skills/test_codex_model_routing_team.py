@@ -67,11 +67,23 @@ class SkillContractTests(unittest.TestCase):
             registry["policy"]["default_openai_route"],
             {
                 "surface": "native_subagent",
-                "model": "gpt-5.6-luna",
-                "thinking": "xhigh",
+                "model": "gpt-5.6-sol",
+                "thinking": "medium",
                 "speed": "standard",
                 "fork_turns": "none",
             },
+        )
+        self.assertEqual(
+            registry["policy"]["high_risk_openai_route"]["thinking"],
+            "high",
+        )
+        self.assertEqual(
+            registry["policy"]["openai_route_profiles"]["critical"]["minimum_thinking"],
+            "xhigh",
+        )
+        self.assertEqual(
+            registry["policy"]["route_selection"]["workload_profiles"]["mechanical"],
+            "mechanical",
         )
         self.assertEqual(
             registry["policy"]["team_limit_profiles"]["expanded"],
@@ -89,7 +101,9 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(models["gpt-5.6-luna"]["multi_agent_version"], "v1")
         self.assertEqual(models["gpt-5.6-luna"]["native_role"], "leaf")
         self.assertEqual(models["gpt-5.6-luna"]["thinking"], ["xhigh", "max"])
-        self.assertEqual(models["gpt-5.6-sol"]["thinking"], ["high", "xhigh", "max"])
+        self.assertEqual(
+            models["gpt-5.6-sol"]["thinking"], ["medium", "high", "xhigh", "max"]
+        )
         self.assertEqual(models["gpt-5.6-terra"]["status"], "opt_in")
         self.assertFalse(models["gpt-5.6-terra"]["automatic"])
         self.assertEqual(models["antigravity/gemini-3.6-flash"]["status"], "manual_only")
@@ -126,8 +140,10 @@ class SkillContractTests(unittest.TestCase):
             "references/native-subagent-lifecycle.md",
             "references/surface-selection-policy.md",
             "references/team-plan.md",
+            "references/route-compiler.md",
             "scripts/route_policy.py",
             "scripts/validate_team_plan.py",
+            "scripts/compile_route_plan.py",
         )
         for relative in required:
             with self.subTest(relative=relative):
@@ -174,7 +190,7 @@ class SkillContractTests(unittest.TestCase):
             encoding="utf-8"
         )
         for case in (
-            "默认 Native Luna",
+            "默认 Native Sol",
             "Native Luna Fast 缺少 schema",
             "Sol thinking 与 Fast",
             "Durable App",
@@ -904,6 +920,22 @@ class SkillContractTests(unittest.TestCase):
             check=False,
         )
 
+    def run_route_compiler(
+        self, request: dict[str, object]
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                sys.executable,
+                str(SKILL_ROOT / "scripts/compile_route_plan.py"),
+                "-",
+            ],
+            cwd=ROOT,
+            input=json.dumps(request),
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
     def live_spawn_evidence(
         self,
         model: str = "gpt-5.6-sol",
@@ -940,6 +972,24 @@ class SkillContractTests(unittest.TestCase):
             "thinking": thinking,
             "speed": "fast",
             "service_tier": "priority",
+            "accepted": True,
+            "host": "test-host",
+            "checked_at": datetime.now(timezone.utc).isoformat(),
+        }
+        evidence.update(overrides)
+        return evidence
+
+    def live_app_evidence(
+        self,
+        model: str = "gpt-5.6-sol",
+        thinking: str = "medium",
+        **overrides: object,
+    ) -> dict[str, object]:
+        evidence: dict[str, object] = {
+            "kind": "live_create_schema",
+            "surface": "app_thread",
+            "model": model,
+            "thinking": thinking,
             "accepted": True,
             "host": "test-host",
             "checked_at": datetime.now(timezone.utc).isoformat(),
@@ -1009,7 +1059,7 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(mismatch.returncode, 2, mismatch.stderr or mismatch.stdout)
         self.assertIn("must match the declared candidate count", mismatch.stdout)
 
-    def test_route_plan_validator_rejects_explicit_sol_medium(self) -> None:
+    def test_route_plan_validator_accepts_explicit_sol_medium(self) -> None:
         plan = {
             "task_class": "EXPLICIT_DURABLE_GENERAL",
             "minimum_thinking": "medium",
@@ -1022,9 +1072,8 @@ class SkillContractTests(unittest.TestCase):
             "max_worker_threads": 1,
             "max_followups_per_thread": 1,
         }
-        invalid = self.run_route_validator(plan)
-        self.assertEqual(invalid.returncode, 2, invalid.stderr or invalid.stdout)
-        self.assertIn("unsupported thinking", invalid.stdout)
+        valid = self.run_route_validator(plan)
+        self.assertEqual(valid.returncode, 0, valid.stderr or valid.stdout)
 
     def test_route_plan_validator_live_gates_luna_fast_and_requires_explicit_sol(self) -> None:
         plan = {
@@ -1179,11 +1228,7 @@ class SkillContractTests(unittest.TestCase):
             "max_followups_per_thread": 1,
         }
         automatic_native = self.run_route_validator(plan)
-        self.assertEqual(automatic_native.returncode, 2, automatic_native.stdout)
-        self.assertIn(
-            "requires explicit_user_request",
-            automatic_native.stdout,
-        )
+        self.assertEqual(automatic_native.returncode, 0, automatic_native.stdout)
 
         plan["explicit_user_request"] = True
         valid = self.run_route_validator(plan)
@@ -1197,6 +1242,214 @@ class SkillContractTests(unittest.TestCase):
             missing_live_evidence.stderr or missing_live_evidence.stdout,
         )
         self.assertIn("requires tuple-bound live runtime evidence", missing_live_evidence.stdout)
+
+    def compact_request(
+        self,
+        *,
+        workload: str = "routine",
+        risk: str = "normal",
+        surface_intent: str = "parent_integrated",
+        evidence: list[dict[str, object]] | dict[str, object] | None = None,
+        **overrides: object,
+    ) -> dict[str, object]:
+        if evidence is None:
+            evidence = [
+                self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+                self.live_spawn_evidence("gpt-5.6-sol", "high"),
+            ]
+        request: dict[str, object] = {
+            "workload": workload,
+            "risk": risk,
+            "surface_intent": surface_intent,
+            "provider_allowlist": ["openai"],
+            "provider_status": {"openai": "allowed"},
+            "data_allowed_providers": ["openai"],
+            "explicit_user_request": False,
+            "risk_acknowledged": False,
+            "live_evidence": evidence,
+        }
+        request.update(overrides)
+        return request
+
+    def test_route_compiler_builds_registry_default_without_dispatching(self) -> None:
+        result = self.run_route_compiler(self.compact_request())
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["status"], "pass")
+        self.assertEqual(payload["selected_profile"], "default")
+        plan = payload["route_plan"]
+        self.assertEqual(plan["schema_version"], "3.0")
+        self.assertEqual(
+            [(item["model"], item["thinking"]) for item in plan["candidates"]],
+            [("gpt-5.6-sol", "medium"), ("gpt-5.6-sol", "high")],
+        )
+        self.assertEqual(payload["validation"]["status"], "pass")
+        self.assertTrue(payload["dispatch"]["ready"])
+        self.assertFalse(payload["dispatch"]["auto_dispatch"])
+        self.assertNotIn("spawn_agent", json.dumps(payload))
+
+    def test_route_compiler_selects_mechanical_and_high_risk_registry_profiles(self) -> None:
+        mechanical = self.run_route_compiler(
+            self.compact_request(
+                workload="mechanical",
+                evidence=[
+                    self.live_spawn_evidence("gpt-5.6-luna", "xhigh"),
+                    self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+                ],
+            )
+        )
+        self.assertEqual(mechanical.returncode, 0, mechanical.stdout)
+        mechanical_payload = json.loads(mechanical.stdout)
+        self.assertEqual(mechanical_payload["selected_profile"], "mechanical")
+        self.assertEqual(
+            mechanical_payload["route_plan"]["candidates"][0]["model"],
+            "gpt-5.6-luna",
+        )
+        high_risk = self.run_route_compiler(
+            self.compact_request(
+                risk="high",
+                evidence=[
+                    self.live_spawn_evidence("gpt-5.6-sol", "high"),
+                    self.live_spawn_evidence("gpt-5.6-sol", "xhigh"),
+                ],
+            )
+        )
+        self.assertEqual(high_risk.returncode, 0, high_risk.stdout)
+        high_risk_payload = json.loads(high_risk.stdout)
+        self.assertEqual(high_risk_payload["selected_profile"], "high_risk")
+        self.assertEqual(
+            high_risk_payload["route_plan"]["candidates"][0]["thinking"],
+            "high",
+        )
+
+    def test_route_compiler_cannot_bypass_registry_risk_floor_with_override(self) -> None:
+        result = self.run_route_compiler(
+            self.compact_request(
+                risk="high",
+                route_profile="default",
+                include_fallback=False,
+                evidence=self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+            )
+        )
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("risk 'high' minimum_thinking high", result.stdout)
+
+    def test_route_compiler_downgrades_fast_without_live_priority_evidence(self) -> None:
+        result = self.run_route_compiler(
+            self.compact_request(
+                speed="fast",
+                explicit_user_request=True,
+                evidence=[
+                    self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+                    self.live_spawn_evidence("gpt-5.6-sol", "high"),
+                ],
+            )
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload["warnings"])
+        candidates = payload["route_plan"]["candidates"]
+        self.assertEqual([item["speed"] for item in candidates], ["standard", "standard"])
+        self.assertNotIn("service_tier", json.dumps(payload["dispatch"]))
+
+    def test_route_compiler_keeps_fast_only_with_exact_live_priority_evidence(self) -> None:
+        result = self.run_route_compiler(
+            self.compact_request(
+                speed="fast",
+                explicit_user_request=True,
+                evidence=[
+                    self.live_spawn_evidence("gpt-5.6-sol", "medium", speed="fast"),
+                    self.live_spawn_evidence("gpt-5.6-sol", "high", speed="fast"),
+                ],
+            )
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(
+            [item["speed"] for item in payload["route_plan"]["candidates"]],
+            ["fast", "fast"],
+        )
+        self.assertEqual(
+            [item.get("service_tier") for item in payload["dispatch"]["candidates"]],
+            ["priority", "priority"],
+        )
+
+    def test_route_compiler_rejects_incomplete_fast_evidence(self) -> None:
+        evidence = self.live_spawn_evidence(
+            "gpt-5.6-sol", "medium", speed="fast"
+        )
+        evidence.pop("service_tier")
+        result = self.run_route_compiler(
+            self.compact_request(
+                speed="fast",
+                explicit_user_request=True,
+                include_fallback=False,
+                evidence=evidence,
+            )
+        )
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn("runtime evidence does not match", result.stdout)
+
+    def test_route_compiler_reports_unaccepted_evidence_and_provider_block(self) -> None:
+        evidence = self.live_spawn_evidence("gpt-5.6-sol", "medium")
+        evidence.pop("accepted")
+        missing_acceptance = self.run_route_compiler(
+            self.compact_request(evidence=evidence, include_fallback=False)
+        )
+        self.assertEqual(missing_acceptance.returncode, 2, missing_acceptance.stdout)
+        missing_payload = json.loads(missing_acceptance.stdout)
+        self.assertIn("accepted", " ".join(missing_payload["errors"]))
+        self.assertNotIn(
+            "accepted",
+            missing_payload["route_plan"]["candidates"][0]["runtime_evidence"],
+        )
+
+        blocked = self.run_route_compiler(
+            self.compact_request(
+                include_fallback=False,
+                provider_status={"openai": "blocked"},
+                evidence=self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+            )
+        )
+        self.assertEqual(blocked.returncode, 2, blocked.stdout)
+        self.assertIn("provider policy is blocked", blocked.stdout)
+
+    def test_route_compiler_requires_app_live_authorization_and_preserves_surface(self) -> None:
+        no_app_evidence = self.run_route_compiler(
+            self.compact_request(
+                include_fallback=False,
+                surface_intent="durable_app",
+                evidence=[],
+            )
+        )
+        self.assertEqual(no_app_evidence.returncode, 2, no_app_evidence.stdout)
+        self.assertIn("host_authorization", no_app_evidence.stdout)
+
+        app_evidence = [
+            self.live_app_evidence("gpt-5.6-sol", "medium"),
+            self.live_app_evidence("gpt-5.6-sol", "high"),
+        ]
+        app = self.run_route_compiler(
+            self.compact_request(
+                surface_intent="durable_app",
+                evidence=app_evidence,
+                host_authorization={
+                    "surface": "app_thread",
+                    "authorized": True,
+                    "host": "test-host",
+                    "source": "test-live-host",
+                    "checked_at": datetime.now(timezone.utc).isoformat(),
+                },
+            )
+        )
+        self.assertEqual(app.returncode, 0, app.stdout)
+        app_payload = json.loads(app.stdout)
+        self.assertEqual(
+            {item["surface"] for item in app_payload["route_plan"]["candidates"]},
+            {"app_thread"},
+        )
+        self.assertFalse(app_payload["dispatch"]["auto_dispatch"])
+        self.assertNotIn("create_thread", json.dumps(app_payload["dispatch"]))
 
     def test_route_plan_validator_accepts_stdin_without_persisting_a_plan(self) -> None:
         plan = {

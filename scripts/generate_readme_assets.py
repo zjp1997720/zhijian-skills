@@ -118,13 +118,13 @@ def routing_team() -> str:
         line(840, 178, 884, 264, "#3B5975", 3),
         rect(884, 50, 264, 84, panel, 10, cyan, 2),
         text(904, 82, "NATIVE V2", 16, cyan, 750, family=MONO),
-        text(904, 108, "LUNA LEAF  ·  XHIGH / MAX", 14, white, 650, family=MONO),
+        text(904, 108, "SOL  ·  MEDIUM", 14, white, 650, family=MONO),
         rect(884, 222, 264, 84, panel, 10, orange, 2),
         text(904, 254, "APP THREAD", 16, orange, 750, family=MONO),
         text(904, 280, "WORKTREE  ·  RECOVERY", 14, white, 650, family=MONO),
         text(765, 338, "provider gate  •  child capacity  •  final evidence", 15, "#8EA4B8", 500, family=MONO, text_anchor="middle"),
     ]
-    return svg("Codex Model Routing Team", "A Codex lead routes parent-integrated leaf work to native Luna and durable workspace work to App threads.", bg, "native-leaf-durable-split", body)
+    return svg("Codex Model Routing Team", "A Codex lead routes parent-integrated execution to native Sol Medium and durable workspace work to App threads.", bg, "native-leaf-durable-split", body)
 
 
 def skill_admin() -> str:

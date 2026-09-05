@@ -5,7 +5,7 @@
 ## 确定性选择顺序
 
 1. 简单问答、状态查询、单文件小改、强顺序任务和不可逆操作留在主 Agent。
-2. 自动路由默认 `native_subagent/gpt-5.6-luna/xhigh/standard`；高难或高风险使用 Luna Max Standard。只有 live spawn schema 对精确 tuple 开放 `service_tier=priority` 时才把候选改成 Fast。
+2. 自动路由按 registry 的风险与工作负载画像选择；当前常规为 `native_subagent/gpt-5.6-sol/medium/standard`，复杂/高风险升 Sol High，关键审查升 Sol XHigh，机械批量使用 Luna XHigh。只有 live schema 对精确 tuple 开放 `service_tier=priority` 时才保留 Fast。
 3. 任务需要独立 worktree、侧栏可见、跨任务恢复、长期监督，或原生路径缺少工具/身份/上下文能力时，选择 `app_thread`。使用 Luna 本身、短时任务或只读检查不是 App Thread 理由。
 4. 当前候选缺少精确 live 能力、Provider 门不通过或所有权无法隔离时，只能进入预声明下一候选；没有下一项时由主 Agent 接管。
 
@@ -27,7 +27,7 @@
 
 `fork_turns="none"` 表示 fresh context；正整数字符串表示只继承最近 N 轮。显式模型覆盖时禁止 `fork_turns="all"`，避免整段父上下文强制继承父模型。App Thread 候选不得写 `fork_turns`。
 
-`thinking` 在原生工具映射为 `reasoning_effort`，在 App Thread 映射为 `thinking`。Luna 最低 XHigh，Sol 最低 High。`speed=fast` 映射为 `service_tier=priority`，并需要当前 Surface 的 tuple-bound live 证据。`surface + model + thinking + speed` 是候选去重键；上下文范围不能被当作绕过单组合重试上限的理由。
+`thinking` 在原生工具映射为 `reasoning_effort`，在 App Thread 映射为 `thinking`。Luna 最低 XHigh，Sol 最低 Medium，风险与工作负载可提升门槛。`speed=fast` 映射为 `service_tier=priority`，并需要当前 Surface 的 tuple-bound live 证据。`surface + model + thinking + speed` 是候选去重键；上下文范围不能绕过单组合重试上限。
 
 旧 `schema_version: "2.1"` 计划仍可校验；它没有 `fork_turns` 绑定，只用于完成既有 run。省略版本的 legacy 候选继续按 `app_thread/standard` 解释。所有新计划必须生成 v3。
 
