@@ -2,9 +2,9 @@
   "skill_name": "codex-model-routing-team",
   "evals": [
     {
-      "id": "default-native-luna-xhigh",
+      "id": "default-native-sol-medium",
       "prompt": "并行完成三个普通复杂子任务，没有点名 Surface 或模型。",
-      "expected_output": "默认使用 parent_integrated 的 native_subagent/gpt-5.6-luna/xhigh/standard；高风险升 max；fork_turns=none；fallback 为预声明 Sol Native Standard。"
+      "expected_output": "默认使用 parent_integrated 的 native_subagent/gpt-5.6-sol/medium/standard；复杂/高风险升 Sol High，关键审查升 XHigh；fork_turns=none；fallback 沿 registry 预声明。"
     },
     {
       "id": "native-luna-leaf",
@@ -32,9 +32,9 @@
       "expected_output": "官方状态确认 completed/idle 后写 RELEASED、released=true、release_method=completed_idle；不把 interrupt 当 close。"
     },
     {
-      "id": "sol-medium-rejected",
+      "id": "sol-medium-default",
       "prompt": "创建 Sol Medium Worker，我认为 Medium 足够。",
-      "expected_output": "无论 App 或 Native 都拒绝；Sol 最低 High。"
+      "expected_output": "常规 App 或 Native 可使用 Sol Medium Standard；复杂/高风险按 registry 升 Sol High/XHigh，Low 仍拒绝。"
     },
     {
       "id": "sol-fast-explicit-gate",

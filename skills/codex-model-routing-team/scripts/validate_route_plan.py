@@ -160,6 +160,9 @@ def main() -> int:
     }
     order = registry.get("policy", {}).get("thinking_order", [])
     rank = {name: index for index, name in enumerate(order)}
+    model_minimums = registry.get("policy", {}).get("minimum_thinking_by_model", {})
+    if not isinstance(model_minimums, dict):
+        model_minimums = {}
     forbidden = set(registry.get("policy", {}).get("forbidden_thinking", []))
     speed_modes = set(registry.get("policy", {}).get("speed_modes", []))
     default_speed = registry.get("policy", {}).get("default_speed", "standard")
@@ -308,6 +311,12 @@ def main() -> int:
         if not isinstance(thinking, str) or thinking not in surface_thinking:
             result["errors"].append(f"candidate {index} uses unsupported thinking")
             continue
+        model_minimum = model_minimums.get(model_id)
+        if isinstance(model_minimum, str) and model_minimum in rank:
+            if rank.get(thinking, -1) < rank[model_minimum]:
+                result["errors"].append(
+                    f"candidate {index} falls below model minimum_thinking {model_minimum}"
+                )
         runtime_evidence = candidate.get("runtime_evidence")
         speed_evidence = candidate.get("speed_evidence")
         if surface == "native_subagent":

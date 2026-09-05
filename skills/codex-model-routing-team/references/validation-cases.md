@@ -8,11 +8,11 @@
 
 ## 核心回归
 
-### 默认 Native Luna
+### 默认 Native Sol
 
 Prompt：并行完成三个普通复杂子任务，没有点名 Surface 或模型。
 
-应出现：3-unit TeamPlan；`surface_intent=parent_integrated`；首项为 `native_subagent/gpt-5.6-luna/xhigh/standard`，高风险升 Max；候选显式写 `fork_turns="none"` 与匹配的 live runtime evidence。Worker 是 leaf，任务包禁止下级派遣。
+应出现：3-unit TeamPlan；`surface_intent=parent_integrated`；首项按 registry 为 `native_subagent/gpt-5.6-sol/medium/standard`，复杂/高风险升 High，关键审查升 XHigh；候选显式写 `fork_turns="none"` 与匹配的 live runtime evidence。Worker 仍是 leaf，任务包禁止下级派遣。
 
 ### Native Luna Fast 缺少 schema
 
@@ -24,7 +24,7 @@ Prompt：创建 Luna XHigh Native Fast Worker，但 live spawn schema 没有 `se
 
 Prompt：实现任务需要独立 worktree、侧栏可见并可跨任务恢复。
 
-应出现：`surface_intent=durable_app`；所有候选都使用 App Thread；按项目与 worktree 绑定，保留 pending/UNKNOWN/归档门。不得 fallback 到 Native 丢失工作区语义。
+应出现：`surface_intent=durable_app`；所有候选都使用 App Thread；当前 `live_create_schema` 证据之外，还要有独立 `host_authorization`（来源、host、时间戳和 `authorized=true`），再按项目与 worktree 绑定，保留 pending/UNKNOWN/归档门。不得 fallback 到 Native 丢失工作区语义。
 
 ### Context scope
 
@@ -42,7 +42,13 @@ Prompt：Native Worker 已完成并被采纳，当前 live tools 没有 close_ag
 
 Prompt：创建 Sol Medium Fast Worker。
 
-应出现：Medium/Low 静态拒绝。Sol High/XHigh/Max 默认 Standard；Fast 还需要用户明确点名和 live priority evidence。
+应出现：Sol Medium Standard 可作为常规首项；Low 静态拒绝。复杂/高风险使用 Sol High/XHigh；Fast 仍需要用户明确点名和 live priority evidence。
+
+### RoutePlan 紧凑编译
+
+Prompt：只提供 workload、risk、Provider 门和按候选顺序排列的 live evidence，运行 `scripts/compile_route_plan.py -`。
+
+应出现：registry 选择 profile，生成 v3 RoutePlan 并调用现有 validator；`dispatch.auto_dispatch=false`。缺少 accepted、host、时间戳或 priority 证据时返回错误/Standard warning，不补写 accepted、observed、capacity 或 tier。
 
 ### TeamPlan write collision
 
@@ -89,7 +95,7 @@ Prompt：Deep Research 已有 researcher/verifier/reviewer 与阶段门。
 
 ## 失败回退
 
-- Native Luna unsupported：熔断精确 native tuple，进入预声明 App 或 Sol；不得把 registry 永久改回 Luna App-only。
+- Native tuple unsupported：熔断精确组合，进入预声明下一候选；不得静默继承父模型或改写 registry。
 - Expanded 容量：只写正整数不够；缺少 live 来源、时间戳过期、未扣协调者/活动 Worker 或算术不平衡都拒绝。
 - completed-idle：只有 `agent_status=completed|idle` 才能进入 `RELEASED`；running/unknown 不得伪装成释放。
 - Fast unsupported：同模型同 Surface 改用预声明 Standard；不把请求接受冒充 observed Fast。

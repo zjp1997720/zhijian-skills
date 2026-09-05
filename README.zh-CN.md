@@ -46,7 +46,7 @@ npx skills add zjp1997720/zhijian-skills \
 | 跨 Agent 交接 | [`codex-external-handoff`](docs/skills/codex-external-handoff/README.zh-CN.md) | 从 WorkBuddy 或 Claude Code 创建并监督持久 Codex 会话与结构化回传 | [文档](docs/skills/codex-external-handoff/README.zh-CN.md) |
 | Codex 管理 | [`codex-handoff`](docs/skills/codex-handoff/README.zh-CN.md) | 把历史过大、响应变慢的 Codex task 换到一个紧凑的新 task 继续 | [文档](docs/skills/codex-handoff/README.zh-CN.md) |
 | 图像生成 | [`codex-image-gen`](docs/skills/codex-image-gen/README.zh-CN.md) | 复用已登录 Codex CLI 的 OAuth 登录态，无 API Key 生成与编辑图片 | [文档](docs/skills/codex-image-gen/README.zh-CN.md) |
-| Codex 管理 | [`codex-model-routing-team`](docs/skills/codex-model-routing-team/README.zh-CN.md) | 把并行工作编译成 TeamPlan，并将 Worker 路由到明确模型 | [文档](docs/skills/codex-model-routing-team/README.zh-CN.md) |
+| Codex 管理 | [`codex-model-routing-team`](docs/skills/codex-model-routing-team/README.zh-CN.md) | 编译并行计划，默认 Sol Medium 执行，按风险分配模型 | [文档](docs/skills/codex-model-routing-team/README.zh-CN.md) |
 | Codex 管理 | [`codex-skill-admin`](docs/skills/codex-skill-admin/README.zh-CN.md) | 审计、关闭、恢复并验证本地 Codex Skill | [文档](docs/skills/codex-skill-admin/README.zh-CN.md) |
 | Codex 体验 | [`codex-theme-studio`](docs/skills/codex-theme-studio/README.zh-CN.md) | 用安全主题变量、自定义图片或内置预设构建可恢复的 macOS Codex 皮肤 | [文档](docs/skills/codex-theme-studio/README.zh-CN.md) |
 | 知识系统 | [`enterprise-clone-builder`](docs/skills/enterprise-clone-builder/README.zh-CN.md) | 从企业证据构建结构化数字分身仓库 | [文档](docs/skills/enterprise-clone-builder/README.zh-CN.md) |

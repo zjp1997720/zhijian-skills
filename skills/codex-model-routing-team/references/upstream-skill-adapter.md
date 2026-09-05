@@ -32,7 +32,7 @@
 4. 计算当前阶段 Worker、后续阶段和重试的 reserved slots。
 5. 输出派遣通知，列明当前 Worker 的 Surface、模型、thinking、speed 与保留额度。
 6. 把验证后的 unit 转换成 `references/task-packet.md`，保留原始验收标准与 `unit_id/team_plan_revision`。
-7. 自动路由默认使用 Native Luna XHigh/Max leaf Worker；需要 worktree、侧栏、跨任务恢复或耐久监督时，RoutePlan 写 `surface_intent=durable_app` 并留在 App Thread。
+7. 自动路由按 registry 风险与工作负载画像选择 Native Sol/Luna Worker；需要 worktree、侧栏、跨任务恢复或耐久监督时，RoutePlan 写 `surface_intent=durable_app`，并通过 live 能力与宿主授权门后留在 App Thread。
 8. 原生候选按 `references/native-subagent-lifecycle.md` 执行；App Thread 有工作区输出时绑定匹配 project local，并按 `references/thread-lifecycle.md` 与 `references/thread-supervision-protocol.md` 执行。
 9. 主 Agent 验证输出文件并更新上游账本。
 10. 只有上游阶段完成且结果采纳后，才按 live 能力 close 或 completed-idle 释放原生 Worker；App Thread 满足收尾门后才归档。
@@ -45,8 +45,8 @@
 standard: researcher_count + 1 verifier + 1 reviewer + retry_reserve <= 8
 ```
 
-- researcher：默认 2–4 个 Native Luna XHigh leaf Worker；高难主题升 Max。live spawn schema 接受 priority 时可用 Fast，否则保持 Standard。公开技术研究可在 Provider 门通过后使用 Grok Medium。
-- verifier：1 个 Native Luna XHigh，在 draft 存在后创建；高风险核验升 Max。
+- researcher：按 registry 画像使用 Native Sol Medium/High；规则明确、可机械验收的批量材料可用 Luna XHigh。live spawn schema 接受 priority 时可用 Fast，否则保持 Standard。公开技术研究可在 Provider 门通过后使用 Grok Medium。
+- verifier：1 个 Native Sol High，在 draft 存在后创建；关键核验升 XHigh。
 - reviewer：1 个 Native Sol High，在 cited 存在并通过检查后创建；需要异构工程复核时可按 RoutePlan 使用 Grok High。
 - FATAL 复审：最多一次 Sol X High，使用 retry reserve。
 - 所有任务绑定包含 `01_项目/调研` 的 vault project。
@@ -72,15 +72,15 @@ standard: researcher_count + 1 verifier + 1 reviewer + retry_reserve <= 8
   "turn_status": null,
   "last_observed_at": null,
   "role": "researcher",
-  "model": "gpt-5.6-luna",
-  "requested_model": "gpt-5.6-luna",
+  "model": "gpt-5.6-sol",
+  "requested_model": "gpt-5.6-sol",
   "platform_accepted_model": null,
   "observed_runtime_model": "unknown",
   "thinking": "xhigh",
   "requested_speed": "standard",
   "platform_accepted_speed": null,
   "observed_runtime_speed": "unknown",
-  "route_plan": {"schema_version": "3.0", "surface_intent": "durable_app", "candidates": [{"surface": "app_thread", "model": "gpt-5.6-luna", "thinking": "xhigh", "speed": "standard"}]},
+  "route_plan": {"schema_version": "3.0", "surface_intent": "durable_app", "candidates": [{"surface": "app_thread", "model": "gpt-5.6-sol", "thinking": "medium", "speed": "standard"}]},
   "provider_policy": {},
   "materialized": false,
   "data_ready": false,

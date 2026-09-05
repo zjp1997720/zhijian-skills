@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 3.1.0 - 2026-09-05
+
+- Default ordinary execution to native Sol Medium Standard; route complex/high-risk work to Sol High, critical review to Sol XHigh, and mechanically verifiable batches to Luna XHigh.
+- Add a registry-driven stdin RoutePlan compiler that returns validated dispatch arguments without creating Workers.
+- Keep live capability evidence separate from App task authorization and reject risk-inappropriate reasoning overrides.
+- Reuse approved upstream plans and reduce duplicate lead work while preserving Provider, lifecycle, attempt and external-action boundaries.
+- Add deterministic compiler and routing coverage; no claim of measured speed or cost superiority over Luna.
+
+
 ## 3.0.0 - 2026-08-16
 
 - Change the automatic route from Luna App threads to native Multi-Agent V2 Luna leaf Workers: XHigh Standard by default, Max for high-risk or high-ambiguity units.

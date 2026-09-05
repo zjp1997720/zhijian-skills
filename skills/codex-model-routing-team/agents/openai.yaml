@@ -1,6 +1,6 @@
 interface:
   display_name: "Codex 模型路由团队"
-  short_description: "轻量 TeamPlan 调度 Luna XHigh/Max Worker"
-  default_prompt: "使用 $codex-model-routing-team 判断净收益、编译 TeamPlan，再为各单元固定精确路由，由主 Agent 集成验收。"
+  short_description: "按风险与工作负载编译 Sol/Luna Worker 路由"
+  default_prompt: "使用 $codex-model-routing-team 判断净收益、编译 TeamPlan 与 RoutePlan，再为各单元固定精确路由，由主 Agent 集成验收。"
 policy:
   allow_implicit_invocation: true
