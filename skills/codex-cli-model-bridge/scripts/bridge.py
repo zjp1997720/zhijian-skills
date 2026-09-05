@@ -411,6 +411,10 @@ def validate_manifest(data: dict) -> list[str]:
     supersedes = data.get("supersedes", [])
     if not isinstance(supersedes, list) or any(not isinstance(item, str) or not item for item in supersedes):
         errors.append("supersedes must be a string array")
+    if "auto_compact_token_limit" in data and not isinstance(data["auto_compact_token_limit"], (int, type(None))):
+        errors.append("auto_compact_token_limit must be an integer or null")
+    if "truncation_token_limit" in data and not isinstance(data["truncation_token_limit"], (int, type(None))):
+        errors.append("truncation_token_limit must be an integer or null")
     return errors
 
 
@@ -455,6 +459,10 @@ def build_entry(manifest: dict, templates: dict[str, dict]) -> dict:
             "prefer_websockets": bool(manifest.get("prefer_websockets", False)),
         }
     )
+    if "auto_compact_token_limit" in manifest:
+        entry["auto_compact_token_limit"] = manifest["auto_compact_token_limit"]
+    if "truncation_token_limit" in manifest:
+        entry["truncation_token_limit"] = manifest["truncation_token_limit"]
     # Tool mode is a model-specific calling protocol, not a generic capability.
     # Third-party models copied from an OpenAI template must be able to opt out
     # of `code_mode_only`, whose freeform `exec` payload cannot be represented
