@@ -1,5 +1,11 @@
 # wechat-article-search Changelog
 
+## 1.0.3 — 2026-08-24
+
+- Detect the Sogou `/antispider` rate-limit redirect and fail loudly instead of reporting it as zero search results.
+- Exit non-zero when the first page is blocked; keep already-collected articles when a later page is blocked.
+- Cover the detection with an offline regression test.
+
 ## 1.0.2 — 2026-07-17
 
 - Publish and install exclusively through `zjp1997720/zhijian-skills`.
