@@ -4,7 +4,7 @@ description: Install, audit, repair, and manage Codex custom model
   Providers and model catalogs backed by a loopback CLIProxyAPI or Codex
   Router. Use whenever the user asks to add, remove, upgrade, restore, or
   diagnose third-party models in Codex or the Codex desktop model picker;
-  mentions Grok, OpenCode Go, DeepSeek, Gemini, GLM Coding Plan, GLM-5.3,
+  mentions Grok, OpenCode Go, DeepSeek, Kimi, Moonshot, Gemini, GLM Coding Plan, GLM-5.3,
   subscription-backed CLI models, custom model_provider, model_catalog_json,
   or Codex Fast mode; or wants the same local proxy models synchronized
   between Codex and WorkBuddy. Preserve unrelated Codex configuration and
