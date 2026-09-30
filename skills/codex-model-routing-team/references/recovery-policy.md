@@ -12,6 +12,7 @@ fallback 的目标是让任务可恢复，同时保持模型、数据边界和�
   "surface_intent": "parent_integrated",
   "task_class": "DEFAULT_GENERAL",
   "risk": "normal",
+  "task_contract": {"decision_state": "specified", "acceptance": "按已定接口运行目标测试，并核对变更范围"},
   "minimum_thinking": "medium",
   "provider_allowlist": ["openai"],
   "provider_status": {"openai": "allowed"},
@@ -19,8 +20,8 @@ fallback 的目标是让任务可恢复，同时保持模型、数据边界和�
   "explicit_user_request": false,
   "risk_acknowledged": false,
   "candidates": [
-    {"surface": "native_subagent", "model": "gpt-5.6-sol", "thinking": "medium", "speed": "standard", "fork_turns": "none"},
-    {"surface": "native_subagent", "model": "gpt-5.6-sol", "thinking": "high", "speed": "standard", "fork_turns": "none"}
+    {"surface": "native_subagent", "model": "gpt-6-luna", "thinking": "xhigh", "speed": "standard", "fork_turns": "none"},
+    {"surface": "native_subagent", "model": "gpt-6.1-sol", "thinking": "medium", "speed": "standard", "fork_turns": "none"}
   ],
   "max_worker_threads": 2,
   "max_followups_per_thread": 1
@@ -67,6 +68,12 @@ App Thread 健康判断分为五层：
 原生 spawn 返回 `Unknown model`、不接受 `reasoning_effort` 或缺少显式模型字段时，归入第一类。它证明当前精确原生组合不可用，不证明同模型的 App Thread 组合不可用。跨 Surface fallback 必须已经出现在 RoutePlan 中。
 
 质量判断只能发生在获得完整、可解析输出之后。传输、协议、MCP 和会话串线不能记成模型能力失败。
+
+## 质量失败与升级选择
+
+派遣前只声明一个 fallback：边界仍清楚、主要风险是执行深度不足，可选 Luna XHigh → Luna Max；需要更强诊断时选 Luna XHigh → Sol Medium 或 Luna Max → Sol High。跨模型 thinking 档位不是同一能力量尺，Sol Medium fallback 不会解除 Luna 的 XHigh 下限。不得编成 Luna XHigh → Luna Max → Sol 三段链。
+
+完整输出局部不达标时，先在原 Worker 定向纠正一次；若暴露核心需求、接口或方案缺口，交回主 Agent 澄清并重判路由，不能把补提示词当成无限重试，也不能用新 unit 重置原任务预算。验收通过即采纳，不机械追加 Sol 全量复做。
 
 ## 两次机会
 

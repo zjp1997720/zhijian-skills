@@ -42,16 +42,21 @@
 - 用户偏好：
 - 关键约束：
 - 与其他 Worker 的接口：
+- 已确定的方案与不变量：
+- task_contract.decision_state：`specified | unresolved`；有未决判断时列明问题
+- task_contract.acceptance：测试命令、来源核对方法或具体审阅标准
 
 ## 验收
 - 完成标准：
 - 必须运行的验证：
-- 缺失信息时的处理：报告缺口，不猜测
+- 缺失信息时的处理：报告缺口，不猜测；发现核心需求或方案未定时交回主 Agent，不自行扩展范围
 ```
 
 `task_intent` 表达权限语义：`mutate` 可以在声明范围内修改；`inspect` 只研究、诊断或写声明的报告；`verify` 只验证既有产物。`mutation_authority` 是实际写入硬门，不能由 Worker 扩大。`declared-output-only` 只允许写交付物路径，不允许顺手修改源文件。
 
 每次 Worker attempt 使用唯一 task id。fallback Worker 使用新 task id；App Thread 由此避免 `list_threads(query=task_id)` 匹配旧 Thread，原生 Worker 由此关联 agent id 与输出。`result_correlation_id` 只用于结果关联，不代表任务正确完成。
+
+Luna 任务的关键方案、接口和验收条件须已定；详细提示词不能代替这些条件。提供必要上下文、权威来源和短输出格式，不复制无关历史。主 Agent 检查证据与关键风险，不默认再派 Sol 重做全文。
 
 主 Agent 另外记录所选 Surface、`model`、`thinking`、`speed`、`fork_turns` 与选择理由。任务包中严禁声称 Worker 已加载某个预制 Agent Type。
 

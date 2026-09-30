@@ -1,13 +1,14 @@
 # 执行 Surface 选择策略
 
-本 Skill 先选执行 Surface，再选模型。`native_subagent` 负责低协调开销的原生叶子执行；`app_thread` 负责有状态工作区与耐久生命周期。
+本 Skill 先选执行 Surface，再选模型。`native_subagent` 负责原生叶子执行；`app_thread` 负责有状态工作区与耐久生命周期；`ephemeral_codex_cli` 负责用户点名 exact model 的一次性本地进程。
 
 ## 确定性选择顺序
 
 1. 简单问答、状态查询、单文件小改、强顺序任务和不可逆操作留在主 Agent。
-2. 自动路由按 registry 的风险与工作负载画像选择；当前常规为 `native_subagent/gpt-5.6-sol/medium/standard`，复杂/高风险升 Sol High，关键审查升 Sol XHigh，机械批量使用 Luna XHigh。只有 live schema 对精确 tuple 开放 `service_tier=priority` 时才保留 Fast。
+2. 自动路由按 registry 的风险与工作负载画像选择；决策已定、可验收的常规任务为 `native_subagent/gpt-6-luna/xhigh/standard`，复杂执行升 Luna Max；未决判断用 Sol Medium/High，高风险 Sol High，关键审查 Sol XHigh。只有 live schema 对精确 tuple 开放 `service_tier=priority` 时才保留 Fast。
 3. 任务需要独立 worktree、侧栏可见、跨任务恢复、长期监督，或原生路径缺少工具/身份/上下文能力时，选择 `app_thread`。使用 Luna 本身、短时任务或只读检查不是 App Thread 理由。
-4. 当前候选缺少精确 live 能力、Provider 门不通过或所有权无法隔离时，只能进入预声明下一候选；没有下一项时由主 Agent 接管。
+4. 用户明确点名 registry 中的 manual/experimental CLI 模型时，只能用 `ephemeral_codex_cli`：当前 CLI help 与本地有效 catalog 都须匹配，host policy 允许，fresh context、read-only、Standard 固定。其 Provider 状态仍不是自动 `allowed`。
+5. 当前候选缺少精确 live 能力、Provider 门不通过或所有权无法隔离时，只能进入预声明下一候选；没有下一项时由主 Agent 接管。
 
 官方依据与策略解释见 [Codex Multi-Agent V2 官方依据](official-multi-agent-v2-evidence.md)。
 
@@ -18,14 +19,14 @@
 ```json
 {
   "surface": "native_subagent",
-  "model": "gpt-5.6-luna",
+  "model": "gpt-6-luna",
   "thinking": "xhigh",
   "speed": "standard",
   "fork_turns": "none"
 }
 ```
 
-`fork_turns="none"` 表示 fresh context；正整数字符串表示只继承最近 N 轮。显式模型覆盖时禁止 `fork_turns="all"`，避免整段父上下文强制继承父模型。App Thread 候选不得写 `fork_turns`。
+`fork_turns="none"` 表示 fresh context；正整数字符串表示只继承最近 N 轮。显式模型覆盖时禁止 `fork_turns="all"`，避免整段父上下文强制继承父模型。App Thread 与 CLI 候选不得写 `fork_turns`；CLI 必须写 `fresh_context=true`。
 
 `thinking` 在原生工具映射为 `reasoning_effort`，在 App Thread 映射为 `thinking`。Luna 最低 XHigh，Sol 最低 Medium，风险与工作负载可提升门槛。`speed=fast` 映射为 `service_tier=priority`，并需要当前 Surface 的 tuple-bound live 证据。`surface + model + thinking + speed` 是候选去重键；上下文范围不能绕过单组合重试上限。
 
@@ -41,4 +42,4 @@
 
 ## 模型身份
 
-registry 与官方 catalog 只提供候选资格。原生候选的 `runtime_evidence` 必须来自当前会话 live spawn schema，与 host、Surface、model、thinking、fork_turns 绑定并在 10 分钟后失效；只有 Fast 才额外绑定 speed 与 `service_tier=priority`。App Fast 使用同样期限的 `speed_evidence`。成功调用分别写 `platform_accepted_model/platform_accepted_speed`，没有可信回显时 observed 字段保持 `unknown`。
+registry 与 catalog 只提供候选资格。原生候选的 `runtime_evidence` 必须来自当前会话 live spawn schema，与 host、Surface、model、thinking、fork_turns 绑定并在 10 分钟后失效；只有 Fast 才额外绑定 speed 与 `service_tier=priority`。App Fast 使用同样期限的 `speed_evidence`。CLI 使用同期限的 help/catalog evidence，不能冒充 native schema。成功调用分别写 `platform_accepted_model/platform_accepted_speed`，没有可信回显时 observed 字段保持 `unknown`。

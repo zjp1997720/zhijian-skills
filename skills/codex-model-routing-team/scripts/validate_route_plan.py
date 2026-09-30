@@ -131,6 +131,93 @@ def valid_app_speed_evidence(
     return True, None
 
 
+def valid_cli_evidence(
+    evidence: Any,
+    *,
+    model: str,
+    thinking: str,
+    speed: str,
+    fresh_context: Any,
+    now: datetime,
+) -> tuple[bool, str | None]:
+    if not isinstance(evidence, dict):
+        return False, "ephemeral Codex CLI route requires tuple-bound help-and-catalog evidence"
+    expected = {
+        "kind": "live_codex_cli_help_catalog",
+        "surface": "ephemeral_codex_cli",
+        "model": model,
+        "thinking": thinking,
+        "speed": speed,
+        "fresh_context": fresh_context,
+        "ephemeral": True,
+        "sandbox": "read-only",
+        "help_verified": True,
+        "catalog_verified": True,
+    }
+    if any(evidence.get(key) != value for key, value in expected.items()):
+        return False, "ephemeral Codex CLI evidence does not match the candidate tuple"
+    if "accepted" in evidence:
+        return False, "ephemeral Codex CLI evidence must not claim native schema acceptance"
+    host = evidence.get("host")
+    if not isinstance(host, str) or not host.strip():
+        return False, "ephemeral Codex CLI evidence lacks a host identity"
+    checked_at = evidence.get("checked_at")
+    if not isinstance(checked_at, str):
+        return False, "ephemeral Codex CLI evidence has an invalid checked_at"
+    try:
+        checked = datetime.fromisoformat(checked_at.replace("Z", "+00:00"))
+    except ValueError:
+        return False, "ephemeral Codex CLI evidence has an invalid checked_at"
+    if checked.tzinfo is None:
+        return False, "ephemeral Codex CLI evidence has an invalid checked_at"
+    age = now - checked.astimezone(timezone.utc)
+    if age > RUNTIME_EVIDENCE_TTL:
+        return False, "ephemeral Codex CLI evidence is stale"
+    if age < -timedelta(minutes=1):
+        return False, "ephemeral Codex CLI evidence is dated in the future"
+    return True, None
+
+
+def valid_cli_authorization(
+    authorization: Any,
+    *,
+    evidence: Any,
+    now: datetime,
+) -> tuple[bool, str | None]:
+    if not isinstance(authorization, dict):
+        return False, "ephemeral_codex_cli requires cli_authorization"
+    expected = {
+        "surface": "ephemeral_codex_cli",
+        "user_authorized": True,
+        "host_policy": "allowed",
+    }
+    if any(authorization.get(key) != value for key, value in expected.items()):
+        return False, "cli_authorization does not permit ephemeral_codex_cli"
+    host = authorization.get("host")
+    source = authorization.get("source")
+    if not isinstance(host, str) or not host.strip():
+        return False, "cli_authorization lacks a host identity"
+    if not isinstance(source, str) or not source.strip():
+        return False, "cli_authorization lacks an authorization source"
+    if isinstance(evidence, dict) and evidence.get("host") != host:
+        return False, "CLI evidence host differs from cli_authorization"
+    checked_at = authorization.get("checked_at")
+    if not isinstance(checked_at, str):
+        return False, "cli_authorization has an invalid checked_at"
+    try:
+        checked = datetime.fromisoformat(checked_at.replace("Z", "+00:00"))
+    except ValueError:
+        return False, "cli_authorization has an invalid checked_at"
+    if checked.tzinfo is None:
+        return False, "cli_authorization has an invalid checked_at"
+    age = now - checked.astimezone(timezone.utc)
+    if age > RUNTIME_EVIDENCE_TTL:
+        return False, "cli_authorization is stale"
+    if age < -timedelta(minutes=1):
+        return False, "cli_authorization is dated in the future"
+    return True, None
+
+
 def main() -> int:
     args = parse_args()
     result: dict[str, Any] = {
@@ -197,9 +284,10 @@ def main() -> int:
     if current_route_plan and surface_intent not in {
         "parent_integrated",
         "durable_app",
+        "ephemeral_cli",
     }:
         result["errors"].append(
-            "surface_intent must be parent_integrated or durable_app for schema 3.0"
+            "surface_intent must be parent_integrated, durable_app, or ephemeral_cli for schema 3.0"
         )
     result["surface_intent"] = surface_intent
 
@@ -246,6 +334,7 @@ def main() -> int:
         speed = candidate.get("speed", default_speed)
         surface = candidate.get("surface", "app_thread")
         fork_turns = candidate.get("fork_turns")
+        fresh_context = candidate.get("fresh_context")
         if structured_route_plan and "surface" not in candidate:
             result["errors"].append(f"candidate {index} must declare surface")
         if structured_route_plan and "speed" not in candidate:
@@ -264,6 +353,15 @@ def main() -> int:
             result["errors"].append(
                 f"candidate {index} App Thread route must not declare fork_turns"
             )
+        elif current_route_plan and surface == "ephemeral_codex_cli":
+            if fork_turns is not None:
+                result["errors"].append(
+                    f"candidate {index} ephemeral Codex CLI route must not declare fork_turns"
+                )
+            if fresh_context is not True:
+                result["errors"].append(
+                    f"candidate {index} ephemeral Codex CLI route requires fresh_context=true"
+                )
         if not isinstance(model_id, str) or model_id not in models:
             result["errors"].append(f"candidate {index} uses an unknown model")
             continue
@@ -273,6 +371,10 @@ def main() -> int:
         if speed == "fast" and model_id not in fast_routing_models:
             result["errors"].append(
                 f"candidate {index} requests Fast for a registry-ineligible model"
+            )
+        if surface == "ephemeral_codex_cli" and speed != "standard":
+            result["errors"].append(
+                f"candidate {index} ephemeral Codex CLI route requires Standard speed"
             )
         if (
             speed == "fast"
@@ -289,7 +391,7 @@ def main() -> int:
         if (
             plan_schema_version == "2.1"
             and surface == "native_subagent"
-            and model_id == "gpt-5.6-luna"
+            and model_id == "gpt-6-luna"
         ):
             result["errors"].append(
                 f"candidate {index} v2.1 cannot authorize native Luna; migrate this run to schema 3.0"
@@ -311,6 +413,30 @@ def main() -> int:
         if not isinstance(thinking, str) or thinking not in surface_thinking:
             result["errors"].append(f"candidate {index} uses unsupported thinking")
             continue
+        if current_route_plan:
+            policy = registry.get("policy", {})
+            selection = policy.get("route_selection", {})
+            protected = selection.get("protected_workloads", [])
+            risk = plan.get("risk", "normal")
+            if not isinstance(risk, str):
+                result["errors"].append("risk must be a string")
+                risk = "normal"
+            required_profile = selection.get("risk_overrides", {}).get(risk)
+            for field in ("workload", "task_class"):
+                if plan.get(field) in protected:
+                    required_profile = selection.get("workload_profiles", {}).get(plan[field])
+            floor = policy.get("openai_route_profiles", {}).get(required_profile, {}).get("minimum_thinking")
+            if floor in rank and rank.get(thinking, -1) < rank[floor]:
+                result["errors"].append(f"candidate {index} falls below protected task minimum_thinking {floor}")
+        if current_route_plan and model_id in registry.get("policy", {}).get("bounded_execution_models", []):
+            contract = plan.get("task_contract")
+            if not isinstance(contract, dict) or contract.get("decision_state") != "specified":
+                result["errors"].append(f"candidate {index} Luna requires task_contract.decision_state=specified")
+            if not isinstance(contract, dict) or not isinstance(contract.get("acceptance"), str) or not contract["acceptance"].strip():
+                result["errors"].append(f"candidate {index} Luna requires task_contract.acceptance")
+            protected = registry.get("policy", {}).get("route_selection", {}).get("protected_workloads", [])
+            if risk in {"high", "critical"} or plan.get("workload") in protected or plan.get("task_class") in protected:
+                result["errors"].append(f"candidate {index} Luna cannot handle high-risk or critical review routing")
         model_minimum = model_minimums.get(model_id)
         if isinstance(model_minimum, str) and model_minimum in rank:
             if rank.get(thinking, -1) < rank[model_minimum]:
@@ -331,6 +457,24 @@ def main() -> int:
             )
             if not evidence_valid:
                 result["errors"].append(f"candidate {index} {evidence_error}")
+        elif surface == "ephemeral_codex_cli":
+            evidence_valid, evidence_error = valid_cli_evidence(
+                runtime_evidence,
+                model=model_id,
+                thinking=thinking,
+                speed=speed,
+                fresh_context=fresh_context,
+                now=now,
+            )
+            if not evidence_valid:
+                result["errors"].append(f"candidate {index} {evidence_error}")
+            authorization_valid, authorization_error = valid_cli_authorization(
+                plan.get("cli_authorization"),
+                evidence=runtime_evidence,
+                now=now,
+            )
+            if not authorization_valid:
+                result["errors"].append(f"candidate {index} {authorization_error}")
         elif speed == "fast":
             evidence_valid, evidence_error = valid_app_speed_evidence(
                 speed_evidence,
@@ -355,6 +499,7 @@ def main() -> int:
                 "thinking": thinking,
                 "speed": speed,
                 "fork_turns": fork_turns,
+                "fresh_context": fresh_context,
                 "runtime_evidence": runtime_evidence,
                 "speed_evidence": speed_evidence,
             }
@@ -366,19 +511,47 @@ def main() -> int:
         if provider not in data_allowed:
             result["errors"].append(f"candidate {index} provider is not approved for task data")
         terms = provider_status.get(provider, "unknown")
+        entry_status = entry.get("status")
+        authorized_manual_status = (
+            surface == "ephemeral_codex_cli"
+            and plan.get("explicit_user_request") is True
+            and (
+                (entry_status == "manual_only" and terms == "manual_authorized")
+                or (
+                    entry_status == "experimental"
+                    and terms == "experimental_authorized"
+                )
+            )
+        )
+        expected_manual_status = (
+            "manual_authorized"
+            if entry_status == "manual_only"
+            else "experimental_authorized"
+        )
         if entry.get("terms_default") == "blocked":
             result["errors"].append(f"candidate {index} registry provider policy is blocked")
         elif terms == "blocked":
             result["errors"].append(f"candidate {index} provider policy is blocked")
-        elif terms != "allowed":
+        elif (
+            entry_status in {"manual_only", "experimental"}
+            and terms != expected_manual_status
+        ):
+            result["warnings"].append(
+                f"candidate {index} provider requires {expected_manual_status} for this run"
+            )
+        elif terms != "allowed" and not authorized_manual_status:
             result["warnings"].append(f"candidate {index} provider requires manual review")
 
-        if entry.get("status") == "manual_only":
+        if entry_status in {"manual_only", "experimental"}:
             if index != 0:
-                result["errors"].append("manual-only model cannot be a fallback candidate")
+                result["errors"].append(
+                    f"{entry_status.replace('_', '-')} model cannot be a fallback candidate"
+                )
             if plan.get("explicit_user_request") is not True:
-                result["errors"].append("manual-only model requires explicit_user_request")
-            if plan.get("risk_acknowledged") is not True:
+                result["errors"].append(
+                    f"{entry_status.replace('_', '-')} model requires explicit_user_request"
+                )
+            if entry.get("authorization_mode") != "explicit_request" and plan.get("risk_acknowledged") is not True:
                 result["errors"].append("manual-only model requires risk_acknowledged")
         elif entry.get("status") == "opt_in":
             if index != 0:
@@ -410,6 +583,19 @@ def main() -> int:
             ):
                 result["errors"].append(
                     "durable_app plans cannot fall back to a non-App surface"
+                )
+        if surface_intent == "ephemeral_cli":
+            if first_surface != "ephemeral_codex_cli":
+                result["errors"].append(
+                    "ephemeral_cli plans must start with an ephemeral_codex_cli candidate"
+                )
+            if any(
+                isinstance(candidate, dict)
+                and candidate.get("surface") != "ephemeral_codex_cli"
+                for candidate in candidates
+            ):
+                result["errors"].append(
+                    "ephemeral_cli plans cannot fall back to another surface"
                 )
 
     if result["errors"]:

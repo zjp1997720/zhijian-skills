@@ -1,7 +1,7 @@
 {
   "name": "codex-model-routing-team",
-  "description": "【需 Codex 宿主能力】主 Agent 负责 TeamPlan、所有权、集成和验收；普通 Worker 默认走原生 Sol Medium，Luna 负责可机械验收的批量任务。",
-  "version": "3.1.0",
+  "description": "【需 Codex 宿主能力】把独立工作编译成可验收的叶子 Worker：已定执行交给 GPT-6 Luna，未决判断交给 GPT-6.1 Sol。",
+  "version": "4.0.0",
   "author": {
     "name": "智见 AI"
   },

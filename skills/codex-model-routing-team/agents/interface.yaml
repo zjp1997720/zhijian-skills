@@ -1,6 +1,6 @@
 interface:
   display_name: "Codex 模型路由团队"
-  short_description: "按风险与工作负载编译 Sol/Luna Worker 路由"
+  short_description: "明确执行优先 Luna，未决判断与关键审查用 Sol"
   default_prompt: "使用 $codex-model-routing-team 判断净收益、编译 TeamPlan 与 RoutePlan，再为各单元固定精确路由，由主 Agent 集成验收。"
 compatibility:
   canonical_format: "agent-skills"
@@ -17,4 +17,4 @@ compatibility:
     remote_inline_execution: "forbid"
     remote_metadata_policy: "deny"
   degradation:
-    openai: "Use registry workload/risk profiles: Sol Medium for routine, Sol High/XHigh for complex or risky work, and Luna XHigh for mechanical batches. Use Fast only with exact live priority evidence; App Threads require live host authorization. TeamPlan scales from standard 6/8/3 to justified expanded 12/16/6."
+    openai: "Use registry workload/risk profiles: Luna XHigh for specified, verifiable execution and Luna Max for complex bounded execution; Sol Medium/High for unresolved judgment, Sol High for high risk, and Sol XHigh for critical review. Require a decision-state and acceptance contract; do not add a routine Sol coordination/review layer. Use Fast only with exact live priority evidence; App Threads require live host authorization. TeamPlan scales from standard 6/8/3 to justified expanded 12/16/6."

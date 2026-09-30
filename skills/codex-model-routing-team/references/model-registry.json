@@ -1,6 +1,6 @@
 {
   "schema_version": "3.0.0",
-  "updated_at": "2026-09-05",
+  "updated_at": "2026-09-30",
   "policy": {
     "runtime_metadata_role": "validate_only",
     "unknown_model_action": "reject",
@@ -12,45 +12,45 @@
     "speed_modes": ["standard", "fast"],
     "default_speed": "standard",
     "service_tier_by_speed": {"standard": null, "fast": "priority"},
-    "fast_routing_models": ["gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra"],
+    "fast_routing_models": ["gpt-6-luna", "gpt-6.1-sol", "gpt-5.6-terra"],
     "default_fast_models": [],
-    "fast_requires_explicit_models": ["gpt-5.6-sol", "gpt-5.6-terra"],
+    "fast_requires_explicit_models": ["gpt-6.1-sol", "gpt-5.6-terra"],
     "app_thread_only_models": [],
-    "native_leaf_models": ["gpt-5.6-luna"],
-    "automatic_native_first_models": ["gpt-5.6-sol", "gpt-5.6-luna"],
+    "native_leaf_models": ["gpt-6-luna"],
+    "automatic_native_first_models": ["gpt-6.1-sol", "gpt-6-luna"],
     "native_first_candidate_requires_explicit_request": false,
     "default_surface": "native_subagent",
     "default_openai_route": {
       "surface": "native_subagent",
-      "model": "gpt-5.6-sol",
-      "thinking": "medium",
+      "model": "gpt-6-luna",
+      "thinking": "xhigh",
       "speed": "standard",
       "fork_turns": "none"
     },
     "high_risk_openai_route": {
       "surface": "native_subagent",
-      "model": "gpt-5.6-sol",
+      "model": "gpt-6.1-sol",
       "thinking": "high",
       "speed": "standard",
       "fork_turns": "none"
     },
     "complex_openai_route": {
       "surface": "native_subagent",
-      "model": "gpt-5.6-sol",
-      "thinking": "high",
+      "model": "gpt-6-luna",
+      "thinking": "max",
       "speed": "standard",
       "fork_turns": "none"
     },
     "critical_openai_route": {
       "surface": "native_subagent",
-      "model": "gpt-5.6-sol",
+      "model": "gpt-6.1-sol",
       "thinking": "xhigh",
       "speed": "standard",
       "fork_turns": "none"
     },
     "mechanical_openai_route": {
       "surface": "native_subagent",
-      "model": "gpt-5.6-luna",
+      "model": "gpt-6-luna",
       "thinking": "xhigh",
       "speed": "standard",
       "fork_turns": "none"
@@ -59,17 +59,17 @@
       "default": {
         "route_ref": "default_openai_route",
         "minimum_thinking": "medium",
-        "fallback_ref": "complex_openai_route"
+        "fallback_ref": "judgment_openai_route"
       },
       "mechanical": {
         "route_ref": "mechanical_openai_route",
         "minimum_thinking": "medium",
-        "fallback_ref": "default_openai_route"
+        "fallback_ref": "judgment_openai_route"
       },
       "complex": {
         "route_ref": "complex_openai_route",
         "minimum_thinking": "high",
-        "fallback_ref": "critical_openai_route"
+        "fallback_ref": "exploratory_openai_route"
       },
       "high_risk": {
         "route_ref": "high_risk_openai_route",
@@ -80,6 +80,16 @@
         "route_ref": "critical_openai_route",
         "minimum_thinking": "xhigh",
         "fallback_ref": null
+      },
+      "judgment": {
+        "route_ref": "judgment_openai_route",
+        "minimum_thinking": "medium",
+        "fallback_ref": "exploratory_openai_route"
+      },
+      "exploratory": {
+        "route_ref": "exploratory_openai_route",
+        "minimum_thinking": "high",
+        "fallback_ref": "critical_openai_route"
       }
     },
     "route_selection": {
@@ -88,19 +98,27 @@
         "routine": "default",
         "mechanical": "mechanical",
         "complex": "complex",
-        "review": "complex",
+        "review": "exploratory",
         "critical_review": "critical",
         "DEFAULT_GENERAL": "default",
         "HIGH_RISK_GENERAL": "high_risk",
         "DURABLE_WORKSPACE": "default",
         "FAST_MECHANICAL": "mechanical",
         "CRITICAL_REVIEW": "critical",
-        "CRITICAL_ARBITRATION": "critical"
+        "CRITICAL_ARBITRATION": "critical",
+        "judgment": "judgment",
+        "exploratory": "exploratory"
       },
       "risk_overrides": {
         "high": "high_risk",
         "critical": "critical"
-      }
+      },
+      "unresolved_profiles": {
+        "default": "judgment",
+        "mechanical": "judgment",
+        "complex": "exploratory"
+      },
+      "protected_workloads": ["critical_review", "CRITICAL_REVIEW", "CRITICAL_ARBITRATION"]
     },
     "default_team_limit_profile": "standard",
     "native_capacity_policy": {
@@ -123,25 +141,50 @@
       }
     },
     "minimum_thinking_by_model": {
-      "gpt-5.6-luna": "xhigh",
-      "gpt-5.6-sol": "medium"
+      "gpt-6-luna": "xhigh",
+      "gpt-6.1-sol": "medium"
     },
-    "default_disabled_models": [
-      "gpt-5.5",
-      "gpt-5.4",
-      "gpt-5.4-mini",
-      "gpt-5.3-codex-spark",
-      "gpt-5.6-terra"
-    ]
+    "default_disabled_models": ["gpt-5.5", "gpt-5.4", "gpt-5.4-mini", "gpt-5.3-codex-spark", "gpt-5.6-terra"],
+    "judgment_openai_route": {
+      "surface": "native_subagent",
+      "model": "gpt-6.1-sol",
+      "thinking": "medium",
+      "speed": "standard",
+      "fork_turns": "none"
+    },
+    "exploratory_openai_route": {
+      "surface": "native_subagent",
+      "model": "gpt-6.1-sol",
+      "thinking": "high",
+      "speed": "standard",
+      "fork_turns": "none"
+    },
+    "bounded_execution_models": ["gpt-6-luna"]
   },
   "models": [
     {
-      "id": "gpt-5.6-luna",
+      "id": "gpt-6-astra",
+      "provider": "openai",
+      "status": "opt_in",
+      "automatic": false,
+      "thinking": ["low", "medium", "high", "xhigh", "max"],
+      "multi_agent_version": "v2",
+      "native_role": "collaborative",
+      "surface_thinking": {
+        "native_subagent": ["low", "medium", "high", "xhigh", "max"],
+        "app_thread": ["low", "medium", "high", "xhigh", "max"]
+      },
+      "roles": ["explicit_expert_worker", "architecture", "critical_review"],
+      "provider_policy": "openai_baseline",
+      "terms_default": "allowed"
+    },
+    {
+      "id": "gpt-6-luna",
       "provider": "openai",
       "status": "baseline",
       "automatic": true,
       "thinking": ["xhigh", "max"],
-      "multi_agent_version": "v1",
+      "multi_agent_version": "v2",
       "native_role": "leaf",
       "surface_thinking": {
         "native_subagent": ["xhigh", "max"],
@@ -152,7 +195,7 @@
       "terms_default": "allowed"
     },
     {
-      "id": "gpt-5.6-sol",
+      "id": "gpt-6.1-sol",
       "provider": "openai",
       "status": "baseline",
       "automatic": true,
@@ -196,6 +239,54 @@
       "roles": ["agentic_code", "terminal_work", "independent_review", "technical_analysis", "cross_provider_challenger"],
       "provider_policy": "xai_conditional",
       "terms_default": "unknown"
+    },
+    {
+      "id": "opencode-go/deepseek-v4.1-flash",
+      "provider": "opencode-go",
+      "status": "manual_only",
+      "automatic": false,
+      "authorization_mode": "explicit_request",
+      "thinking": [
+        "high",
+        "max"
+      ],
+      "surface_thinking": {
+        "ephemeral_codex_cli": [
+          "high",
+          "max"
+        ]
+      },
+      "roles": [
+        "explicit_writing_worker",
+        "independent_challenger"
+      ],
+      "provider_policy": "opencode_go_manual",
+      "terms_default": "manual"
+    },
+    {
+      "id": "antigravity/gemini-3.8-flash",
+      "provider": "google-antigravity",
+      "status": "experimental",
+      "automatic": false,
+      "authorization_mode": "explicit_request",
+      "thinking": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "surface_thinking": {
+        "ephemeral_codex_cli": [
+          "low",
+          "medium",
+          "high"
+        ]
+      },
+      "roles": [
+        "explicit_writing_worker",
+        "long_context_challenger"
+      ],
+      "provider_policy": "google_antigravity_experimental",
+      "terms_default": "experimental"
     },
     {
       "id": "antigravity/gemini-3.6-flash",

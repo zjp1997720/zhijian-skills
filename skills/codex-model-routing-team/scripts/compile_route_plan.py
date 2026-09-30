@@ -23,7 +23,7 @@ SKILL_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REGISTRY = SKILL_ROOT / "references" / "model-registry.json"
 DEFAULT_VALIDATOR = SKILL_ROOT / "scripts" / "validate_route_plan.py"
 EVIDENCE_TTL = timedelta(minutes=10)
-KNOWN_SURFACES = {"native_subagent", "app_thread"}
+KNOWN_SURFACES = {"native_subagent", "app_thread", "ephemeral_codex_cli"}
 
 
 def load_json(source: str) -> Any:
@@ -105,7 +105,9 @@ def route_selection(
     if not isinstance(workload_profiles, dict):
         workload_profiles = {}
 
-    if risk in risk_overrides:
+    if workload in selection.get("protected_workloads", []):
+        profile = workload_profiles[workload]
+    elif risk in risk_overrides:
         profile = risk_overrides[risk]
     elif workload in workload_profiles:
         profile = workload_profiles[workload]
@@ -121,6 +123,18 @@ def route_selection(
     if not isinstance(profile, str) or not profile.strip():
         add_error(result, "registry route selection returned an invalid profile")
         return None
+    contract = request.get("task_contract")
+    if request.get("routes") is None and request.get("model") is None:
+        if not isinstance(contract, dict) or contract.get("decision_state") not in {
+            "specified", "unresolved"
+        }:
+            add_error(result, "automatic routing requires task_contract.decision_state: specified or unresolved")
+            return None
+        if not isinstance(contract.get("acceptance"), str) or not contract["acceptance"].strip():
+            add_error(result, "automatic routing requires task_contract.acceptance")
+            return None
+    if isinstance(contract, dict) and contract.get("decision_state") == "unresolved":
+        profile = selection.get("unresolved_profiles", {}).get(profile, profile)
     return profile
 
 
@@ -194,13 +208,29 @@ def route_from_request(
             add_error(result, f"{label}.route must be an object")
             return None
         route = copy.deepcopy(nested)
-        for key in ("surface", "model", "thinking", "speed", "fork_turns"):
+        for key in (
+            "surface",
+            "model",
+            "thinking",
+            "speed",
+            "fork_turns",
+            "fresh_context",
+            "output_last_message",
+        ):
             if key in value:
                 route[key] = copy.deepcopy(value[key])
     else:
         route = {
             key: copy.deepcopy(value[key])
-            for key in ("surface", "model", "thinking", "speed", "fork_turns")
+            for key in (
+                "surface",
+                "model",
+                "thinking",
+                "speed",
+                "fork_turns",
+                "fresh_context",
+                "output_last_message",
+            )
             if key in value
         }
     for key in ("runtime_evidence", "speed_evidence", "live_evidence", "surface_evidence"):
@@ -216,7 +246,11 @@ def candidate_evidence(
     request: dict[str, Any], route: dict[str, Any], index: int, surface: str
 ) -> Any:
     for key in (
-        "runtime_evidence" if surface == "native_subagent" else "speed_evidence",
+        (
+            "runtime_evidence"
+            if surface in {"native_subagent", "ephemeral_codex_cli"}
+            else "speed_evidence"
+        ),
         "live_evidence",
         "surface_evidence",
     ):
@@ -281,7 +315,15 @@ def apply_request_overrides(
     route = copy.deepcopy(route)
     if from_explicit_routes:
         return route
-    for key in ("surface", "model", "thinking", "speed", "fork_turns"):
+    for key in (
+        "surface",
+        "model",
+        "thinking",
+        "speed",
+        "fork_turns",
+        "fresh_context",
+        "output_last_message",
+    ):
         if key in request:
             route[key] = copy.deepcopy(request[key])
     context = request.get("context")
@@ -335,7 +377,7 @@ def prepare_candidate(
     candidate["speed"] = speed
 
     evidence = candidate_evidence(request, candidate, index, surface)
-    if speed == "fast":
+    if speed == "fast" and surface != "ephemeral_codex_cli":
         fast_models = set(policy.get("fast_routing_models", []))
         explicit_required = set(policy.get("fast_requires_explicit_models", []))
         can_request_fast = model in fast_models and not (
@@ -369,7 +411,7 @@ def prepare_candidate(
         candidate["runtime_evidence"] = evidence
         for key in ("speed_evidence", "live_evidence", "surface_evidence"):
             candidate.pop(key, None)
-    else:
+    elif surface == "app_thread":
         if "fork_turns" in candidate:
             add_error(result, f"candidate {index} App Thread route must not declare fork_turns")
         candidate.pop("fork_turns", None)
@@ -380,6 +422,34 @@ def prepare_candidate(
             candidate["speed_evidence"] = evidence
         else:
             candidate.pop("speed_evidence", None)
+    else:
+        if "fork_turns" in candidate:
+            add_error(
+                result,
+                f"candidate {index} ephemeral Codex CLI route must not declare fork_turns",
+            )
+        candidate.pop("fork_turns", None)
+        if candidate.get("fresh_context") is not True:
+            add_error(
+                result,
+                f"candidate {index} ephemeral Codex CLI route requires fresh_context=true",
+            )
+        if candidate.get("speed") != "standard":
+            add_error(
+                result,
+                f"candidate {index} ephemeral Codex CLI route requires Standard speed",
+            )
+        output = candidate.get("output_last_message", "response.md")
+        if not isinstance(output, str) or not output.strip():
+            add_error(
+                result,
+                f"candidate {index} output_last_message must be a non-empty string",
+            )
+        else:
+            candidate["output_last_message"] = output
+        candidate["runtime_evidence"] = evidence
+        for key in ("speed_evidence", "live_evidence", "surface_evidence"):
+            candidate.pop(key, None)
 
     return candidate
 
@@ -446,6 +516,23 @@ def validate_native_evidence(
         )
 
 
+def validate_cli_evidence(
+    candidate: dict[str, Any], index: int, result: dict[str, Any]
+) -> None:
+    evidence = candidate.get("runtime_evidence")
+    if not isinstance(evidence, dict):
+        add_error(
+            result,
+            f"candidate {index} ephemeral Codex CLI requires help-and-catalog evidence",
+        )
+        return
+    if evidence.get("kind") != "live_codex_cli_help_catalog":
+        add_error(
+            result,
+            f"candidate {index} ephemeral Codex CLI evidence must not impersonate native schema",
+        )
+
+
 def validate_host_authorization(
     candidates: list[dict[str, Any]], request: dict[str, Any], result: dict[str, Any]
 ) -> None:
@@ -486,6 +573,51 @@ def validate_host_authorization(
             evidence = candidate.get("surface_evidence")
             if isinstance(evidence, dict) and evidence.get("host") != auth_host:
                 add_error(result, f"candidate {index} App evidence host differs from host_authorization")
+
+
+def validate_cli_authorization(
+    candidates: list[dict[str, Any]], request: dict[str, Any], result: dict[str, Any]
+) -> None:
+    cli_candidates = [
+        candidate
+        for candidate in candidates
+        if candidate.get("surface") == "ephemeral_codex_cli"
+    ]
+    if not cli_candidates:
+        return
+    authorization = request.get("cli_authorization")
+    if not isinstance(authorization, dict):
+        add_error(result, "ephemeral_codex_cli requires cli_authorization")
+        return
+    if authorization.get("surface") != "ephemeral_codex_cli":
+        add_error(result, "cli_authorization must target ephemeral_codex_cli")
+    if authorization.get("user_authorized") is not True:
+        add_error(result, "cli_authorization lacks current user authorization")
+    if authorization.get("host_policy") != "allowed":
+        add_error(result, "cli_authorization host_policy must be allowed")
+    auth_host = authorization.get("host")
+    if not isinstance(auth_host, str) or not auth_host.strip():
+        add_error(result, "cli_authorization lacks a host identity")
+    auth_source = authorization.get("source")
+    if not isinstance(auth_source, str) or not auth_source.strip():
+        add_error(result, "cli_authorization lacks an authorization source")
+    auth_checked = parse_checked_at(authorization.get("checked_at"))
+    if auth_checked is None:
+        add_error(result, "cli_authorization has an invalid checked_at")
+    else:
+        age = datetime.now(timezone.utc) - auth_checked
+        if age > EVIDENCE_TTL:
+            add_error(result, "cli_authorization is stale")
+        elif age < -timedelta(minutes=1):
+            add_error(result, "cli_authorization is dated in the future")
+    if isinstance(auth_host, str) and auth_host.strip():
+        for index, candidate in enumerate(cli_candidates):
+            evidence = candidate.get("runtime_evidence")
+            if isinstance(evidence, dict) and evidence.get("host") != auth_host:
+                add_error(
+                    result,
+                    f"candidate {index} CLI evidence host differs from cli_authorization",
+                )
 
 
 def build_routes(
@@ -634,8 +766,10 @@ def build_plan(
         if candidate is not None:
             if candidate["surface"] == "app_thread":
                 validate_app_evidence(candidate, index, result)
-            else:
+            elif candidate["surface"] == "native_subagent":
                 validate_native_evidence(candidate, index, result)
+            else:
+                validate_cli_evidence(candidate, index, result)
             candidates.append(candidate)
 
     if not candidates:
@@ -705,7 +839,12 @@ def build_plan(
     }
     if "host_authorization" in request:
         plan["host_authorization"] = copy.deepcopy(request["host_authorization"])
+    if "cli_authorization" in request:
+        plan["cli_authorization"] = copy.deepcopy(request["cli_authorization"])
+    if "task_contract" in request:
+        plan["task_contract"] = copy.deepcopy(request["task_contract"])
     validate_host_authorization(candidates, request, result)
+    validate_cli_authorization(candidates, request, result)
     return plan
 
 
@@ -745,9 +884,31 @@ def dispatch_candidate(candidate: dict[str, Any]) -> dict[str, Any]:
         args["reasoning_effort"] = candidate.get("thinking")
         args["fork_turns"] = candidate.get("fork_turns")
         evidence = candidate.get("runtime_evidence")
-    else:
+    elif surface == "app_thread":
         args["thinking"] = candidate.get("thinking")
         evidence = candidate.get("speed_evidence")
+    else:
+        args["thinking"] = candidate.get("thinking")
+        args["fresh_context"] = candidate.get("fresh_context")
+        args["lifecycle"] = "process_exit"
+        args["audit_schema"] = "references/cli-audit-schema.json"
+        output = candidate.get("output_last_message", "response.md")
+        args["argv"] = [
+            "codex",
+            "exec",
+            "--ephemeral",
+            "-s",
+            "read-only",
+            "-m",
+            candidate.get("model"),
+            "-c",
+            f'model_reasoning_effort="{candidate.get("thinking")}"',
+            "--json",
+            "-o",
+            output,
+            "-",
+        ]
+        evidence = candidate.get("runtime_evidence")
     if candidate.get("speed") == "fast" and isinstance(evidence, dict):
         service_tier = evidence.get("service_tier")
         if isinstance(service_tier, str) and service_tier:
