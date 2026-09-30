@@ -1,41 +1,34 @@
 ---
 name: codex-model-routing-team
-description: 为有明确净并行收益的任务编译 TeamPlan，按 registry 与 live schema 固定 Worker 路由。用于两个以上独立交付物、独立验证，或明确要求模型路由、后台 Worker、Agents Team、Grok/Gemini Worker。简单问答、状态查询、单文件小改、强顺序、不可逆操作不触发。
+description: "为有净收益的独立子任务安排多模型协作；简单或强顺序任务直接执行。"
 ---
 
 # Codex 模型路由团队
 
-主 Agent 保持当前模型，只做必要规划、所有权、集成和最终验收。独立的批量或复杂执行交给 1–3 个 Luna/Sol Worker，不重复已委派工作。两个以上 Worker 先编译 TeamPlan；registry 按风险/工作负载选路：常规 Sol Medium，复杂/高风险 Sol High，关键审查 Sol XHigh，机械批量 Luna XHigh。
+主 Agent 保持模型并负责集成验收；独立执行交给 1–3 个 Worker。两个以上 Worker 先编译 TeamPlan；边界明确且可验收的执行默认 GPT-6 Luna XHigh，复杂执行 Luna Max；未决判断 Sol Medium/High，高风险 Sol High，关键独立审查 Sol XHigh。派遣前声明 `task_contract`：决策是否已定、如何验收；提示词长或文件多不单独触发 Sol。
 
-## 不使用
+## 按需选择路径
 
-简单问答、状态查询、单文件小改、强顺序和不可逆操作留在主任务；Worker 只能准备外部动作材料。
-
-## 执行模式
-
-- `native-v2`（默认）：按 registry 选 `native_subagent` Sol/Luna Worker；fresh context 使用 `fork_turns="none"`，少量上下文写正整数。JSON 默认从 stdin 校验。
-- `durable-app`：仅当前 live 能力与宿主授权都通过时使用 App Thread；worktree 需求本身不授权创建用户可见 Task。
+- 默认原生 Standard、新 standard 团队且单元可共用风险路由：读 [原生简洁路径](references/native-quick-path.md)，用 `scripts/prepare_native_team.py` 一次生成已校验派遣参数和初始账本。
+- 路由不同、Fast、单 Worker 或已有团队恢复：读 [编译器接口](references/route-compiler.md)；两个以上 Worker 按 [TeamPlan](references/team-plan.md) 校验，原生执行读 [生命周期](references/native-subagent-lifecycle.md)。
+- 需要用户明确要求的持久 Task：核对宿主授权后读 [Thread 生命周期](references/thread-lifecycle.md) 与 [监督协议](references/thread-supervision-protocol.md)。worktree 需求本身不授权创建 Task。
+- 用户点名 exact CLI model：读 [CLI Surface](references/ephemeral-cli-surface.md)，核对 help/catalog、授权与 fresh context。
 - 上游 Skill 已定义拆分、阶段和产物时，遵守 [适配协议](references/upstream-skill-adapter.md)，不重做阶段门或业务账本。
-- `python3 scripts/compile_route_plan.py -` 把紧凑 JSON 编译为 RoutePlan 并校验；只返回 dispatch 参数，永不派遣。
 
-## 执行流程
+## 所有路径共用
 
-1. 自动派遣需 2+ 独立交付物且净收益为正；用户明确点名单 Worker 可执行，否则 `lead_only`。
-2. 两个以上 Worker 按 [TeamPlan 协议](references/team-plan.md) 编译 unit、依赖、所有权、交付物和集成顺序，并运行 `scripts/validate_team_plan.py`；上游计划只编译。
-3. 按 [registry](references/model-registry.json)、[Provider](references/provider-policy.md)、[路由](references/routing-policy.md) 与 [Surface](references/surface-selection-policy.md) 固定候选链；编译器降低手写成本。
-4. 每个 unit 生成 `schema_version: "3.0"` RoutePlan，写 `surface_intent` 并运行 `scripts/validate_route_plan.py`。原生候选须写 `fork_turns`、tuple-bound `runtime_evidence`；Fast 还须有 live `service_tier=priority` 证据。
-5. [任务包](references/task-packet.md) 写 unit、唯一 `task_id`、权限、验收和禁止下级派遣；简报路由、fallback 与 reserved slots。
-6. 原生路径遵守 [生命周期](references/native-subagent-lifecycle.md)；App 路径遵守 [Thread 生命周期](references/thread-lifecycle.md) 与 [监督协议](references/thread-supervision-protocol.md)。
-7. TeamPlan 默认 `standard` 6/8/3；`expanded` 12/16/6 需 live 容量门、2 个 reserved slots；按 child slots 切波，更严的宿主/用户限制优先。
-8. 每 unit 最多 2 次 attempt、一次 follow-up；失败只沿 [预声明链](references/recovery-policy.md)。结构变化才修订 TeamPlan。
-9. 主 Agent 验证集成；原生 Worker close 或 completed-idle 后写 `RELEASED`，App Thread 过门后归档；运行 `scripts/validate_team_ledger.py`。
+1. 自动派遣需 2+ 独立交付物且净收益为正；点名单 Worker 可执行，否则主 Agent 直接完成。
+2. 编译器读取 registry 并执行 RoutePlan 校验，不省略 Provider、live schema 或数据边界。特殊 Provider/覆盖或失败诊断才展开 [Provider](references/provider-policy.md)、[路由](references/routing-policy.md)、[Surface](references/surface-selection-policy.md)；不用每次先读齐。
+3. 派遣前明确 unit、唯一 task_id、权限、精确所有权和验收；完整 [任务包](references/task-packet.md) 仅在输入/上下文/权限复杂时展开。主 Agent 保持集成和最终验收。
+4. 默认 `standard` 6/8/3，实际受 live child slots 及更严的用户上限约束；`expanded` 12/16/6 仅按 TeamPlan 容量门启用。每 unit 最多 2 次 attempt、一次 follow-up；失败只沿 [预声明链](references/recovery-policy.md)。
+5. 结果经主 Agent 验证后采纳，正式状态确认收口并运行 `scripts/validate_team_ledger.py`。编译准备不等于已执行，不把创建回执当完成。
 
 ## 硬门
 
 - registry 决定范围；live schema 只证明当前 host 接受精确组合。requested/accepted/observed 分开记录，未回显为 `unknown`。
-- V2 父 Agent 可创建 picker 可见且未禁用的 V1 leaf model；Luna 可走原生 V2但不获协作工具，Sol/Terra 也禁止下级派遣。
+- GPT-6.1 Sol / GPT-6 Luna 的官方 catalog 均为 V2；本 Skill 将所有 Worker 限制为叶子执行角色，禁止继续派遣。当前 host 必须接受精确模型组合。
 - 不加 `model: luna` frontmatter；编排入口留在协作父 Agent，Luna 只做 Worker。
-- Luna 最低 XHigh；Sol 最低 Medium，按工作负载与风险提升到 High/XHigh；Terra 仅显式首项；Grok 过门；Gemini blocked。禁止旧模型、Ultra 和低强度 fallback。
+- Luna 最低 XHigh；Sol 最低 Medium；Terra 仅显式首项；Grok 过门；Gemini 3.6 blocked。DeepSeek 4.1/Gemini 3.8 仅走 manual/experimental CLI。禁止 Ultra。
 - Fast 即 `service_tier=priority`；live schema 无字段时一律 Standard，不把 catalog 或请求值冒充 observed Fast。
 - `app_thread` 只用于 worktree、侧栏、跨任务恢复、耐久监督或预声明 fallback，并且必须有 live 能力与宿主授权证据。
 - Worker 不得继续派生或执行发布、发送、付款、删除、账户、生产变更；主 Agent 不切换模型。

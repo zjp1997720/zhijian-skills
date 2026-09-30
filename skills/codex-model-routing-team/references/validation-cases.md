@@ -8,11 +8,20 @@
 
 ## 核心回归
 
-### 默认 Native Sol
+### 默认 Native Luna
 
-Prompt：并行完成三个普通复杂子任务，没有点名 Surface 或模型。
+Prompt：并行完成三个方案明确、可验收的普通子任务，没有点名 Surface 或模型。
 
-应出现：3-unit TeamPlan；`surface_intent=parent_integrated`；首项按 registry 为 `native_subagent/gpt-5.6-sol/medium/standard`，复杂/高风险升 High，关键审查升 XHigh；候选显式写 `fork_turns="none"` 与匹配的 live runtime evidence。Worker 仍是 leaf，任务包禁止下级派遣。
+应出现：3-unit TeamPlan；`surface_intent=parent_integrated`；声明 `task_contract`，首项为 `native_subagent/gpt-6-luna/xhigh/standard`；复杂执行 Luna Max，未决判断 Sol Medium/High，高风险 Sol High，关键审查 Sol XHigh；候选显式写 `fork_turns="none"` 与匹配的 live runtime evidence。Worker 仍是 leaf，任务包禁止下级派遣。
+
+### 决策边界与成本
+
+- 已定接口、设计与验收的多文件实现：`specified + complex` → Luna Max。
+- 根因未知或冲突证据需要裁决：`unresolved + complex` → Sol High；详细提示词不能代替已定方案。
+- 普通来源/测试清单核验：Luna XHigh/Max；关键独立审查 Sol XHigh。
+- 缺少 `task_contract`、决策状态未知或验收为空：自动编译失败；显式 routes 也不能绕过 Luna 入门条件。
+- routine 唯一 fallback 可用 `fallback: "complex"` 选 Luna Max；三段 XHigh → Max → Sol 必须拒绝。
+- 已验收的 Luna 输出：主 Agent 采纳；无额外风险时不追加 Sol 全量复做。
 
 ### Native Luna Fast 缺少 schema
 
@@ -42,13 +51,21 @@ Prompt：Native Worker 已完成并被采纳，当前 live tools 没有 close_ag
 
 Prompt：创建 Sol Medium Fast Worker。
 
-应出现：Sol Medium Standard 可作为常规首项；Low 静态拒绝。复杂/高风险使用 Sol High/XHigh；Fast 仍需要用户明确点名和 live priority evidence。
+应出现：显式 Sol Medium Standard 可作首项；Low 静态拒绝。明确复杂执行自动使用 Luna Max，未决复杂判断/高风险使用 Sol High，关键审查 Sol XHigh；Fast 仍需要用户明确点名和 live priority evidence。
 
 ### RoutePlan 紧凑编译
 
-Prompt：只提供 workload、risk、Provider 门和按候选顺序排列的 live evidence，运行 `scripts/compile_route_plan.py -`。
+Prompt：提供 workload、risk、task_contract、Provider 门和按候选顺序排列的 live evidence，运行 `scripts/compile_route_plan.py -`。
 
 应出现：registry 选择 profile，生成 v3 RoutePlan 并调用现有 validator；`dispatch.auto_dispatch=false`。缺少 accepted、host、时间戳或 priority 证据时返回错误/Standard warning，不补写 accepted、observed、capacity 或 tier。
+
+### Explicit ephemeral CLI
+
+Prompt：用户点名用 DeepSeek 4.1 Flash 和 Gemini 3.8 Flash 各写一份独立稿件，当前 CLI help 与本地有效 catalog 均列出 exact model/High。
+
+应出现：两个独立的单候选计划；`surface_intent=ephemeral_cli`、`surface=ephemeral_codex_cli`、High/Standard、`fresh_context=true`。DeepSeek 用 `manual_authorized`，Gemini 用 `experimental_authorized`；两者都要求当前用户授权与 `host_policy=allowed`。dispatch 返回 `codex exec --ephemeral -s read-only ... --json -o response.md -` argv，不自动执行。CLI JSONL 未回显 identity 时 observed 记 `unknown`。
+
+反例：缺少 catalog/help、证据过期或 tuple 不匹配、`fresh_context=false`、Fast、host 禁止、用 `live_spawn_schema`/`accepted=true` 伪装 native，或把任一模型放 fallback，均拒绝。
 
 ### TeamPlan write collision
 
@@ -72,7 +89,7 @@ Prompt：create_thread 返回 pending id，或按 task id 查询得到零/多个
 
 - Grok 只在 runtime/provider/data 门通过后使用。
 - Terra 只能作为用户点名的首项；unknown model 只熔断该精确 tuple。
-- Gemini Antigravity 当前 terms blocked，即使点名也不创建。
+- Gemini 3.6 Antigravity 当前 terms blocked，即使点名也不创建；Gemini 3.8 只有本轮 experimental CLI 路径。
 
 ### 上游 Skill
 

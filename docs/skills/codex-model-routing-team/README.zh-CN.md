@@ -1,14 +1,14 @@
 # Codex 模型路由团队
 
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Codex 主 Agent 通过原生 V2 把执行任务路由给 Sol Medium，并把耐久任务留给 App Thread">
+  <img src="./assets/readme/hero.svg" width="100%" alt="task_contract 把已定执行路由给 GPT-6 Luna，把未决判断路由给 GPT-6.1 Sol">
 </p>
 
-<p align="center"><strong>主 Agent 负责 TeamPlan、所有权、集成和验收；普通 Worker 默认走原生 Sol Medium，Luna 负责可机械验收的批量任务。</strong></p>
+<p align="center"><strong>把独立工作编译成可验收的叶子 Worker：已定执行交给 GPT-6 Luna，未决判断交给 GPT-6.1 Sol。</strong></p>
 
 <p align="center"><a href="./README.md">English</a> · <a href="https://github.com/zjp1997720/zhijian-skills/tree/main/skills/codex-model-routing-team">统一源码</a></p>
 
-适合存在明确净并行收益的任务。它把并行工作编译成轻量 TeamPlan，为每个单元固定 Surface、模型、推理强度、速度和上下文范围，再由主 Agent 统一验收。
+仅在任务包含至少两个独立、可验收交付物，并行净收益高于协调成本时使用。主 Agent 保持当前模型，负责计划、文件所有权、集成和最终验收。
 
 ## 安装
 
@@ -16,72 +16,59 @@
 npx skills add zjp1997720/zhijian-skills
 ```
 
-全局安装到 Codex，并复制真实文件：
+全局复制安装到 Codex：
 
 ```bash
 npx skills add zjp1997720/zhijian-skills \
   -g -a codex --skill codex-model-routing-team --copy -y
 ```
 
-安装后检查：
-
-```bash
-npx skills ls -g -a codex
-find ~/.agents/skills/codex-model-routing-team -maxdepth 2 -type f | sort
-```
-
 ## 环境要求
 
 - Codex 原生 Multi-Agent V2，或 Codex App Thread 工具，或两者。
-- 当前 live schema 能确认 RoutePlan 里的精确模型、reasoning、context 和可选速度字段。
-- 跨 Provider 路由前，项目数据边界、凭证路径和服务条款允许该候选。
+- 派遣前，live schema 能接受精确的模型、推理强度、上下文和可选速度组合。
+- Provider 条款、凭证和项目数据边界允许对应候选。
+- 用户点名实验性 CLI 精确模型时，必须取得当前 CLI help 和模型目录证据。
 
 ## 启用
 
-直接点名：
-
 ```text
-使用 $codex-model-routing-team 并行调研这 6 个独立主题，最后统一核验。
+使用 $codex-model-routing-team 分别实现和测试这三个独立模块，最后统一集成验收。
 ```
 
-需要自动触发时，把下面的授权放进用户级或项目级 `AGENTS.md`：
+需要自动触发时，可把以下授权放进 `AGENTS.md`：
 
 ```markdown
-## Codex 后台模型路由授权
+## Codex 模型路由授权
 
-- 可安全拆成至少两个独立交付物且并行净收益为正时，自动使用 `$codex-model-routing-team`；派遣前简报 Worker 数、Surface、模型、强度、速度和职责。
-- 两个以上 Worker 先编译轻量 TeamPlan；已有上游计划时只编译。主 Agent 保持当前模型，负责所有权、集成和验收。
-- 默认用 Native Sol Medium；复杂或高风险任务用 Sol High/XHigh，Luna XHigh 用于可机械验收的批量任务。App Task 需符合宿主授权及项目目录约束。
-- Worker 禁止 Ultra、下级派遣和不可逆外部动作；实际波次必须为协调者预留 live slot。
+- 只有任务至少包含两个独立、可验收交付物，且并行净收益为正时，才自动使用 `$codex-model-routing-team`。
+- 派遣前简报 Worker 数、Surface、模型、强度、速度和职责。主 Agent 保持当前模型，负责集成和最终验收。
+- 每条自动路由先声明 `task_contract`：决策是否已定、什么证据算验收通过。
+- 已定执行默认 GPT-6 Luna XHigh，复杂已定执行用 Luna Max；未决判断用 GPT-6.1 Sol Medium/High，高风险用 Sol High，关键独立审查用 Sol XHigh。
+- Worker 只能做叶子执行：禁止 Ultra、继续派生、发布、发送、付款、删除、账户和生产变更。
 ```
-
-## 为什么升级到 v3
-
-OpenAI Codex 在 [leaf-model support PR](https://github.com/openai/codex/pull/36892) 与 [rust-v0.147.0](https://github.com/openai/codex/releases/tag/rust-v0.147.0) 中让 V2 父 Agent 可以创建 picker 可见且未禁用的 leaf model。Luna 虽然本身是 leaf、不能继续协作，但现在可以作为原生 V2 Worker。
-
-最初 v3 把默认路径从“Luna App Thread”改为“Native Luna leaf Worker”；当前按工作负载采用常规 Sol Medium、机械批量 Luna XHigh。App Thread 仍保留给 worktree、侧栏可见、跨任务恢复和耐久监督。Skill 本身不添加 `model: luna` frontmatter，因为编排入口必须留在具备协作工具的父 Agent。
 
 ## 主要能力
 
-- 净收益门：没有两个独立可验收交付物时，由主 Agent 直接完成。
-- TeamPlan：校验依赖、同波写冲突、attempt、reserved slots 和集成顺序。
-- RoutePlan v3：区分 `parent_integrated` 与 `durable_app`，Native 候选显式写 `fork_turns`。
-- 精确路由：默认 Native Sol Medium Standard，复杂或高风险单元用 Sol High/XHigh；Fast 只在 live schema 接受 `service_tier=priority` 时启用。
-- 生命周期：Native 结果按 live 能力 close 或 completed-idle 释放；App Thread 保留 pending、UNKNOWN、恢复和归档门。
-- Provider 安全：Terra 仅显式首项，Grok 需过预检，Gemini Antigravity 当前 blocked。
-- 主 Agent 保留发布、发送、付款、删除、账户和生产变更。
+- 净收益门：简单任务或强顺序任务由主 Agent 直接完成。
+- TeamPlan：两个以上 Worker 时，校验依赖、所有权、预算、同波写冲突和集成顺序。
+- `task_contract`：自动选模前必须明确决策状态和验收证据；提示词长、文件多不单独触发强模型。
+- 模型分工：已定执行走 GPT-6 Luna XHigh/Max；未决、高风险和关键判断走 GPT-6.1 Sol Medium/High/XHigh。
+- 边界模型：GPT-6 Astra 仅显式使用，Terra 仅显式首项，Grok 需过预检，Gemini 3.6 blocked；DeepSeek 4.1/Gemini 3.8 只走显式手动 CLI。
+- 耐久任务：worktree、侧栏、跨任务恢复、耐久监督或预声明 fallback 才进入 App Thread。
+- 审计 requested、accepted、observed 三种模型与速度身份，不把请求值冒充运行事实。
 
 ## 工作方式
 
-1. 主 Agent 判断净并行收益，编译并校验 TeamPlan。
-2. 每个 unit 生成 Task Packet 和 `schema_version: "3.0"` RoutePlan。
-3. 普通任务写 `surface_intent=parent_integrated`，默认 Native Sol Medium；获宿主授权的耐久工作区写 `durable_app`。
-4. Native fresh context 使用 `fork_turns="none"`；正整数字符串表示最近 N 轮；模型覆盖禁止 `all`。
-5. 失败只沿预声明候选链，主 Agent按集成顺序验证真实产物。
-
-轻量路径不需要落协调文件：
+1. 主 Agent 确认独立单元并写清验收证据。
+2. 两个以上 Worker 先校验 TeamPlan；依赖环、同波写冲突、超预算和下放最终验收都会被拒绝。
+3. `prepare_native_team.py` 可一次生成已校验的原生派遣参数和初始账本，但不会创建 Worker。
+4. 每个 Worker 获得唯一 task ID、精确所有权、一份 RoutePlan；每单元最多两次 attempt 和一次 follow-up。
+5. Native 结果按 live close 或已确认 completed-idle 释放；App Thread 保留 pending、UNKNOWN、恢复和归档门。
+6. 主 Agent 按顺序检查真实产物、完成集成，并校验最终账本。
 
 ```bash
+python3 scripts/prepare_native_team.py --help
 printf '%s' "$TEAM_PLAN_JSON" | python3 scripts/validate_team_plan.py -
 printf '%s' "$ROUTE_PLAN_JSON" | python3 scripts/validate_route_plan.py -
 printf '%s' "$TEAM_LEDGER_JSON" | python3 scripts/validate_team_ledger.py -
@@ -90,37 +77,30 @@ printf '%s' "$TEAM_LEDGER_JSON" | python3 scripts/validate_team_ledger.py -
 ## 示例
 
 ```text
-使用 $codex-model-routing-team 分别实现、测试和审查 3 个独立模块，避免文件所有权重叠。
+使用 $codex-model-routing-team。接口已经定稿：给三个 GPT-6 Luna XHigh Worker 分配互不重叠的模块，最后运行验收套件。
 ```
 
 ```text
-用 Native Sol XHigh 并行审计三个高风险模块；只有宿主授权且项目允许时，才把耐久工作区放到 App Task。
+先用 GPT-6.1 Sol High 解决两个架构未决问题；主 Agent 采纳决定前不要开始实现。
 ```
 
 ```text
-让 $codex-model-routing-team 作为 $deep-research 的路由 Orchestrator，保留 verifier 和 reviewer 阶段。
+我明确要用 DeepSeek 4.1 Flash 做一次只读对比。先核对当前 CLI 模型目录，再用 fresh context 执行。
 ```
 
 ## 安全与限制
 
-- Sol Medium 为常规起点，复杂或高风险用 High/XHigh；Luna 保留 XHigh 下限，仅承担低风险批量工作；Ultra 永久禁止。
-- picker/catalog 资格不是 live runtime 证据；没有精确 schema 证明时，不派遣该 tuple。
-- Standard Native evidence 不伪造 speed/service tier；Fast 才绑定 priority evidence。
-- v2.1 RoutePlan 仅用于完成既有 run；所有新计划使用 v3。
-- App durable fallback 必须留在 App Surface，避免丢失 worktree 或恢复语义。
+- Luna 必须有已定决策和具体验收证据，不能承担高风险或关键独立审查。
+- Sol 不低于 Medium，Luna 不低于 XHigh，禁止 Ultra。
+- catalog 可见不等于 live runtime 支持；无法确认精确 tuple 时不得派遣。
+- Fast 等于 `service_tier=priority`；live schema 没有该字段时保持 Standard。
+- 精确 CLI 路由仅限显式、只读、fresh context 和非自动路径，不能替代 Native/App 生命周期证据。
+- 没有同任务对照，不宣称更快或更省钱。
 
 ## 验证
 
-确定性测试覆盖 Sol Medium、风险升级、stdin 编译器、App 授权、Native Luna、leaf 边界、fork scope、Fast live gate、durable App、RELEASED 生命周期、TeamPlan 档位、Provider 门、pending/UNKNOWN 恢复和隔离安装。
+本次发布运行 82 项路由测试，覆盖 task contract、Luna/Sol 准入、原生快速准备、CLI 精确模型边界、Provider 门、live tuple、速度、TeamPlan 所有权、attempt、生命周期、恢复和隔离安装。
 
 ## 许可证
 
 [MIT](../../../skills/codex-model-routing-team/LICENSE)
-
-## Route compiler / 路由编译器
-
-```bash
-python3 scripts/compile_route_plan.py - < request.json
-```
-
-传入工作负载、风险、Provider 边界与当前宿主能力证据。编译器返回已校验的 RoutePlan 和派遣参数，本身不创建 Worker。详见[输入合同](../../../skills/codex-model-routing-team/references/route-compiler.md)。尚无同任务对照，不承诺比 Luna 更快或更便宜。

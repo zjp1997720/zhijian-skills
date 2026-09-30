@@ -3,7 +3,9 @@ from __future__ import annotations
 from typing import Any
 
 
-KNOWN_SURFACES = frozenset({"native_subagent", "app_thread"})
+KNOWN_SURFACES = frozenset(
+    {"native_subagent", "app_thread", "ephemeral_codex_cli"}
+)
 
 
 def supported_thinking(entry: dict[str, Any], surface: str) -> set[str]:

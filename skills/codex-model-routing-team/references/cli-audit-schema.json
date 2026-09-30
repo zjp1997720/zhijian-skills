@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ephemeral Codex CLI audit record",
+  "type": "object",
+  "required": [
+    "surface",
+    "lifecycle",
+    "requested_model",
+    "requested_thinking",
+    "requested_speed",
+    "process_exit_code",
+    "output_last_message",
+    "observed_runtime_model",
+    "observed_runtime_thinking",
+    "started_at",
+    "completed_at"
+  ],
+  "properties": {
+    "surface": {"const": "ephemeral_codex_cli"},
+    "lifecycle": {"const": "process_exit"},
+    "requested_model": {"type": "string", "minLength": 1},
+    "requested_thinking": {"type": "string", "minLength": 1},
+    "requested_speed": {"const": "standard"},
+    "process_exit_code": {"type": "integer"},
+    "output_last_message": {"type": "string", "minLength": 1},
+    "observed_runtime_model": {"type": "string", "minLength": 1},
+    "observed_runtime_thinking": {"type": "string", "minLength": 1},
+    "started_at": {"type": "string", "format": "date-time"},
+    "completed_at": {"type": "string", "format": "date-time"}
+  },
+  "additionalProperties": true
+}
