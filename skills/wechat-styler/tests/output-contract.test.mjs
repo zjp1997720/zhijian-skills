@@ -51,20 +51,54 @@ test('renders fenced code with explicit hard breaks that survive WeChat sanitiza
   fs.rmSync(workDir, { recursive: true, force: true });
 });
 
-test('passes the generated path to the opener without shell interpretation', () => {
+function fakeOpener(workDir) {
+  const bin = path.join(workDir, 'bin');
+  const log = path.join(workDir, 'opened.log');
+  fs.mkdirSync(bin);
+  fs.writeFileSync(path.join(bin, 'open'), `#!/bin/sh\nprintf '%s\\n' "$1" >> "${log}"\n`, { mode: 0o755 });
+  return { bin, log };
+}
+
+function runConvert(workDir, args, extraEnv) {
+  const { NODE_TEST_CONTEXT, CI, WECHAT_STYLER_NO_OPEN, ...env } = process.env;
+  return spawnSync(process.execPath, [path.join(skillRoot, 'scripts/convert.mjs'), ...args], {
+    cwd: workDir, encoding: 'utf8', env: { ...env, ...extraEnv },
+  });
+}
+
+test('passes the generated path to the opener without shell interpretation', async () => {
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-output-safety-'));
-  const input = path.join(workDir, 'article.md');
-  const output = path.join(workDir, 'article.html"; touch INJECTED; #');
-  fs.writeFileSync(input, '# 正文\n');
+  try {
+    const { bin, log } = fakeOpener(workDir);
+    const input = path.join(workDir, 'article.md');
+    const output = path.join(workDir, 'article.html"; touch INJECTED; #');
+    fs.writeFileSync(input, '# 正文\n');
+    const result = runConvert(workDir, [input, '--output', output], { PATH: `${bin}:${process.env.PATH}` });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.equal(fs.existsSync(path.join(workDir, 'INJECTED')), false);
+    assert.equal(fs.existsSync(output), true);
+    assert.equal(fs.readFileSync(log, 'utf8').trim(), output, 'opener receives the exact path');
+  } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
+});
 
-  const result = spawnSync(process.execPath, [
-    path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', output,
-  ], { cwd: workDir, encoding: 'utf8' });
-
-  assert.equal(result.status, 0, result.stderr || result.stdout);
-  assert.equal(fs.existsSync(path.join(workDir, 'INJECTED')), false);
-  assert.equal(fs.existsSync(output), true);
-  fs.rmSync(workDir, { recursive: true, force: true });
+test('never opens a browser under node --test, CI, WECHAT_STYLER_NO_OPEN or --no-open', () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-no-open-'));
+  try {
+    const { bin, log } = fakeOpener(workDir);
+    const input = path.join(workDir, 'article.md');
+    fs.writeFileSync(input, '正文。\n');
+    const PATH = `${bin}:${process.env.PATH}`;
+    for (const [env, args] of [
+      [{ NODE_TEST_CONTEXT: 'child-v8' }, []],
+      [{ CI: 'true' }, []],
+      [{ WECHAT_STYLER_NO_OPEN: '1' }, []],
+      [{}, ['--no-open']],
+    ]) {
+      const result = runConvert(workDir, [input, '--output', path.join(workDir, 'a.html'), ...args], { PATH, ...env });
+      assert.equal(result.status, 0, result.stderr || result.stdout);
+    }
+    assert.equal(fs.existsSync(log), false);
+  } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
 });
 
 test('zhijian theme keeps action and trust semantics visually distinct', () => {

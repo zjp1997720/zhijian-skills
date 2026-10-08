@@ -50,6 +50,8 @@ function parseArgs() {
   --cover-author <text|none>  Cover byline, used verbatim (scroll-painting);
                               default "<top label> 出品"; "none" hides it
   --brand-cta <mode>          auto | ending | none (default: auto)
+  --no-open                   Do not open the result in a browser (also skipped
+                              under node --test, CI, or WECHAT_STYLER_NO_OPEN=1)
   --topics <a,b,c|none>       WeChat topic tags at the end of the body, rendered
                               as editor-native #topic links, italic 14px
                               (default: frontmatter.topics; "none" disables)
@@ -77,7 +79,8 @@ function parseArgs() {
     brandCta: 'auto',
     topics: null,
     strictDensity: false,
-    keepH1: false
+    keepH1: false,
+    noOpen: false
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -111,6 +114,11 @@ function parseArgs() {
       } else {
         options.cover = true;
       }
+      continue;
+    }
+
+    if (key === 'no-open') {
+      options.noOpen = true;
       continue;
     }
 
@@ -1297,10 +1305,15 @@ async function main() {
       console.log(`3. Copy (Cmd+C)`);
       console.log(`4. Paste into WeChat Official Account editor`);
 
-      // Auto-open in default browser (single file only)
-      execFile('open', [outputPath], (err) => {
-        if (err) console.error(`Warning: Could not auto-open browser: ${err.message}`);
-      });
+      // Auto-open in default browser (single file only)。
+      // 测试与 CI 中跳过:否则每次转换都弹出一个指向临时文件的浏览器标签。
+      const skipOpen = options.noOpen || process.env.WECHAT_STYLER_NO_OPEN === '1'
+        || Boolean(process.env.NODE_TEST_CONTEXT) || Boolean(process.env.CI);
+      if (!skipOpen) {
+        execFile('open', [outputPath], (err) => {
+          if (err) console.error(`Warning: Could not auto-open browser: ${err.message}`);
+        });
+      }
     }
   }
 }

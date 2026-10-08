@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Stop test runs from flooding the browser with blank tabs (1.14.1): conversion no longer auto-opens the result under `node --test` (`NODE_TEST_CONTEXT`), `CI`, `WECHAT_STYLER_NO_OPEN=1`, or the new `--no-open` flag. Previously every spawned conversion in the suite opened a tab pointing at a temp file that was deleted moments later. The opener-safety test now uses a fake `open` on `PATH` and asserts the exact path it receives, and a new test proves none of the four skip paths call the opener.
+
 - Add WeChat topic tags (1.14.0): `topics` in frontmatter or `--topics a,b,c` renders a closing line of `#topic` links after the last paragraph, before the ending GIF. Each link reproduces the editor's native `a.wx_topic_link[data-topic]` structure in italic 14px, so the live editor parses it as a `topic` mark (verified against the real editor) and saving keeps the tags. Topics accept comma, 、, or whitespace separators with or without `#`, are de-duplicated, capped at WeChat's 10, and `--topics none` disables them. SKILL.md now tells agents to pick 3–4 topics (column tag first, then 2–3 audience/topic tags, no generic words, product names only when the article shows the product) when the source has none.
 
 - Stop repeating the article title under the opening animation (1.13.1): with `--cover`, the leading `# H1` (first non-blank line) is removed from the body and becomes the last fallback for the cover title (`--cover-title` → frontmatter.title → leading H1). Mid-article H1s are untouched, `--keep-h1` opts out, and conversions without `--cover` are unchanged.
