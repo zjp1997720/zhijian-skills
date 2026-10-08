@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Stop repeating the article title under the opening animation (1.13.1): with `--cover`, the leading `# H1` (first non-blank line) is removed from the body and becomes the last fallback for the cover title (`--cover-title` → frontmatter.title → leading H1). Mid-article H1s are untouched, `--keep-h1` opts out, and conversions without `--cover` are unchanged.
+
 - Re-lay out all six opening SVG templates for phones (1.13.0): viewBox width drops from 640 to 360 so one unit ≈ one CSS px in the ~358px mobile column, height grows only with the lines actually used, and `max-width` is 480px on desktop. Headlines now render at about 26–30px on a 390px phone (was ~22px), subtitles at 15–16px (was ~9.5px), and dates, bylines, tags and scroll hints at 12px (was ~6px). Long titles wrap to two `<tspan leaf>` lines (punctuation/「的」→ space → balanced CJK break, never inside Latin words) instead of overflowing; subtitles shrink to 14px before wrapping. `typewriter` types wrapped lines in sequence, `xiaolan-terminal` scales the sprite to the left with a 240-wide terminal column, and the bouncing ↓ arrow no longer doubles its translate during animation. Animation timing, static semantic baselines and `--top-label` / `--cover-author` behaviour are unchanged.
 
 - Expose summary comparison in success, failure, and read-only verification reports, including explicit clearing and omitted-summary states.

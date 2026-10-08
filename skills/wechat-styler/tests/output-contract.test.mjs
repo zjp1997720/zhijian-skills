@@ -168,3 +168,40 @@ test('local image conversion warns about hosting while preserving preview and so
     assert.equal(fs.readFileSync(input, 'utf8'), source);
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
+
+function convertWith(markdown, extraArgs) {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-cover-h1-'));
+  const input = path.join(workDir, 'article.md');
+  const output = path.join(workDir, 'article.html');
+  fs.writeFileSync(input, markdown);
+  const result = spawnSync(process.execPath, [
+    path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', output, ...extraArgs,
+  ], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const html = fs.readFileSync(output, 'utf8');
+  fs.rmSync(workDir, { recursive: true, force: true });
+  return html;
+}
+
+const h1Article = '\n# 学校 AI 推不动的根本原因\n\n第一段正文。\n\n## 小节\n\n# 中段一级标题\n\n后文。\n';
+const countH1 = (html) => (html.match(/<h1\b/g) || []).length;
+
+test('opening animation replaces the leading H1 instead of repeating it', () => {
+  const html = convertWith(h1Article, ['--cover', '--cover-template', 'scroll-painting', '--brand-cta', 'none']);
+  assert.equal(countH1(html), 1, 'only the mid-article H1 stays');
+  assert.doesNotMatch(html, /<h1[^>]*>(?:<[^>]+>)*学校 AI 推不动的根本原因/);
+  assert.match(html, /中段一级标题/);
+  assert.match(html, /<svg[\s\S]*学校 AI 推不动的/, 'cover title falls back to the leading H1');
+});
+
+test('explicit cover title still removes the leading H1; --keep-h1 opts out', () => {
+  const removed = convertWith(h1Article, ['--cover', '--cover-title', '短标题', '--brand-cta', 'none']);
+  assert.equal(countH1(removed), 1);
+  const kept = convertWith(h1Article, ['--cover', '--keep-h1', '--brand-cta', 'none']);
+  assert.equal(countH1(kept), 2);
+});
+
+test('without an opening animation the leading H1 is unchanged', () => {
+  const html = convertWith(h1Article, ['--brand-cta', 'none']);
+  assert.equal(countH1(html), 2);
+});

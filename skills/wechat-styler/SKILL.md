@@ -2,7 +2,7 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.13.0
+version: 1.13.1
 description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
 summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
 tags:
@@ -83,6 +83,7 @@ disable-model-invocation: true
 - 输出为完整内联样式 HTML，可复制或在获授权后注入公众号编辑器。
 - 占位图、参数、主题、输出路径和命令见 `references/conversion-workflow.md`。
 - 品牌 GIF 位于文章首尾，正文中间使用静态组件。明确启用 SVG 开场动画时只保留结尾 GIF。
+- 开场动画承担文章标题：启用 `--cover` 时自动移除正文开头的一级标题（首个非空行的 `# 标题`），动画标题依次取 `--cover-title`、frontmatter.title、该一级标题；正文中段的一级标题不受影响，确需保留时传 `--keep-h1`。
 
 ## References
 
@@ -98,4 +99,4 @@ disable-model-invocation: true
 
 ---
 
-**版本：** 1.13.0 · **作者：** 大鹏
+**版本：** 1.13.1 · **作者：** 大鹏
