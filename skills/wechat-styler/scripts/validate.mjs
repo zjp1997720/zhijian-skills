@@ -57,7 +57,8 @@ const rules = [
   {
     name: '禁用属性 class=',
     level: 'ERROR',
-    test: (line) => /\sclass\s*=/i.test(line) ? '公众号会剥离 class 属性,样式必须内联' : null
+    // 例外:编辑器原生话题标签 class="wx_topic_link"(编辑器靠它识别话题,不承载样式)
+    test: (line) => /\sclass\s*=/i.test(line.replace(/\sclass="wx_topic_link"/g, '')) ? '公众号会剥离 class 属性,样式必须内联' : null
   },
   {
     name: '禁用属性 id=',
