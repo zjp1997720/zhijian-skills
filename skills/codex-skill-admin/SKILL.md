@@ -1,6 +1,6 @@
 ---
 name: codex-skill-admin
-description: Codex-only skill administration for auditing, enabling, disabling, restoring, and verifying local Codex skills. Use when the user asks to manage Codex skills, reduce skill token load, close unused skills without uninstalling them, restore disabled skills, inspect current skill visibility, or automate skill enablement through Codex's official app-server protocol.
+description: "核对、启停或恢复Codex Skill可见性与加载开销；不卸载插件。"
 ---
 
 # Codex Skill Admin
@@ -21,6 +21,7 @@ python3 "$SKILL_DIR/scripts/codex_skill_admin.py" audit-unused --cwd "$PWD" --da
 python3 "$SKILL_DIR/scripts/codex_skill_admin.py" disable-unused --cwd "$PWD" --days 30
 python3 "$SKILL_DIR/scripts/codex_skill_admin.py" disable-unused --cwd "$PWD" --days 30 --apply
 python3 "$SKILL_DIR/scripts/codex_skill_admin.py" disable-unused --cwd "$PWD" --days 10 --max-uses 2
+python3 "$SKILL_DIR/scripts/codex_skill_admin.py" audit-unused --cwd "$PWD" --days 30 --exclude-session /path/to/session.jsonl
 python3 "$SKILL_DIR/scripts/codex_skill_admin.py" verify --cwd "$PWD"
 ```
 
@@ -53,12 +54,18 @@ The Codex desktop Skills tab count is a total discovered skill count. It is expe
 
 The audit is intentionally conservative:
 
-- Count actual `SKILL.md` reads from recent Codex session tool calls.
-- Count OMO dynamic session fingerprints that include `SKILL.md`.
-- Count usage as distinct evidence source/session files, so repeated reads inside one session do not inflate `usageCount`.
-- Ignore always-loaded "Available skills" lists, because they are not usage.
+- Count a read only when a `function_call` or `custom_tool_call` contains an actual file-read operation. `functions.exec` wrappers are parsed for read commands such as `cat` and `sed`; structured read tools are parsed from their path input.
+- Require a matching tool result. A result marked successful, with exit code 0, or with non-empty output counts as `success`; a failed result never counts as usage.
+- Filter each event timestamp by the requested window. A recent session file does not make an old event recent. Missing or unparseable timestamps are reported as `unknown` and do not count as usage.
+- Count `usageCount` as distinct evidence session/source files. Repeated successful reads in one session increase `evidenceCount`, but do not inflate `usageCount`.
+- Keep failed, unmatched, unknown, and unsupported read intents in separate audit fields. They protect the affected enabled Skill from becoming a disable candidate until the evidence is classifiable.
+- Ignore prose mentions, `SKILL.md` paths in general audit/available-Skills listings, and OMO fingerprints without structured tool events. OMO events are counted only when they retain the same call/result evidence.
 
 This is local evidence, not the product Profile page's server-side analytics.
+
+`audit-unused` and `disable-unused` accept repeatable `--exclude-session PATH` arguments. They also read `CODEX_SKILL_ADMIN_SESSION`, `CODEX_SESSION_FILE`, `CODEX_SESSION_PATH`, `CODEX_SESSION_ID`, and `CODEX_THREAD_ID` when set, so the current audit session can be excluded without copying private session data. The default `--exclude-current-audit` setting ignores calls that invoke this script's own `audit-unused` or `disable-unused` command; use `--no-exclude-current-audit` only when inspecting that invocation itself. An excluded session is reported in `excludedSessionCount` and does not contribute evidence.
+
+The audit JSON keeps the existing `usedEnabled`, `disableCandidates`, `usageCount`, and `evidenceCount` fields. It additionally reports the per-path `readIntent`, `unknown`, `failed`, and `unsupported` evidence, plus `uncertainEnabled`, `rawReadIntentSkillPathCount`, `rawUnknownSkillPathCount`, `rawFailedSkillPathCount`, `unsupportedEvidenceCount`, `outsideWindowCount`, and `missingTimestampCount`. `disableCandidates` contains enabled Skills with no proven usage and no uncertain read intent; an uncertain or unsupported record is never silently treated as zero use.
 
 If the same skill appears through multiple equivalent paths, set path aliases before auditing:
 

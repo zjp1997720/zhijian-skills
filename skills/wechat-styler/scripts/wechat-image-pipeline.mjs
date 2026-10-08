@@ -12,6 +12,9 @@ function escapeRegExp(value) {
 
 function run(command, args) {
   const result = spawnSync(command, args, { encoding: 'utf8', maxBuffer: 10 * 1024 * 1024 });
+  if (result.error) {
+    throw new Error(`${command} could not start: ${result.error.message}`);
+  }
   if (result.status !== 0) {
     const detail = result.stderr?.trim() || result.stdout?.trim() || `exit ${result.status}`;
     throw new Error(`${command} failed: ${detail}`);
@@ -27,6 +30,15 @@ async function request(url, options, timeoutMs) {
 
 export function shouldOptimizeImage(contentLength, maxBytes) {
   return Number.isFinite(contentLength) && contentLength > maxBytes;
+}
+
+export function isGifImageUrl(url) {
+  try {
+    const { pathname } = new URL(url);
+    return /\.gif$/i.test(pathname);
+  } catch {
+    return false;
+  }
 }
 
 export function findRemoteImageUrls(content) {
@@ -50,13 +62,22 @@ export function optimizedFilenameForUrl(url) {
   return `wechat-${identity}.jpg`;
 }
 
+export function optimizedGifFilenameForUrl(url) {
+  const identity = createHash('sha256').update(url).digest('hex').slice(0, 16);
+  return `wechat-${identity}.gif`;
+}
+
+function optimizedUploadFilenameForUrl(url) {
+  return isGifImageUrl(url) ? optimizedGifFilenameForUrl(url) : optimizedFilenameForUrl(url);
+}
+
 export function assertDistinctUploadedUrls(mapping) {
   const owners = new Map();
   for (const [source, target] of mapping.entries()) {
     const previousSource = owners.get(target);
     if (previousSource && previousSource !== source) {
       throw new Error(
-        `PicGo returned the same URL for different source images: ${optimizedFilenameForUrl(previousSource)} and ${optimizedFilenameForUrl(source)}. `
+        `PicGo returned the same URL for different source images: ${optimizedUploadFilenameForUrl(previousSource)} and ${optimizedUploadFilenameForUrl(source)}. `
         + 'The upload has been stopped to prevent image overwrite; verify the PicGo naming strategy or retry with --no-optimize-images.',
       );
     }
@@ -94,6 +115,44 @@ function optimizeLocalImage(sourcePath, maxWidth, quality, workDir, targetFilena
   return targetPath;
 }
 
+export function gifOptimizationProfiles(maxWidth) {
+  const profiles = [
+    { width: 1200, fps: 8, colors: 128 },
+    { width: 1000, fps: 6, colors: 96 },
+    { width: 800, fps: 5, colors: 64 },
+    { width: 640, fps: 4, colors: 48 },
+    { width: 480, fps: 3, colors: 32 },
+  ];
+  return profiles.map((profile) => ({ ...profile, width: Math.min(maxWidth, profile.width) }));
+}
+
+export function optimizeLocalGif(sourcePath, options) {
+  const runCommand = options.runCommand || run;
+  const getFileSize = options.getFileSize || ((filePath) => fs.statSync(filePath).size);
+  const targetPath = path.join(options.workDir, options.targetFilename);
+  let lastSize = 0;
+  for (const profile of gifOptimizationProfiles(options.maxWidth)) {
+    const filter = [
+      `fps=${profile.fps},scale='min(${profile.width},iw)':-2:flags=lanczos,split[s0][s1]`,
+      `[s0]palettegen=max_colors=${profile.colors}:stats_mode=diff[p]`,
+      '[s1][p]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle',
+    ].join(';');
+    runCommand('ffmpeg', [
+      '-hide_banner', '-loglevel', 'error', '-y',
+      '-i', sourcePath,
+      '-vf', filter,
+      '-loop', '0',
+      targetPath,
+    ]);
+    lastSize = getFileSize(targetPath);
+    if (lastSize <= options.maxBytes) return targetPath;
+  }
+  throw new Error(
+    `animated GIF remains ${lastSize} bytes after ffmpeg optimization; `
+    + `raise --max-image-bytes above ${options.maxBytes} or replace the source GIF`,
+  );
+}
+
 async function uploadWithPicGo(filePath, server, timeoutMs) {
   const response = await request(`${server.replace(/\/$/, '')}/upload`, {
     method: 'POST',
@@ -114,13 +173,20 @@ async function optimizeRemoteImage(url, options) {
     const extension = path.extname(new URL(url).pathname) || '.img';
     const sourcePath = path.join(workDir, `source${extension}`);
     await downloadRemoteImage(url, sourcePath, options.timeoutMs);
-    const optimizedPath = optimizeLocalImage(
-      sourcePath,
-      options.maxWidth,
-      options.quality,
-      workDir,
-      optimizedFilenameForUrl(url),
-    );
+    const optimizedPath = isGifImageUrl(url)
+      ? optimizeLocalGif(sourcePath, {
+        maxWidth: options.maxWidth,
+        maxBytes: options.maxBytes,
+        workDir,
+        targetFilename: optimizedGifFilenameForUrl(url),
+      })
+      : optimizeLocalImage(
+        sourcePath,
+        options.maxWidth,
+        options.quality,
+        workDir,
+        optimizedFilenameForUrl(url),
+      );
     return await uploadWithPicGo(optimizedPath, options.picgoServer, options.timeoutMs);
   } finally {
     fs.rmSync(workDir, { recursive: true, force: true });

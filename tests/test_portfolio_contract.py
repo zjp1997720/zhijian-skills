@@ -21,6 +21,7 @@ EXPECTED_SKILLS = {
     "html-express",
     "leadbook",
     "light-plan-and-work",
+    "scholar-stickers",
     "skill-open-sourcer",
     "wechat-article-search",
     "wechat-styler",

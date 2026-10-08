@@ -168,7 +168,7 @@
       "changelog": "docs/changelogs/codex-skill-admin.md",
       "canonical_tag": "codex-skill-admin/v1.0.2",
       "validation": {
-        "commands": [],
+        "commands": ["python3 -m unittest tests.skills.test_codex_skill_admin -v"],
         "live_smoke": "python3 skills/codex-skill-admin/scripts/codex_skill_admin.py verify --cwd ."
       },
       "capabilities": {
@@ -334,6 +334,31 @@
       "harnesses": [
         "codex",
         "claude-code",
+        "agents"
+      ]
+    },
+    {
+      "name": "scholar-stickers",
+      "lifecycle": "active",
+      "version": "1.0.0",
+      "path": "skills/scholar-stickers",
+      "documentation": "docs/skills/scholar-stickers/README.md",
+      "documentation_zh": "docs/skills/scholar-stickers/README.zh-CN.md",
+      "changelog": "docs/changelogs/scholar-stickers.md",
+      "canonical_tag": "scholar-stickers/v1.0.0",
+      "validation": {
+        "commands": [],
+        "live_smoke": null
+      },
+      "capabilities": {
+        "network": "read",
+        "subprocess": "none",
+        "filesystem": "write",
+        "credentials": "none"
+      },
+      "harnesses": [
+        "claude-code",
+        "codex",
         "agents"
       ]
     },

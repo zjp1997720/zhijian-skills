@@ -1,6 +1,9 @@
 ---
 name: html-express
-description: 把信息密集的内容做成结构化、可读的自包含 HTML——调研报告、对比矩阵、清单、数据看板、决策页。当 Agent 要输出大段信息、对比、指标、时间线，或用户说「做成网页/可视化报告/HTML 报告」时触发。产物是单个可双击打开的 .html 文件。郑重 PDF/简历/PPT/落地页交付请用 kami；视频/动画用 hyperframes；上线部署不在本 skill 范围。
+description: 把信息密集的内容做成结构化、可读的自包含 HTML——调研报告、对比矩阵、清单、数据看板、决策页。当 Agent
+  要输出大段信息、对比、指标、时间线，或用户说「做成网页/可视化报告/HTML 报告」时触发。产物是单个可双击打开的 .html 文件。郑重
+  PDF/简历/PPT/落地页交付请用 kami；视频/动画用 hyperframes；上线部署不在本 skill 范围。
+disable-model-invocation: true
 ---
 
 # html-express

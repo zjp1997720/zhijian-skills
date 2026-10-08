@@ -1,6 +1,13 @@
 ---
 name: skill-open-sourcer
-description: Audit, package, add, verify, and publish local Agent Skills through the canonical zjp1997720/zhijian-skills portfolio. Use when the user gives a SKILL.md or Skill directory and asks to open-source, publish, release, share, validate, manage versions, make installable with npx skills, prepare documentation, or generate launch copy. Every public Skill must live in the canonical repository's nested skills directory; never create or update a standalone Skill repository.
+description: Audit, package, add, verify, and publish local Agent Skills through
+  the canonical zjp1997720/zhijian-skills portfolio. Use when the user gives a
+  SKILL.md or Skill directory and asks to open-source, publish, release, share,
+  validate, manage versions, make installable with npx skills, prepare
+  documentation, or generate launch copy. Every public Skill must live in the
+  canonical repository's nested skills directory; never create or update a
+  standalone Skill repository.
+disable-model-invocation: true
 ---
 
 # Skill Open Sourcer
@@ -16,6 +23,12 @@ Publish every public Skill from the single canonical repository: `https://github
 - Stop on secrets, private paths, client data, unpublished proprietary material, unclear asset ownership, or an unverified canonical remote.
 
 Read [Portfolio mode](references/portfolio-mode.md), [Registry contract](references/registry-contract.md), [Release package](references/release-package.md), and [README design](references/readme-design.md) before writing.
+
+## WorkBuddy marketplace branch
+
+For WorkBuddy custom-source adaptation, marketplace maintenance, or an install-success/cold-start-missing failure, read [WorkBuddy marketplace](references/workbuddy-marketplace.md) before editing. Follow its completion contract for adapter-only tasks; use the full release workflow below when Skill payloads also change.
+
+When a Skill release changes Registry inventory or versions, or descriptions used by an existing WorkBuddy catalog, refresh and verify the generated marketplace before freezing the release plan. This branch preserves the publishing, source-ownership, and authorization boundaries above.
 
 ## Workflow
 

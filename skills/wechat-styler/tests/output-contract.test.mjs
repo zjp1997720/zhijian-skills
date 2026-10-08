@@ -25,6 +25,32 @@ test('renders the shared content root and metadata for downstream publishers', (
   fs.rmSync(workDir, { recursive: true, force: true });
 });
 
+test('renders fenced code with explicit hard breaks that survive WeChat sanitization', () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-code-breaks-'));
+  const input = path.join(workDir, 'article.md');
+  const output = path.join(workDir, 'article.html');
+  fs.writeFileSync(input, [
+    '```text',
+    '第一行',
+    '第二行',
+    '',
+    '第四行',
+    '```',
+    '',
+  ].join('\n'));
+
+  const result = spawnSync(process.execPath, [
+    path.join(skillRoot, 'scripts/convert.mjs'), input,
+    '--theme', 'zhijian',
+    '--output', output,
+  ], { encoding: 'utf8' });
+
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const html = fs.readFileSync(output, 'utf8');
+  assert.match(html, /<pre\b[^>]*><code\b[^>]*>第一行<br>第二行<br><br>第四行<\/code><\/pre>/);
+  fs.rmSync(workDir, { recursive: true, force: true });
+});
+
 test('passes the generated path to the opener without shell interpretation', () => {
   const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-output-safety-'));
   const input = path.join(workDir, 'article.md');
@@ -82,4 +108,63 @@ test('zhijian theme keeps action and trust semantics visually distinct', () => {
   assert.match(html, /<p style="font-family:'Source Han Sans CN'[^\"]*font-size:13px[^\"]*line-height:1\.4;text-align:center;margin:0 12px 22px/);
   assert.doesNotMatch(html, /text-align:center;margin:0 0 8px;background-color:#F5F4ED/);
   fs.rmSync(workDir, { recursive: true, force: true });
+});
+
+for (const script of ['convert', 'content-density-audit', 'mobile-visual-qa']) {
+  for (const flag of ['--help', '-h']) {
+    test(`${script} ${flag} documents options without reading files or launching Chrome`, () => {
+      const result = spawnSync(process.execPath, [path.join(skillRoot, `scripts/${script}.mjs`), '/missing/input.md', flag],
+        { encoding: 'utf8', env: { ...process.env, CHROME_CHANNEL: 'must-not-launch' } });
+      assert.equal(result.status, 0, result.stderr || result.stdout);
+      assert.match(result.stdout, /Usage:/);
+      assert.match(result.stdout, /--/);
+      assert.equal(result.stderr, '');
+    });
+  }
+}
+
+test('generated HTML is Git whitespace clean while preserving meaningful code spaces', () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-whitespace-'));
+  try {
+    const input = path.join(workDir, 'article.md');
+    const output = path.join(workDir, 'article.html');
+    const source = '# 标题\n\n正文。\n\n```text\n  indented  \nnext\n```\n';
+    fs.writeFileSync(input, source);
+    const result = spawnSync(process.execPath, [path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', output], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const html = fs.readFileSync(output, 'utf8');
+    assert.doesNotMatch(html, /[ \t]+$/m);
+    assert.match(html, /  indented  <br>next/);
+    assert.equal(fs.readFileSync(input, 'utf8'), source);
+    const check = spawnSync('git', ['-c', 'core.whitespace=blank-at-eol,blank-at-eof', 'diff', '--no-index', '--check', '/dev/null', output], { encoding: 'utf8' });
+    assert.ok([0, 1].includes(check.status), check.stdout || check.stderr);
+    assert.equal(check.stdout + check.stderr, '');
+  } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
+});
+
+test('density help also works through a Skill symlink', () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-help-link-'));
+  try {
+    const link = path.join(workDir, 'skill');
+    fs.symlinkSync(skillRoot, link, 'dir');
+    const result = spawnSync(process.execPath, [path.join(link, 'scripts/content-density-audit.mjs'), '--help'], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Usage:/);
+  } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
+});
+
+test('local image conversion warns about hosting while preserving preview and source', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-local-images-'));
+  try {
+    const input = path.join(dir, 'article.md');
+    const output = path.join(dir, 'article.html');
+    const source = '![本地图](图片和附件/local.png)\n\n![远程图](https://example.com/a.png)\n';
+    fs.writeFileSync(input, source);
+    const result = spawnSync(process.execPath, [path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', output], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    assert.match(result.stderr, /1.*非 HTTP/);
+    assert.match(result.stderr, /opencli-injection/);
+    assert.match(fs.readFileSync(output, 'utf8'), /src="图片和附件\/local.png"/);
+    assert.equal(fs.readFileSync(input, 'utf8'), source);
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });

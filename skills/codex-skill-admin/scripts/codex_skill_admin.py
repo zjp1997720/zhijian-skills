@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import ast
 import base64
 import datetime as dt
 import glob
@@ -9,6 +10,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import socket
 import struct
 import subprocess
@@ -26,16 +28,27 @@ PATH_ALIASES_ENV = "CODEX_SKILL_ADMIN_PATH_ALIASES"
 
 
 def normalize_path(path: str) -> str:
-    normalized = os.path.expanduser(path)
+    normalized = os.path.normpath(os.path.expanduser(path))
+    mappings: list[tuple[str, str]] = []
     for mapping in os.environ.get(PATH_ALIASES_ENV, "").split(os.pathsep):
         if not mapping or "=" not in mapping:
             continue
         source, target = mapping.split("=", 1)
-        source = os.path.expanduser(source)
-        target = os.path.expanduser(target)
-        if normalized.startswith(source):
+        mappings.append(
+            (
+                os.path.normpath(os.path.expanduser(source)),
+                os.path.normpath(os.path.expanduser(target)),
+            )
+        )
+    # Longest roots first avoids a short alias accidentally matching a sibling
+    # such as /old/root2.  Apply one pass per mapping; aliases are intentionally
+    # treated as path roots, rather than arbitrary string substitutions.
+    for source, target in sorted(mappings, key=lambda item: len(item[0]), reverse=True):
+        if normalized == source:
+            normalized = target
+        elif normalized.startswith(source + os.sep):
             normalized = target + normalized[len(source) :]
-    return normalized
+    return os.path.normpath(normalized)
 
 
 def json_print(value: Any) -> None:
@@ -256,14 +269,580 @@ def recent_session_files(days: int) -> list[pathlib.Path]:
     return sorted(files)
 
 
-def collect_used_skill_paths(days: int) -> dict[str, list[dict[str, str]]]:
-    used: dict[str, list[dict[str, str]]] = {}
+READ_COMMANDS = frozenset(
+    {
+        "awk",
+        "bat",
+        "cat",
+        "head",
+        "less",
+        "more",
+        "nl",
+        "sed",
+        "tail",
+    }
+)
+SEARCH_COMMANDS = frozenset({"grep", "rg", "ripgrep"})
+READ_TOOL_NAME_RE = re.compile(r"(?:^|[_:.\-])(read|open|cat|head|tail|sed)(?:$|[_:.\-])", re.I)
+RESULT_TYPES = frozenset(
+    {
+        "function_call_output",
+        "custom_tool_call_output",
+        "tool_result",
+        "tool_call_output",
+        "exec_command_output",
+    }
+)
+CALL_TYPES = frozenset({"function_call", "custom_tool_call"})
+SUCCESS_STATUSES = frozenset({"completed", "complete", "ok", "success", "succeeded", "done"})
+FAILED_STATUSES = frozenset({"failed", "failure", "error", "errored", "cancelled", "canceled"})
+CURRENT_SESSION_ENV_VARS = (
+    "CODEX_SKILL_ADMIN_SESSION",
+    "CODEX_SESSION_FILE",
+    "CODEX_SESSION_PATH",
+    "CODEX_SESSION_ID",
+    "CODEX_THREAD_ID",
+)
 
-    def add(path: str, source: str, timestamp: str) -> None:
-        path = normalize_path(path)
-        used.setdefault(path, []).append({"source": source, "timestamp": timestamp})
 
+def parse_event_timestamp(value: Any) -> float | None:
+    """Return a JSON event timestamp as Unix seconds, or None when unsupported."""
+    if value is None or value == "":
+        return None
+    if isinstance(value, (int, float)):
+        number = float(value)
+        # Millisecond timestamps are common in exported event logs.
+        return number / 1000 if number > 100_000_000_000 else number
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not text:
+        return None
+    try:
+        number = float(text)
+    except ValueError:
+        number = None
+    if number is not None:
+        return number / 1000 if number > 100_000_000_000 else number
+    try:
+        parsed = dt.datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=dt.timezone.utc)
+    return parsed.timestamp()
+
+
+def event_timestamp(event: dict[str, Any]) -> str:
+    payload = _event_payload(event)
+    for candidate in (
+        event.get("timestamp"),
+        event.get("created_at"),
+        event.get("createdAt"),
+        payload.get("timestamp"),
+        payload.get("created_at"),
+        payload.get("createdAt"),
+    ):
+        if candidate not in (None, ""):
+            return str(candidate)
+    return ""
+
+
+def _event_payload(event: dict[str, Any]) -> dict[str, Any]:
+    payload = event.get("payload")
+    if isinstance(payload, dict):
+        if "type" not in payload and event.get("type") in CALL_TYPES | RESULT_TYPES:
+            return {**event, **payload}
+        return payload
+    if isinstance(payload, str):
+        try:
+            parsed = json.loads(payload)
+        except (TypeError, json.JSONDecodeError):
+            parsed = None
+        if isinstance(parsed, dict):
+            return parsed
+    return event
+
+
+def _json_value(value: Any) -> Any:
+    if not isinstance(value, str):
+        return value
+    text = value.strip()
+    if not text or text[0] not in "[{":
+        return value
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        return value
+
+
+def _tool_call(event: dict[str, Any]) -> dict[str, Any] | None:
+    payload = _event_payload(event)
+    kind = payload.get("type")
+    if kind not in CALL_TYPES:
+        return None
+    raw_input = payload.get("arguments") if kind == "function_call" else payload.get("input")
+    if raw_input is None:
+        raw_input = payload.get("arguments", payload.get("params"))
+    return {
+        "type": kind,
+        "name": str(payload.get("name") or payload.get("tool_name") or ""),
+        "input": raw_input,
+        "call_id": payload.get("call_id") or payload.get("callId") or payload.get("id"),
+        "timestamp": event_timestamp(event),
+        "raw": payload,
+    }
+
+
+def _tool_result(event: dict[str, Any]) -> dict[str, Any] | None:
+    payload = _event_payload(event)
+    kind = payload.get("type")
+    if kind not in RESULT_TYPES:
+        return None
+    return {
+        "type": kind,
+        "call_id": payload.get("call_id") or payload.get("callId") or payload.get("id"),
+        "timestamp": event_timestamp(event),
+        "payload": payload,
+    }
+
+
+def _skill_path(raw: Any, workdir: str | None = None) -> str | None:
+    if not isinstance(raw, str):
+        return None
+    path = raw.strip().strip("'\"`<>,;()[]{}")
+    if path.startswith("file://"):
+        path = path[7:]
+    if not path.endswith("SKILL.md"):
+        return None
+    if path in {"SKILL.md", "./SKILL.md"} and not workdir:
+        return None
+    if not (path.startswith(("/", "~", "./", "../")) or os.sep in path):
+        return None
+    if not os.path.isabs(os.path.expanduser(path)):
+        if not workdir:
+            return None
+        path = os.path.join(os.path.abspath(os.path.expanduser(workdir)), path)
+    return normalize_path(path)
+
+
+def _direct_paths(value: Any, workdir: str | None = None) -> list[str]:
+    """Extract paths from structured file-read arguments, never free text."""
+    value = _json_value(value)
+    if not isinstance(value, dict):
+        return []
+    paths: list[str] = []
+    for key in ("path", "file", "filename", "file_path", "filePath", "uri"):
+        candidate = value.get(key)
+        if isinstance(candidate, str):
+            path = _skill_path(candidate, workdir)
+            if path:
+                paths.append(path)
+    return sorted(set(paths))
+
+
+def _shell_read_paths(command: str, workdir: str | None = None) -> list[str]:
+    """Find SKILL.md operands of commands that actually read file contents."""
+    paths: set[str] = set()
+    for segment in re.split(r"(?:&&|\|\||[;|])", command):
+        segment = segment.strip()
+        if not segment:
+            continue
+        try:
+            tokens = shlex.split(segment, posix=True)
+        except ValueError:
+            continue
+        if not tokens:
+            continue
+        command_name = os.path.basename(tokens[0]).lower()
+        # `bash -lc 'cat /x/SKILL.md'` is a common extra wrapper around exec.
+        if command_name in {"bash", "sh", "zsh", "fish"}:
+            for index, token in enumerate(tokens[:-1]):
+                if token in {"-c", "-lc", "--command"}:
+                    paths.update(_shell_read_paths(tokens[index + 1], workdir))
+            continue
+        if command_name in {"python", "python3", "node", "ruby", "perl"}:
+            script_parts = [
+                token
+                for index, token in enumerate(tokens)
+                if index and tokens[index - 1] in {"-c", "-e", "--eval"}
+            ]
+            script = " ".join(script_parts)
+            if re.search(r"(?:open|read_text|readFile|readFileSync|\.read\s*\()", script, re.I):
+                for match in SESSION_PATH_RE.finditer(script):
+                    path = _skill_path(match.group(1), workdir)
+                    if path:
+                        paths.add(path)
+            continue
+        if command_name == "rg" and "--files" in tokens:
+            continue
+        if command_name not in READ_COMMANDS | SEARCH_COMMANDS:
+            # Shell input redirection still proves a read for a known file.
+            if "<" in tokens:
+                index = tokens.index("<")
+                for token in tokens[index + 1 :]:
+                    path = _skill_path(token, workdir)
+                    if path:
+                        paths.add(path)
+            continue
+        skip_output_target = False
+        for token in tokens[1:]:
+            if skip_output_target:
+                skip_output_target = False
+                continue
+            if token in {">", ">>", "1>", "2>", "1>>", "2>>"}:
+                skip_output_target = True
+                continue
+            if token.startswith((">", "1>", "2>")):
+                continue
+            if token.startswith("-"):
+                # Support --file=/path/SKILL.md while skipping flags that are
+                # merely textual mentions.
+                token = token.partition("=")[2] if "=" in token else ""
+            path = _skill_path(token, workdir)
+            if path:
+                paths.add(path)
+    return sorted(paths)
+
+
+def _js_property_string(source: str, property_name: str) -> str | None:
+    """Decode one static quoted JS object property without evaluating JS."""
+    match = re.search(rf"\b{re.escape(property_name)}\s*:\s*([\"'`])", source)
+    if not match:
+        return None
+    quote = match.group(1)
+    start = match.end()
+    escaped = False
+    end = start
+    for index in range(start, len(source)):
+        char = source[index]
+        if escaped:
+            escaped = False
+            continue
+        if char == "\\":
+            escaped = True
+            continue
+        if char == quote:
+            end = index
+            break
+    if end == start and (end >= len(source) or source[end] != quote):
+        return None
+    literal = source[start:end]
+    try:
+        if quote == '"':
+            return json.loads('"' + literal + '"')
+        if quote == "'":
+            value = ast.literal_eval("'" + literal + "'")
+            return value if isinstance(value, str) else None
+        # Backtick strings are accepted only when they contain no interpolation.
+        if "${" in literal:
+            return None
+        return bytes(literal, "utf-8").decode("unicode_escape")
+    except (SyntaxError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        return None
+
+
+def _js_exec_input(source: str) -> tuple[str | None, str | None]:
+    """Read static cmd/workdir properties from a functions.exec JS wrapper."""
+    if "exec_command" not in source:
+        return None, None
+    return _js_property_string(source, "cmd") or _js_property_string(source, "command"), _js_property_string(source, "workdir")
+
+
+def _js_unknown_paths(source: str, workdir: str | None = None) -> list[str]:
+    """Retain explicit SKILL.md paths from unparseable JS as unknown evidence."""
+    paths: set[str] = set()
+    for match in SESSION_PATH_RE.finditer(source):
+        path = _skill_path(match.group(1), workdir)
+        if path:
+            paths.add(path)
+    return sorted(paths)
+
+
+def _call_read_paths(call: dict[str, Any]) -> tuple[list[str], bool]:
+    name = call["name"].lower()
+    value = _json_value(call.get("input"))
+    workdir = None
+    if isinstance(value, dict):
+        for key in ("workdir", "cwd", "working_directory", "workingDirectory"):
+            if isinstance(value.get(key), str):
+                workdir = value[key]
+                break
+    wrapper = name in {"functions.exec", "functions.exec_command", "exec", "exec_command"}
+    if wrapper:
+        command: str | None = None
+        if isinstance(value, str):
+            if "exec_command" in value:
+                command, js_workdir = _js_exec_input(value)
+                if js_workdir:
+                    workdir = js_workdir
+                if command is None:
+                    # Do not execute or fully parse arbitrary JS.  Explicit
+                    # paths remain as low-confidence unknown evidence.
+                    return _js_unknown_paths(value, workdir), False
+            else:
+                command = value
+        elif isinstance(value, dict):
+            for key in ("cmd", "command", "shell_command", "shellCommand", "script"):
+                if isinstance(value.get(key), str):
+                    command = value[key]
+                    break
+        if command:
+            return _shell_read_paths(command, workdir), True
+        return [], False
+    if READ_TOOL_NAME_RE.search(name):
+        return _direct_paths(value, workdir), True
+    # An unknown custom tool carrying a structured path is an auditable intent,
+    # but it cannot be called successful until its result is understood.
+    paths = _direct_paths(value, workdir)
+    return paths, False
+
+
+ERROR_PREFIX_RE = re.compile(
+    r"^\s*(?:error|failed|failure)\s*[:!]|^\s*(?:permission denied|command not found|"
+    r"command failed|command exited with code\s*[1-9]|non[- ]zero exit)\b|"
+    r"^\s*(?:tool|exec|command)\s+error\s*[:!]",
+    re.I,
+)
+MISSING_FILE_RE = re.compile(
+    r"(?:^\s*no such file(?: or directory)?|\b(?:cat|sed|head|tail|awk|grep|rg):[^\n]*(?:no such file|is a directory))",
+    re.I,
+)
+PENDING_TEXT_RE = re.compile(
+    r"(?:^\s*(?:pending|in[_ -]?progress|queued|script running\b|running with cell id)|\bscript running with cell id)",
+    re.I,
+)
+WRAPPED_SUCCESS_RE = re.compile(r"^\s*script completed\b", re.I)
+EXIT_CODE_RE = re.compile(r'(?:exit[_ ]code["\']?\s*[:=]?\s*|process exited with code\s+)(-?\d+)', re.I)
+
+
+def _result_value_statuses(value: Any, depth: int = 0) -> list[str]:
+    """Return every status found in a result, preserving failure/unknown evidence."""
+    if depth > 8:
+        return ["unknown"]
+    if value is None:
+        return []
+    if isinstance(value, bool):
+        return ["success" if value else "unknown"]
+    if isinstance(value, (int, float)):
+        return ["success" if value == 0 else "failed"]
+    if isinstance(value, str):
+        text = value.strip()
+        if not text:
+            return []
+        parsed = _json_value(text)
+        if parsed is not value:
+            return _result_value_statuses(parsed, depth + 1)
+        # App wrappers often prefix JSON with `Script completed`; inspect all
+        # embedded signals instead of treating the wrapper as success.
+        exit_codes = [int(match.group(1)) for match in EXIT_CODE_RE.finditer(text)]
+        if any(code != 0 for code in exit_codes):
+            return ["failed"]
+        if ERROR_PREFIX_RE.search(text) or MISSING_FILE_RE.search(text):
+            return ["failed"]
+        if PENDING_TEXT_RE.search(text):
+            return ["unknown"]
+        if WRAPPED_SUCCESS_RE.search(text):
+            return ["success"] if exit_codes else ["unknown"]
+        return ["success"]
+    if isinstance(value, list):
+        statuses: list[str] = []
+        for item in value:
+            statuses.extend(_result_value_statuses(item, depth + 1))
+        return statuses or ["unknown"]
+    if not isinstance(value, dict):
+        return ["unknown"]
+
+    statuses: list[str] = []
+    payload_type = str(value.get("type") or "").lower()
+    if payload_type in FAILED_STATUSES or payload_type in {"error", "tool_error"}:
+        statuses.append("failed")
+    for key in ("is_error", "isError", "failed"):
+        if value.get(key) is True:
+            statuses.append("failed")
+        elif value.get(key) is False:
+            statuses.append("success")
+    status = str(value.get("status") or "").lower()
+    if status in FAILED_STATUSES:
+        statuses.append("failed")
+    elif status in SUCCESS_STATUSES:
+        statuses.append("success")
+    elif status in {"pending", "in_progress", "queued", "running"}:
+        statuses.append("unknown")
+    exit_code = value.get("exit_code", value.get("exitCode"))
+    if isinstance(exit_code, (int, float)):
+        statuses.append("success" if exit_code == 0 else "failed")
+    for key in ("error", "errors"):
+        if value.get(key):
+            statuses.append("failed")
+
+    found_content = False
+    for key in ("output", "result", "content", "data", "text", "stdout", "stderr"):
+        if key in value:
+            found_content = True
+            statuses.extend(_result_value_statuses(value[key], depth + 1))
+    if not found_content and not statuses:
+        statuses.append("unknown")
+    return statuses
+
+
+def _result_status(result: dict[str, Any]) -> str:
+    """Classify a tool result with failure and unknown states taking priority."""
+    statuses = _result_value_statuses(result.get("payload") or {})
+    if "failed" in statuses:
+        return "failed"
+    if "unknown" in statuses:
+        return "unknown"
+    return "success" if statuses and all(status == "success" for status in statuses) else "unknown"
+
+
+def _excluded_session(session: pathlib.Path, session_keys: set[str]) -> bool:
+    if not session_keys:
+        return False
+    normalized = normalize_path(str(session))
+    return (
+        normalized in session_keys
+        or session.name in session_keys
+        or any(key and key in session.stem for key in session_keys if os.sep not in key)
+    )
+
+
+def _self_audit_call(call: dict[str, Any]) -> bool:
+    text = json.dumps(call.get("input"), ensure_ascii=False) if not isinstance(call.get("input"), str) else call["input"]
+    return "codex_skill_admin.py" in text and re.search(r"\b(?:audit-unused|disable-unused)\b", text) is not None
+
+
+def _new_usage_report() -> dict[str, Any]:
+    return {
+        "successful": {},
+        "read_intents": {},
+        "unknown": {},
+        "failed": {},
+        "unsupported": [],
+        "outside_window_count": 0,
+        "missing_timestamp_count": 0,
+        "excluded_session_count": 0,
+    }
+
+
+def _append_evidence(bucket: dict[str, list[dict[str, Any]]], path: str, evidence: dict[str, Any]) -> None:
+    bucket.setdefault(path, []).append(evidence)
+
+
+def _collect_events(
+    events: list[dict[str, Any]],
+    source: pathlib.Path,
+    cutoff: float,
+    now: float,
+    report: dict[str, Any],
+    excluded_current_audit: bool,
+) -> None:
+    calls: list[tuple[int, dict[str, Any]]] = []
+    results: list[tuple[int, dict[str, Any]]] = []
+    for index, event in enumerate(events):
+        call = _tool_call(event)
+        if call:
+            call["event_index"] = index
+            call["session"] = str(source)
+            calls.append((index, call))
+        result = _tool_result(event)
+        if result:
+            result["event_index"] = index
+            results.append((index, result))
+
+    for index, call in calls:
+        paths, recognized = _call_read_paths(call)
+        if not paths:
+            continue
+        if excluded_current_audit and _self_audit_call(call):
+            continue
+        timestamp_text = call.get("timestamp", "")
+        timestamp = parse_event_timestamp(timestamp_text)
+        if timestamp is None:
+            report["missing_timestamp_count"] += len(paths)
+            status = "unknown"
+        elif timestamp < cutoff or timestamp > now:
+            report["outside_window_count"] += len(paths)
+            continue
+        else:
+            status = "unknown"
+            call_id = call.get("call_id")
+            matching = [
+                candidate
+                for result_index, candidate in results
+                if result_index > index and call_id is not None and candidate.get("call_id") == call_id
+            ]
+            if matching:
+                status = _result_status(matching[0])
+            if not recognized:
+                # A result from an unknown tool can be successful for that
+                # tool, but it does not prove that the SKILL.md was read.
+                status = "unknown"
+        for path in paths:
+            evidence: dict[str, Any] = {
+                "path": path,
+                "source": str(source),
+                "session": str(source),
+                "timestamp": str(timestamp_text),
+                "status": status,
+                "confidence": "high" if status == "success" else "low",
+            }
+            _append_evidence(report["read_intents"], path, evidence)
+            if status == "success":
+                _append_evidence(report["successful"], path, evidence)
+            elif status == "failed":
+                _append_evidence(report["failed"], path, evidence)
+            else:
+                _append_evidence(report["unknown"], path, evidence)
+            if not recognized:
+                report["unsupported"].append({**evidence, "path": path, "tool": call.get("name", "")})
+
+
+def _session_keys(values: list[str] | None) -> set[str]:
+    keys = {normalize_path(value) for value in (values or []) if value}
+    for env_name in CURRENT_SESSION_ENV_VARS:
+        value = os.environ.get(env_name)
+        if value:
+            keys.add(normalize_path(value))
+            keys.add(pathlib.Path(value).name)
+    return keys
+
+
+def _omo_events(value: Any) -> list[dict[str, Any]]:
+    if isinstance(value, list):
+        events: list[dict[str, Any]] = []
+        for item in value:
+            events.extend(_omo_events(item))
+        return events
+    if isinstance(value, dict):
+        if _tool_call(value) or _tool_result(value):
+            return [value]
+        events: list[dict[str, Any]] = []
+        for key in ("events", "records", "items", "messages"):
+            nested = value.get(key)
+            if isinstance(nested, (dict, list)):
+                events.extend(_omo_events(nested))
+        return events
+    return []
+
+
+def collect_skill_usage(
+    days: int,
+    *,
+    exclude_sessions: list[str] | None = None,
+    exclude_current_audit: bool = True,
+    now: float | None = None,
+) -> dict[str, Any]:
+    """Collect proven reads plus separate uncertain/read-intent evidence."""
+    now = time.time() if now is None else now
+    cutoff = now - days * 86400
+    report = _new_usage_report()
+    excluded = _session_keys(exclude_sessions)
     for session in recent_session_files(days):
+        if _excluded_session(session, excluded):
+            report["excluded_session_count"] += 1
+            continue
+        events: list[dict[str, Any]] = []
         try:
             with session.open("r", encoding="utf-8", errors="ignore") as handle:
                 for line in handle:
@@ -271,35 +850,52 @@ def collect_used_skill_paths(days: int) -> dict[str, list[dict[str, str]]]:
                         event = json.loads(line)
                     except json.JSONDecodeError:
                         continue
-                    payload = event.get("payload") or {}
-                    if event.get("type") != "response_item":
-                        continue
-                    if payload.get("type") != "function_call":
-                        continue
-                    arguments = payload.get("arguments") or ""
-                    if "SKILL.md" not in arguments:
-                        continue
-                    for match in SESSION_PATH_RE.finditer(arguments):
-                        add(match.group(1), str(session), event.get("timestamp", ""))
+                    if isinstance(event, dict):
+                        events.append(event)
         except OSError:
             continue
+        _collect_events(events, session, cutoff, now, report, exclude_current_audit)
 
+    # OMO exports are supported when they retain the same structured tool
+    # events.  A bare SKILL.md fingerprint is intentionally unknown and is not
+    # promoted to successful usage.
     omo_dir = CODEX_HOME / "plugins" / "data" / "omo-sisyphuslabs" / "sessions"
-    cutoff = time.time() - days * 86400
     for raw in glob.glob(str(omo_dir / "*.json")):
         path = pathlib.Path(raw)
+        if _excluded_session(path, excluded):
+            report["excluded_session_count"] += 1
+            continue
         try:
             stat = path.stat()
             if stat.st_mtime < cutoff:
                 continue
-            text = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+            parsed = json.loads(path.read_text(encoding="utf-8", errors="ignore"))
+        except (OSError, json.JSONDecodeError):
             continue
-        timestamp = dt.datetime.fromtimestamp(stat.st_mtime).isoformat()
-        for match in SESSION_PATH_RE.finditer(text):
-            add(match.group(1), str(path), timestamp)
+        events = _omo_events(parsed)
+        if events:
+            _collect_events(events, path, cutoff, now, report, exclude_current_audit)
+    # Keep both spellings available to callers while the CLI uses the clearer
+    # camelCase labels below.  The dictionaries are intentionally shared so
+    # no evidence can drift between compatibility views.
+    report["read_intent"] = report["read_intents"]
+    return report
 
-    return used
+
+def collect_used_skill_paths(
+    days: int,
+    *,
+    exclude_sessions: list[str] | None = None,
+    exclude_current_audit: bool = True,
+    now: float | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Backward-compatible view containing only high-confidence successful reads."""
+    return collect_skill_usage(
+        days,
+        exclude_sessions=exclude_sessions,
+        exclude_current_audit=exclude_current_audit,
+        now=now,
+    )["successful"]
 
 
 def map_used_to_current(
@@ -335,8 +931,12 @@ def map_used_to_current(
     return used_current_paths, evidence_by_current_path
 
 
-def usage_count(evidence: list[dict[str, str]]) -> int:
-    sources = {item.get("source", "") for item in evidence if item.get("source")}
+def usage_count(evidence: list[dict[str, Any]]) -> int:
+    sources = {
+        item.get("session") or item.get("source", "")
+        for item in evidence
+        if item.get("session") or item.get("source")
+    }
     return len(sources) if sources else len(evidence)
 
 
@@ -346,15 +946,29 @@ def audit_unused(
     max_uses: int,
     include_system: bool,
     keep_names: list[str],
+    exclude_sessions: list[str] | None = None,
+    exclude_current_audit: bool = True,
 ) -> dict[str, Any]:
-    used_raw = collect_used_skill_paths(days)
+    usage = collect_skill_usage(
+        days,
+        exclude_sessions=exclude_sessions,
+        exclude_current_audit=exclude_current_audit,
+    )
+    used_raw = usage["successful"]
+    uncertain_raw: dict[str, list[dict[str, Any]]] = {}
+    for bucket_name in ("unknown", "failed"):
+        for path, evidence in usage[bucket_name].items():
+            uncertain_raw.setdefault(path, []).extend(evidence)
     used_current, evidence = map_used_to_current(skills, used_raw)
+    uncertain_current, uncertain_evidence = map_used_to_current(skills, uncertain_raw)
     keep_set = set(keep_names)
     enabled = [item for item in skills if item.get("enabled")]
     candidates = []
     used_enabled = []
+    uncertain_enabled = []
     for item in enabled:
         item_evidence = evidence.get(item["path"], [])
+        item_uncertain = uncertain_evidence.get(item["path"], [])
         item_usage_count = usage_count(item_evidence)
         if item["path"] in used_current and item_usage_count > max_uses:
             used_enabled.append(
@@ -364,6 +978,22 @@ def audit_unused(
                     "path": item["path"],
                     "usageCount": item_usage_count,
                     "evidenceCount": len(item_evidence),
+                }
+            )
+            continue
+        # A read intent with an unclassified or failed result is evidence about
+        # this skill, but not proof of successful use. Keep it out of the
+        # disable set so parser gaps cannot turn into an unsafe zero.
+        if item["path"] in uncertain_current:
+            uncertain_enabled.append(
+                {
+                    "name": item["name"],
+                    "scope": item["scope"],
+                    "path": item["path"],
+                    "usageCount": item_usage_count,
+                    "evidenceCount": len(item_evidence),
+                    "readIntentCount": len(item_uncertain),
+                    "reason": "read intent exists but successful result is not proven",
                 }
             )
             continue
@@ -386,10 +1016,26 @@ def audit_unused(
         "maxUses": max_uses,
         "summary": summarize(skills),
         "usedEnabledCount": len(used_enabled),
+        "uncertainEnabledCount": len(uncertain_enabled),
         "disableCandidateCount": len(candidates),
         "usedEnabled": sorted(used_enabled, key=lambda item: (item["name"], item["path"])),
+        "uncertainEnabled": sorted(uncertain_enabled, key=lambda item: (item["name"], item["path"])),
         "disableCandidates": sorted(candidates, key=lambda item: (item["scope"], item["name"], item["path"])),
         "rawUsedSkillPathCount": len(used_raw),
+        "rawReadIntentSkillPathCount": len(usage["read_intents"]),
+        "rawUnknownSkillPathCount": len(usage["unknown"]),
+        "rawFailedSkillPathCount": len(usage["failed"]),
+        "readIntent": usage["read_intents"],
+        "read_intent": usage["read_intents"],
+        "unknown": usage["unknown"],
+        "failed": usage["failed"],
+        "unsupported": usage["unsupported"],
+        "unsupportedEvidenceCount": len(usage["unsupported"]),
+        "outsideWindowCount": usage["outside_window_count"],
+        "missingTimestampCount": usage["missing_timestamp_count"],
+        "excludedSessionCount": usage["excluded_session_count"],
+        "excludedSessions": sorted(set(exclude_sessions or [])),
+        "excludeCurrentAudit": exclude_current_audit,
     }
 
 
@@ -421,7 +1067,15 @@ def cmd_list(args: argparse.Namespace, client: WebSocketJsonRpc) -> int:
 @with_client
 def cmd_audit_unused(args: argparse.Namespace, client: WebSocketJsonRpc) -> int:
     skills = skill_list(client, args.cwd, True)
-    audit = audit_unused(skills, args.days, args.max_uses, args.include_system, args.keep_name)
+    audit = audit_unused(
+        skills,
+        args.days,
+        args.max_uses,
+        args.include_system,
+        args.keep_name,
+        getattr(args, "exclude_session", []),
+        getattr(args, "exclude_current_audit", True),
+    )
     json_print(audit)
     return 0
 
@@ -429,7 +1083,15 @@ def cmd_audit_unused(args: argparse.Namespace, client: WebSocketJsonRpc) -> int:
 @with_client
 def cmd_disable_unused(args: argparse.Namespace, client: WebSocketJsonRpc) -> int:
     skills = skill_list(client, args.cwd, True)
-    audit = audit_unused(skills, args.days, args.max_uses, args.include_system, args.keep_name)
+    audit = audit_unused(
+        skills,
+        args.days,
+        args.max_uses,
+        args.include_system,
+        args.keep_name,
+        getattr(args, "exclude_session", []),
+        getattr(args, "exclude_current_audit", True),
+    )
     candidates = audit["disableCandidates"]
     ui_count_note = (
         "The Codex desktop Skills tab count is the total discovered skill count, "
@@ -585,6 +1247,18 @@ def build_parser() -> argparse.ArgumentParser:
     audit_p.add_argument("--include-system", action="store_true")
     audit_p.add_argument("--keep-system", action="store_true", help=argparse.SUPPRESS)
     audit_p.add_argument("--keep-name", action="append", default=[])
+    audit_p.add_argument(
+        "--exclude-session",
+        action="append",
+        default=[],
+        help="exclude a session JSONL path (repeatable); current session env vars are excluded too",
+    )
+    audit_p.add_argument(
+        "--exclude-current-audit",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="ignore tool calls that invoke codex_skill_admin audit-unused/disable-unused (default: true)",
+    )
     audit_p.set_defaults(func=cmd_audit_unused)
 
     disable_p = sub.add_parser("disable-unused")
@@ -596,6 +1270,18 @@ def build_parser() -> argparse.ArgumentParser:
     disable_p.add_argument("--include-system", action="store_true")
     disable_p.add_argument("--keep-system", action="store_true", help=argparse.SUPPRESS)
     disable_p.add_argument("--keep-name", action="append", default=[])
+    disable_p.add_argument(
+        "--exclude-session",
+        action="append",
+        default=[],
+        help="exclude a session JSONL path (repeatable); current session env vars are excluded too",
+    )
+    disable_p.add_argument(
+        "--exclude-current-audit",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="ignore tool calls that invoke codex_skill_admin audit-unused/disable-unused (default: true)",
+    )
     disable_p.set_defaults(func=cmd_disable_unused)
 
     restore_p = sub.add_parser("restore")

@@ -2,283 +2,100 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.9.0
-description: 将 Markdown 文章转换为微信公众号可用的内联样式 HTML，支持多主题切换、结构化组件和 SVG 开场动画。用于公众号排版、文章 HTML 生成、替代不稳定外部排版服务。默认纯净排版,加 --components 启用 Agent 智能改写(组件+开场动画)。
-summary: Markdown → 公众号 HTML，多主题 + 组件 + SVG 开场动画。
-tags: [wechat, markdown, html, publishing, design]
+version: 1.12.0
+description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
+summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
+tags:
+  - wechat
+  - markdown
+  - html
+  - publishing
+  - design
 license: MIT
+disable-model-invocation: true
 ---
 
-# WeChat Styler - 公众号排版工具
+# WeChat Styler
 
-将 Markdown 文章转换为优雅的公众号 HTML，支持多主题切换、结构化组件和 SVG 开场动画。
+把已定稿或已授权排版的 Markdown 转成可评审公众号 HTML。默认保留正文并自动加入智见品牌首尾 GIF；组件改写、主题开场动画和微信编辑器注入按需加载。
 
 ![WeChat Styler 左右并列效果预览](https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/img/wechat-styler-before-after-recent.png)
 
-## 使用方式
+## 分支路由
 
-```bash
-# 默认模式（纯净排版，无组件无动画）
-/wechat-styler path/to/article.md
-/wechat-styler path/to/article.md --theme kami
+先选分支，再读取对应 reference。默认转换无需读取组件、动画或编辑器细则。
 
-# 组件模式（Agent 智能改写 + 开场动画 + 8 种结构化表达）
-/wechat-styler path/to/article.md --components
+| 用户需求 | 执行分支 | 读取 |
+|---|---|---|
+| 公众号排版、HTML、换主题、批量转换 | 默认转换 | `references/conversion-workflow.md`；主题需要判断时再读 `references/theme-guide.md` |
+| 结构化组件、丰富排版、开场动画 | 组件与动画 | 默认转换 reference + `references/component-guide.md` + `references/svg-animation-design.md` |
+| 注入公众号、保存草稿、核验编辑器中的成品 | 编辑器注入 | `references/opencli-injection.md` + `references/wechat-compatibility.md` |
+| 修改 Zhijian 主题视觉基线 | 主题维护 | `references/zhijian-theme-baseline.md` + `references/theme-guide.md` |
 
-# 丰富组件模式（仅在用户明确要求“激进一点 / 多用组件”时启用）
-/wechat-styler path/to/article.md --components --component-density rich
+任务中出现新需求时只补读新增分支。
 
-# 批量转换
-/wechat-styler "articles/*.md" --theme kami
+## 授权与能力边界
 
-# 输出到指定路径
-/wechat-styler path/to/article.md --output path/to/output.html
-```
+- 用户已授权排版且正文、主题明确时，简报选择并直接生成 HTML 预览，不重复确认。只有缺口会改变原意、关键表达方向或交付格式且无法推断时才问；先完成不受影响的部分。
+- 预览生成、编辑器写入和草稿保存是不同动作。沿用会话中已有授权；没有编辑器写入或保存授权时，只交付 HTML 与核验结果。
+- 某后端因能力缺失而不可用时，可以选择已授权且满足注入验收条件的后端。遇到明确的权限拒绝或安全策略拒绝时必须停止并报告，不能换工具、CDP、浏览器自动化或间接脚本绕过。
+- 不修改输入 Markdown；组件分支在内存或临时文件中改写。
 
-**两种模式：**
-- **默认模式**：直接转换，克制排版，无组件无动画。90% 场景用这个。
-- **组件模式（`--components`）**：Agent 分析文章结构，智能改写 Markdown，自动加开场动画。生成前向用户确认。
+## 工作流
 
-组件密度由 Agent 改写层控制，不传时保持 `standard`：
+### 1. 默认转换
 
-| 密度 | 触发方式 | 结构组件预算 |
-|------|----------|--------------|
-| `restrained` | 用户说“克制、少组件、轻排版” | 2-4 个 |
-| `standard` | 默认 | 3-6 个 |
-| `rich` | 用户说“激进一点、丰富一点、多用组件” | 7-12 个；超过 8000 字可到 14 个 |
+默认保留正文、不增加正文组件；转换器自动加入品牌开头与结尾 GIF。开场互斥、关闭方式与素材维护见 `references/brand-cta.md`；每次转换读取该规则。按 `references/conversion-workflow.md` 选择主题与参数、运行转换并完成最小 QA。用户只给文件路径时默认使用 `zhijian`。
 
-普通图片、正文引用和行内高亮不计入结构组件预算。密度只改变组件候选数量，不放宽防重复、卡片短文本和微信兼容规则。
+### 2. 组件与动画
 
-## 可用主题
+组件分支先通过严格段落密度门，再按 `component-density` 在内存中改写 Markdown。默认 `standard`，只有用户明确要求“克制”或“丰富、激进、多用组件”时改为 `restrained` 或 `rich`。
 
-| 主题 | 命令 | 风格 | 适用场景 |
-|------|------|------|----------|
-| zhijian（默认） | `--theme zhijian` | 暖纸感 × 顾问可信度 | 智见AI 品牌内容 |
-| kami | `--theme kami` | 纸感编辑排版 | 深度文章、商业分析 |
-| magazine-ink | `--theme magazine-ink` | 墨水经典杂志 | 通用杂志内页 |
-| magazine-indigo | `--theme magazine-indigo` | 靛蓝研究风 | 技术研究、深度调研 |
-| magazine-forest | `--theme magazine-forest` | 森林田野笔记 | 非虚构、自然叙事 |
-| elegant | `--theme elegant` | 优雅复古 | 商业案例、知识分享 |
-| modern | `--theme modern` | 现代简约 | 科技产品、教程 |
-| minimal | `--theme minimal` | 极简主义 | 哲学思考、个人随笔 |
+执行时遵守：
 
-主题详情、YAML 参数、扩展指南见 `references/theme-guide.md`。
+- 金句、NOTE、WARNING 和其他组件替换对应原文，不在正文后重复同一意思。
+- `:::compare`、`:::flow`、`:::timeline` 独占一行且前后留空行；矩阵对比保留 table。
+- 卡片只放短文本；组件数量、横向布局和完整语法按 `references/component-guide.md`。
+- 从正文推断开场标题、副标题和不超过 3 个标签；模板选择与 SVG 技术边界按 `references/svg-animation-design.md`。
+- `xiaolan-terminal` 只在用户明确要求小蓝、智见小蓝或品牌 IP 时使用。
+- 生成前完成组件 reference 中的检查清单，然后运行转换与移动端视觉 QA。
 
-## 工作流程
+### 3. 质量验收
 
-### 默认模式
+正式候选必须满足：
 
-用户只给文件路径和主题，Agent 直接调用 `convert.mjs` 转换，不做 Markdown 改写。
+- 严格段落密度门通过；不靠缩小字号、放大行高或增加组件掩盖阅读墙。
+- 390px 视口无横向溢出、坏图和图片 URL 异常重复；图片去重检查为严格模式。
+- 引用、标题层级、暖陶色基线和卡片在移动端显示正常。
+- 组件没有重复正文，围栏没有泄漏，正文语义未被改写。
+- 代码围栏中的换行编译为显式 `<br>`；不能只依赖 `\n` 与 `white-space:pre-wrap`。
+- 兼容硬规则按 `references/wechat-compatibility.md` 通过后，才进入编辑器注入。
 
-### 组件模式（`--components`）
+### 4. 编辑器注入
 
-Agent **不直接调用 convert**，先执行 5 步智能改写流程：
+仅在授权范围内按 `references/opencli-injection.md` 执行。发布命令始终带 `--report`；保存草稿后必须以页面可见信号或报告中的新 `appmsgid` / 历史变化核对真实保存，不把命令成功当作保存证据。
 
-**写作层前置硬门：先检查段落密度**
+报告至少保留：阶段、脱敏错误、图片状态、封面策略、代码块硬换行计数、正文首尾、草稿保存证据和可直接执行的恢复动作。失败后优先用只读验证定位，不盲目重复写入。
 
-WeChat Styler 不负责把拥挤长段自动切开。段落边界属于写作语义，渲染器按标点拆段会破坏作者节奏。组件改写前先运行：
+## 输出合同
 
-```bash
-npm run qa:density -- /absolute/path/to/article.md --strict
-```
-
-如果失败，停止排版，回到上游 Markdown 按事实、判断、机制、例子、边界和行动的切换点拆段。不要用缩小字号、放大行高或增加组件掩盖正文阅读墙。
-
-**第 1 步：分析文章结构**
-
-读完整篇 Markdown，识别适合用组件呈现的内容（表格→对比卡片、流程→步骤块、金句→金句块等）。只改写确实适合的内容，并按 `component-density` 执行预算；未指定时使用 `standard` 的 3-6 个。详见 `references/component-guide.md`。
-
-**⛔ 防重复硬规则**：金句块/提示块/警告块的核心原则是**替换原文，不是追加**。如果原文已经把同样的意思说清楚了，不要在原文后面追加组件重复一遍。正确做法是删掉原文的概括句，只保留视觉权重更高的组件；或者原文已完整表达时不加组件。生成前必须全文扫描确认无重复。
-
-**⛔ 围栏格式硬规则**：`:::compare` / `:::flow` / `:::timeline` 必须独占一行，前后留空行。紧跟正文的 `:::compare` 不会被解析，会以原始 markdown 显示。
-
-**第 2 步：提取开场动画参数**
-
-从文章内容推断标题（frontmatter.title）、副标题（核心观点一句话）、标签（3个以内关键词），并选择模板（见下）。
-
-**第 3 步：向用户确认**
-
-```
-组件改写计划:
-  • 开场动画(typewriter): 标题「初识 WorkBuddy」/ 副标题「...」/ 标签: ...
-  • 「专家对比表」→ 对比卡片
-  • 「Ask/Plan/Craft」→ 对比卡片
-  • 「用好 WorkBuddy 的核心」→ 金句块
-确认后开始生成?
-```
-
-**第 4 步：生成前检查（必做）**
-
-调用 convert 之前，必须对改写后的 Markdown 逐条检查 `references/component-guide.md` 的「生成前检查清单」：
-- 图片插入位置是否在完整段落之后（不在句子中间）
-- 金句块/提示块/警告块是否与原文重复
-- `:::compare` / `:::flow` 围栏是否独占一行
-- 矩阵对比是否被误转成 compare
-- 开场动画标题长度是否超出 viewBox
-- 结构组件数量是否落在选定密度预算内
-- 段落密度硬门是否通过；记录中位数、P90、百字长段占比和最长连续长段
-
-**第 5 步：生成**
-
-在内存中改写 Markdown（不改原文件），然后调用 convert：
-
-```bash
-node scripts/convert.mjs /tmp/rewritten.md --theme zhijian --components \
-  --strict-density \
-  --cover --cover-template typewriter \
-  --cover-title "..." --cover-subtitle "..." --cover-tags "..."
-```
-
-`--components` 启用时自动包含 `--cover`（开场动画）。
-
-生成 HTML 后，`zhijian` 主题必须执行移动端视觉检查：
-
-```bash
-npm run qa:mobile -- /absolute/path/to/article.html \
-  --expect-zhijian --strict-image-uniqueness \
-  --screenshot /tmp/article-mobile.png
-```
-
-检查项包括 390px 视口横向溢出、坏图、图片 URL 异常重复、引用符号与首行同段对齐、引用是否误用左侧竖线、H2 暖陶色层级。失败时先修排版，再注入公众号。
-
-`convert.mjs` 默认会打印段落密度软门报告；正式发布候选必须传 `--strict-density`。该门自动阻止明显的阅读墙；连续超短段只提醒人工检查，不能仅凭数量判失败。渲染器不自动修改正文。
-
-## SVG 开场动画
-
-`--components` 模式自动包含开场动画。SVG SMIL 动画只在首次加载时播放，因此只做开场，其他位置用静态组件。
-
-### 5 个模板
-
-| 模板 | 参数值 | 气质 | 适配 |
-|------|--------|------|------|
-| 墨韵开篇 | `ink-wash` (默认) | 仪式感·墨点晕染 | 方法论、品牌、课程 |
-| 打字机流 | `typewriter` | 极客感·逐字打字·光标跟随 | 技术教程、工具介绍 |
-| 画卷展开 | `scroll-painting` | 叙事感·双横线·渐入佳境 | 案例、复盘、故事 |
-| 聚焦聚光灯 | `spotlight` | 判断感·聚光·标题缩放 | 观点、评测、趋势 |
-| 极简白描 | `minimal-sketch` | 克制·留白·呼吸圆点 | 随笔、思考、感悟 |
-
-### Agent 模板选择逻辑
-
-- 「教程/工具/技术/CLI/Agent/开发」→ **typewriter**
-- 「案例/复盘/故事/落地/实战记录」→ **scroll-painting**
-- 「判断/观点/趋势/评测/分析」→ **spotlight**
-- 「随笔/思考/感悟/月度/年度」→ **minimal-sketch**
-- 默认/品牌课程/方法论 → **ink-wash**
-
-Agent 选定模板后，在确认环节明确告知用户："我选了 X 模板，因为文章有 Y 特征，你可以换。" 不确定时默认 ink-wash。
-
-模板设计原则和踩坑清单见 `references/svg-animation-design.md`。
-
-## 注入微信编辑器
-
-微信编辑器的粘贴过滤器会剥离 `<animate>` 标签。当前稳定路径是用 OpenCLI 直接操作 DOM：
-
-```bash
-export OPENCLI_PROFILE="<your-opencli-profile>"
-export WX_EDITOR_URL="https://mp.weixin.qq.com/..."
-node scripts/inject-to-wechat.mjs article_wechat.html
-```
-
-**发布后端选择规则：** Codex 内置 Chrome 只有在公众号编辑页允许 DOM 访问和写入时才可能成为注入后端。当前 Chrome Browser 安全策略会在 `mp.weixin.qq.com/cgi-bin/appmsg` 拒绝页面访问，并明确禁止通过 CDP 绕过，因此不能用来注入或验证 SVG 动画。遇到该策略拦截时直接使用 OpenCLI；不得改走 CDP、其他浏览器自动化或间接脚本规避。未来只有在同一编辑页完成“只读探测 → 正文写入 → `<animate>` 回读 → 草稿保存”四项实测后，才能调整默认后端。
-
-稳定发布模式：
-
-```bash
-node scripts/inject-to-wechat.mjs article_wechat.html \
-  --reuse-current \
-  --title "公众号标题" \
-  --summary "转发摘要" \
-  --sync-cover-from-body \
-  --cover-file /path/to/local-cover.jpg \
-  --save-draft \
-  --report /tmp/wechat-publish-report.json
-```
-
-`--cover-file` 是推荐的明确封面入口：已有封面时会替换为指定文件；没有封面时会自动打开图片库、上传本地封面、选择素材，并依次完成“下一步”和裁剪确认。只使用 `--sync-cover-from-body` 且不传文件时，才会优先沿用已有封面或从正文选择第一张图。本地封面建议使用 2.35:1，超过 180KB 时在 macOS 自动压成适合页面注入的 JPEG。
-
-注入器会轮询定位正文编辑区，避开标题 ProseMirror；同步标题、摘要；自动压缩超过 2MB 的远程图片；等待微信完成图片转存；把 `mmbiz.qlogo.cn`、`mmbiz.qpic.cn` 和 `wx.qlogo.cn` 都视为微信已接管的图片；保存后通过“出现新的 `appmsgid`”或“已有 `appmsgid` + 本次保存提示/历史变更”确认草稿，并验证 SVG、动画、图片和正文首尾。`history` 等页面字段缺失时会归一化为空数组，不再触发脚本异常。
-
-发布命令应始终带 `--report`。成功报告包含 `cover.strategy`、图片状态和保存证据；任何阶段失败也会写入 `mode: "failed"`、`phase`、脱敏后的错误、只读现场状态与可直接执行的恢复动作。使用 `--verify-only --reuse-current` 可以只读检查已经打开的草稿。
-
-详细流程见 `references/opencli-injection.md`。
-
-## 组件拓展层
-
-`--components` 模式启用 8 种结构化表达。默认模式下组件语法优雅降级成普通 markdown。
-
-| 组件 | 语法 | 适用场景 |
-|------|------|----------|
-| 金句块 | `> **核心观点**` | 文章核心论点 |
-| 轻量标记 | `==关键词==` | 正文关键词强调（底部细线） |
-| 提示块 | `> [!NOTE] 内容` | 补充说明、技术旁注 |
-| 警告块 | `> [!WARNING] 内容` | 注意事项、踩坑提醒 |
-| 步骤序号 | `1. [step] 动作` | 操作流程、动作清单 |
-| 流程卡片 | `:::flow` 围栏 | 阶段流程 |
-| 对比卡片 | `:::compare` 围栏 | 方案 A vs B vs C |
-| 时间线 | `:::timeline` 围栏 | 演进历程、项目复盘 |
-
-完整语法示例和设计原则见 `references/component-guide.md`。
-
-**设计原则：** 克制优于装饰 · 颜色从主题取 · 横向卡片 flex:1 等分优先 overflow 兜底 · 矩阵对比保留 table · 卡片内容要短 · 默认沉默
-
-## 参数说明
-
-| 参数 | 说明 | 默认值 |
-|------|------|--------|
-| `--theme` | 主题名称 | `zhijian` |
-| `--font-size` | 正文字号（px） | 主题默认 |
-| `--line-height` | 行高 | 主题默认 |
-| `--accent-color` | 强调色 | 主题默认 |
-| `--background-color` | 背景色（solid hex） | 主题默认 |
-| `--max-width` | 内容最大宽度（px） | `640` |
-| `--output` | 输出文件路径 | `<input>_wechat.html` |
-| `--components` | 启用组件模式（智能改写+动画+组件） | `false` |
-| `--component-density` | Agent 改写层组件密度：`restrained / standard / rich`，不传给 `convert.mjs` | `standard` |
-| `--strict-density` | 段落密度失败时停止生成；正式发布候选必传 | `false` |
-| `--cover` | 生成开场动画（`--components` 自动包含） | `false` |
-| `--cover-template` | 开场动画模板 | `ink-wash` |
-| `--cover-title` | 开场动画主标题 | 从 frontmatter.title 取 |
-| `--cover-subtitle` | 开场动画副标题 | 从 frontmatter.summary 取 |
-| `--cover-tags` | 开场动画标签(逗号分隔) | 无 |
-
-### 字号建议
-
-`zhijian` 当前视觉基线为 `editorial-weighted-2026-07`：H2/H3 使用仓耳今楷优先栈，正文使用思源宋体 VF 15px / 450 / 1.68，图注和元信息使用思源黑体 13px。大鹏已确认 15px 在手机端阅读更舒服；450 字重补回纸面阅读的稳定感。字号只控制显示尺度，不能替代内容层的段落修复。建议：
-
-- **公众号长文/信息密度高的文章**：保持默认 15px，同时先通过段落密度硬门
-- **叙事文章、年长读者或希望更舒展**：可使用 17px
-- **16px 舒展模式**：读者年龄偏高或正文术语较多时可显式使用
-- **极简主题 minimal**：默认就偏小，一般不需要调
-
-## 占位符机制
-
-写作时图床还没准备好？在 Markdown 里写占位符，convert 会渲染成居中虚线灰框：
-
-```markdown
-【插入:文章开头的视频截图】
-```
-
-只支持独占一行的 `【插入:xxx】`（全角方括号）。
-
-## 输出规则
-
-- 输入：`path/to/article.md` → 输出：`path/to/article_wechat.html`
-- 完整 HTML，内联样式，可直接复制到公众号编辑器
-- convert 后自动运行 `validate.mjs` 软门校验（不阻断，打印报告）
-
-兼容硬规则详情见 `references/wechat-compatibility.md`。
+- 默认输入 `article.md`，输出同目录 `article_wechat.html`；也可显式指定输出路径。
+- 输出为完整内联样式 HTML，可复制或在获授权后注入公众号编辑器。
+- 占位图、参数、主题、输出路径和命令见 `references/conversion-workflow.md`。
+- 品牌 GIF 位于文章首尾，正文中间使用静态组件。明确启用 SVG 开场动画时只保留结尾 GIF。
 
 ## References
 
-| 文件 | 内容 |
-|------|------|
-| `references/theme-guide.md` | 8 主题完整配置、Renderer Presets、扩展指南、技术实现 |
-| `references/component-guide.md` | 8 种结构化表达的语法示例、设计原则与智能改写规则 |
-| `references/svg-animation-design.md` | 5 模板设计原则、技术约束、11 条踩坑清单 |
-| `references/wechat-compatibility.md` | 公众号兼容硬规则（ERROR/WARN 详情） |
-| `references/opencli-injection.md` | OpenCLI 注入流程、浏览器能力边界、前置条件与故障恢复 |
-| `references/zhijian-theme-baseline.md` | Zhijian 主题版本对照、样式锁与移动端视觉基线 |
+| 文件 | 何时读取 |
+|---|---|
+| `references/conversion-workflow.md` | 默认转换、参数、主题、占位符与 390px QA |
+| `references/theme-guide.md` | 主题选择、YAML 参数或扩展主题 |
+| `references/component-guide.md` | 组件语法、密度预算、改写与检查清单 |
+| `references/svg-animation-design.md` | 动画模板选择、SVG 技术约束与回归要求 |
+| `references/wechat-compatibility.md` | 公众号兼容硬规则 |
+| `references/opencli-injection.md` | 已授权的编辑器注入、封面、图片、保存证据与恢复 |
+| `references/zhijian-theme-baseline.md` | Zhijian 主题样式锁与移动端视觉基线 |
 
 ---
 
-**版本：** 1.9.0 · **作者：** 大鹏
+**版本：** 1.12.0 · **作者：** 大鹏

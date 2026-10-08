@@ -1,6 +1,6 @@
 {
   "name": "wechat-styler",
-  "version": "1.10.0",
+  "version": "1.11.1",
   "description": "Convert Markdown to beautifully styled WeChat HTML",
   "type": "module",
   "scripts": {

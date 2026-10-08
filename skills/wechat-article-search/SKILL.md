@@ -1,19 +1,20 @@
 ---
 name: wechat-article-search
-description: "搜索微信公众号文章技能。通过微信搜索获取文章列表，覆盖科技/AI、社会热点、财经、教育、职场等各类中文资讯；可按关键词检索并返回标题、概要、发布时间、来源公众号与链接。当用户需要查找微信公众号文章、整理参考资料或快速获取文章信息时使用此技能。"
-description_zh: "搜索微信公众号文章（标题、摘要、发布时间、来源账号、链接）"
-description_en: "Search WeChat public account articles by keyword"
+description: 搜索微信公众号文章技能。通过微信搜索获取文章列表，覆盖科技/AI、社会热点、财经、教育、职场等各类中文资讯；可按关键词检索并返回标题、概要、发布时间、来源公众号与链接。当用户需要查找微信公众号文章、整理参考资料或快速获取文章信息时使用此技能。
+description_zh: 搜索微信公众号文章（标题、摘要、发布时间、来源账号、链接）
+description_en: Search WeChat public account articles by keyword
 version: 0.1.0
 allowed-tools: Bash,Read
 metadata:
   clawdbot:
-    emoji: "\U0001F50E"
+    emoji: 🔎
     requires:
       bins:
         - node
-display_name: "wechat-article-search"
-display_name_en: "wechat-article-search"
-visibility: "public"
+display_name: wechat-article-search
+display_name_en: wechat-article-search
+visibility: public
+disable-model-invocation: false
 ---
 
 # 微信公众号文章搜索说明
@@ -25,40 +26,38 @@ visibility: "public"
 
 ## 工作流程
 
-### 步骤1: 确认已安装依赖包
-该脚本依赖NodeJS依赖包 `cheerio`，建议先执行全局安装或在项目中安装：
+### 步骤1: 定位脚本和依赖
 
-```bash
-npm install -g cheerio
-```
+先把 `SKILL_DIR` 设为本次读取的 `SKILL.md` 所在目录（软链接先解析真实目录）。依赖在该目录内管理；已安装时直接使用，仅缺少依赖时按下文的仓库约定安装，不全局安装，也不在用户项目根目录安装。
 
-### 步骤2: 确认搜索词语数量
-1、 确认关键词与数量
+### 步骤2: 使用已有输入
+
+从用户请求提取关键词；未指定数量时用默认 10 条。已有关键词和范围时直接执行；只有缺少搜索主题时才询问。输出文件仅在用户要求保存时创建。
 
 ### 步骤3: 执行搜索命令
 1、执行常规搜索命令
 
 ```bash
-node scripts/search_wechat.js "关键词" 
+node "$SKILL_DIR/scripts/search_wechat.js" "关键词"
 ```
 
 ## 特殊流程（可选）
 1) 执行包含数量限制的搜索命令
 
 ```bash
-node scripts/search_wechat.js "关键词"  -n 15
+node "$SKILL_DIR/scripts/search_wechat.js" "关键词"  -n 15
 ```
 
 2) 如果用户需要保存结果到文件，执行命令
 
 ```bash
-node scripts/search_wechat.js "关键词" -n 20 -o result.json
+node "$SKILL_DIR/scripts/search_wechat.js" "关键词" -n 20 -o result.json
 ```
 
 3) 若想要获取微信文章域名的真实链接”，执行如下命令
 
 ```bash
-node scripts/search_wechat.js "关键词" -n 5 -r
+node "$SKILL_DIR/scripts/search_wechat.js" "关键词" -n 5 -r
 ```
 
 ## 参数说明
@@ -93,7 +92,7 @@ node scripts/search_wechat.js "关键词" -n 5 -r
 本 skill 在仓库内自包含依赖，**不要**全局安装。首次使用或克隆仓库后，在本 skill 目录执行一次：
 
 ```bash
-cd .claude/skills/wechat-article-search
+cd "$SKILL_DIR"
 npm install
 ```
 
@@ -101,9 +100,9 @@ npm install
 
 ### 单一真源与同步
 
-- 真源：`.claude/skills/wechat-article-search/`
-- 同步：由 `scripts/sync-claude-skills.sh` 自动软链到 `.agents/skills/`、`.opencode/skills/`、`~/.codex/skills/`、`~/.config/opencode/skills/`、`.workbuddy/skills/`（LaunchAgent 监听 `.claude/skills` 目录变化 + git hook 兜底）。
-- **改 skill 只改 `.claude/skills/wechat-article-search/`，不要直接改其它位置的软链。**
+- 真源：本 Portfolio 的 `skills/wechat-article-search/`。
+- 安装入口可以是宿主 Skill 目录内的软链接；以本次读取路径解析后的真实目录为准，不假设所有宿主共享同步脚本。
+- **修改本 Portfolio 的 `skills/wechat-article-search/` 真实来源；先解析软链接，不把安装入口当另一份源码。**
 
 ### 与 `wxmp-article-harvester` 的衔接
 

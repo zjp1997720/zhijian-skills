@@ -54,6 +54,8 @@ export function normalizeVerificationState(value) {
     failedUrls: asStringArray(state.failedUrls),
     pendingImages: asStringArray(state.pendingImages),
     history: asStringArray(state.history),
+    codeBlockCount: Number.isFinite(state.codeBlockCount) ? state.codeBlockCount : 0,
+    codeBlockBreakCount: Number.isFinite(state.codeBlockBreakCount) ? state.codeBlockBreakCount : 0,
   };
 }
 
@@ -97,24 +99,36 @@ export function compareSaveStates(beforeValue, latestValue) {
   };
 }
 
-export function prepareSession(options) {
+export function prepareSession(options, run = runOpencli) {
   if (options.reuseCurrent) {
-    let state = '';
+    const probe = () => {
+      const state = parseOpencliJson(run(options.profile, options.session,
+        ['eval', 'JSON.stringify({url: window.location.href})']));
+      let url;
+      try { url = new URL(state.url); } catch { return null; }
+      const isEditor = url.origin === 'https://mp.weixin.qq.com'
+        && url.pathname === '/cgi-bin/appmsg'
+        && /^media\/appmsg_edit(?:_v2)?$/.test(url.searchParams.get('t') || '');
+      return isEditor ? state : null;
+    };
     try {
-      state = runOpencli(options.profile, options.session, ['state']);
+      const state = probe();
+      if (state) return state;
+      // A bound non-editor must not silently switch to another user's tab.
+      throw new OpencliError('the bound tab is not a WeChat editor');
     } catch (error) {
-      if (!(error instanceof OpencliError)) throw error;
+      // Bind only for an explicitly unbound session, never for permission/policy errors.
+      if (!(error instanceof OpencliError)
+        || !/no (?:bound |active )?tab|not bound|unbound|session.*not (?:found|initialized)|未绑定/i.test(error.details || error.message)
+        || /denied|forbidden|policy|permission|拒绝|权限/i.test(`${error.message} ${error.details}`)) throw error;
     }
-    if (/^URL:\s+https:\/\/mp\.weixin\.qq\.com/im.test(state)) return state;
-    runOpencli(options.profile, options.session, ['bind']);
-    const reboundState = runOpencli(options.profile, options.session, ['state']);
-    if (!/^URL:\s+https:\/\/mp\.weixin\.qq\.com/im.test(reboundState)) {
-      throw new OpencliError('the active Chrome tab is not a WeChat editor');
-    }
-    return reboundState;
+    run(options.profile, options.session, ['bind']);
+    const rebound = probe();
+    if (!rebound) throw new OpencliError('the active Chrome tab is not a WeChat editor');
+    return rebound;
   }
   if (!options.url) throw new OpencliError('editor URL is required unless --reuse-current is used');
-  return runOpencli(options.profile, options.session, ['open', options.url]);
+  return run(options.profile, options.session, ['open', options.url]);
 }
 
 export async function waitForEditor(options) {
@@ -178,7 +192,11 @@ function getCoverState(options) {
 async function openCoverPicker(options) {
   const opened = evaluateJson(options.profile, options.session, `(() => {
     const bodyEditor = document.querySelector(".rich_media_content .ProseMirror") || document.querySelector("#js_editor .ProseMirror");
-    const firstImage = bodyEditor?.querySelector("img:not(.ProseMirror-separator)");
+    const firstImage = [...(bodyEditor?.querySelectorAll("img:not(.ProseMirror-separator)") || [])].find((img) =>
+      !img.closest('[data-wechat-cta]') && !img.hasAttribute('data-wechat-cta-image') &&
+      !/zhijian-cta-(opening|ending)-/.test(img.currentSrc || img.src || '') &&
+      !/^(关注大鹏，把 AI 用进真实工作|有用，就留一份：点赞、收藏、转给需要的人)$/.test(img.alt || '')
+    );
     const trigger = document.querySelector("#js_cover_area") || document.querySelector(".js_cover_btn_area");
     if (!trigger) return JSON.stringify({ ok: false, reason: "cover trigger not found" });
     trigger.click();
@@ -252,18 +270,58 @@ function coverChanged(cover, previousSources = []) {
   return cover.sources.some((source) => !previousSources.includes(source));
 }
 
+const coverDialogLookup = `
+  const dialogs = [...document.querySelectorAll("mp-image-product-dialog,[role=dialog],.weui-desktop-dialog,[class*=dialog]")]
+    .filter((element) => element.getClientRects().length > 0);
+  const visibleButtons = (dialog) => [...dialog.querySelectorAll("button,a")]
+    .filter((element) => element.getClientRects().length > 0 && !element.disabled
+      && element.getAttribute("aria-disabled") !== "true");
+  const cropDialog = [...dialogs].reverse().find((dialog) =>
+    /编辑封面|裁剪封面|裁剪图片/.test(dialog.innerText || "")
+    && (/2\\.35\\s*[:：]\\s*1|1\\s*[:：]\\s*1/.test(dialog.innerText || "")
+      || dialog.querySelector("[class*=crop],canvas,img"))
+    && visibleButtons(dialog).some((button) => ["确认", "完成"].includes((button.textContent || "").trim())));
+`;
+
+export function buildCoverUploadSelectionScript(filename) {
+  return `(() => {
+${coverDialogLookup}
+    const filename = ${JSON.stringify(filename)};
+    // Upload may bypass the library and open the crop dialog immediately.
+    if (cropDialog) return JSON.stringify({ ok: true, stage: "crop", filename });
+    const dialog = [...dialogs].reverse().find((element) =>
+      element.querySelector(".weui-desktop-img-picker__img-title,.weui-desktop-img-picker__item"));
+    const title = [...(dialog?.querySelectorAll(".weui-desktop-img-picker__img-title,strong,[title]") || [])]
+      .filter((element) => element.getClientRects().length > 0)
+      .find((element) => {
+        const value = (element.textContent || element.getAttribute("title") || "").trim();
+        return value === filename || value === filename.replace(/-wechat(?=\\.jpg$)/, "");
+      });
+    const item = title?.closest(".weui-desktop-img-picker__item,label,li");
+    if (item) item.click();
+    return JSON.stringify({ ok: Boolean(item), stage: item ? "library" : "waiting", filename });
+  })()`;
+}
+
+export function buildAdvanceCoverScript() {
+  return `(() => {
+${coverDialogLookup}
+    const labels = ["下一步", "确认", "完成"];
+    const dialog = cropDialog || [...dialogs].reverse().find((element) =>
+      /封面|图片|素材/.test(element.innerText || "")
+      && visibleButtons(element).some((button) => labels.includes((button.textContent || "").trim())));
+    const button = dialog && visibleButtons(dialog)
+      .find((element) => labels.includes((element.textContent || "").trim()));
+    if (button) button.click();
+    return JSON.stringify({ ok: true, clicked: button ? (button.textContent || "").trim() : "" });
+  })()`;
+}
+
 async function advanceCoverFlow(options, previousSources = []) {
   for (let step = 0; step < 5; step += 1) {
     const cover = getCoverState(options);
     if (coverChanged(cover, previousSources)) return cover;
-    const action = evaluateJson(options.profile, options.session, `(() => {
-      const labels = ["下一步", "确认", "完成"];
-      const button = [...document.querySelectorAll("button,a")]
-        .filter((element) => element.offsetParent !== null && !element.disabled)
-        .find((element) => labels.includes((element.textContent || "").trim()));
-      if (button) button.click();
-      return JSON.stringify({ ok: true, clicked: button ? (button.textContent || "").trim() : "" });
-    })()`);
+    const action = evaluateJson(options.profile, options.session, buildAdvanceCoverScript());
     if (!action.clicked) break;
     await sleep(800);
   }
@@ -357,17 +415,12 @@ async function uploadCoverFile(options, filePath, previousSources = []) {
 
     const deadline = Date.now() + (options.timeoutMs || 30000);
     while (Date.now() < deadline) {
-      const selected = evaluateJson(options.profile, options.session, `(() => {
-        const filename = ${JSON.stringify(payload.filename)};
-        const title = [...document.querySelectorAll(".weui-desktop-img-picker__img-title,strong,[title]")]
-          .find((element) => {
-            const value = ((element.textContent || element.getAttribute("title") || "").trim());
-            return value === filename || value.includes(filename.replace(/-wechat(?=\\.jpg$)/, ""));
-          });
-        const item = title?.closest(".weui-desktop-img-picker__item,label,li") || null;
-        if (item) item.click();
-        return JSON.stringify({ ok: Boolean(item), filename });
-      })()`);
+      const currentCover = getCoverState(options);
+      if (coverChanged(currentCover, previousSources)) {
+        return { ...currentCover, strategy: 'uploaded-file', filename: payload.filename };
+      }
+      const selected = evaluateJson(options.profile, options.session,
+        buildCoverUploadSelectionScript(payload.filename));
       if (selected.ok) {
         const cover = await advanceCoverFlow(options, previousSources);
         if (coverChanged(cover, previousSources)) {

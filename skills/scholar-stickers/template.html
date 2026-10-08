@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>哲学，从惊讶与疑惑开始 · 教育哲学家贴纸（16:9 幻灯片版）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Noto+Sans+SC:wght@300;400;500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f3ebdb;
+    --bg-deep: #ebe0c8;
+    --ink: #1a1612;
+    --ink-soft: #2a2520;
+    --ink-mute: #6a5e4a;
+    --paper: #fbf6e8;
+    --vermillion: #b8392a;
+    --indigo: #2c3a5a;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #221d16;
+    overflow: hidden;
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    color: var(--ink);
+  }
+
+  #viewport { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #stage {
+    width: 1600px; height: 900px;
+    position: relative;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 18% 0%, rgba(184, 57, 42, 0.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 100%, rgba(44, 58, 90, 0.06) 0%, transparent 55%),
+      repeating-linear-gradient(45deg, transparent, transparent 90px, rgba(154,142,122,0.035) 90px, rgba(154,142,122,0.035) 91px);
+    transform-origin: center center;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    opacity: 0; visibility: hidden;
+    transform: translateX(40px);
+    transition: opacity 0.45s ease, transform 0.45s cubic-bezier(.2,.8,.2,1), visibility 0.45s;
+  }
+  .slide.active { opacity: 1; visibility: visible; transform: translateX(0); }
+  .slide.exit-left { transform: translateX(-40px); }
+
+  .top-bar {
+    position: absolute; top: 36px; left: 64px; right: 64px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 15px; letter-spacing: 0.4em; text-transform: uppercase;
+    color: var(--ink-mute);
+    padding-bottom: 14px; border-bottom: 1px solid var(--ink);
+  }
+  .top-bar .accent { color: var(--vermillion); font-weight: 700; }
+
+  .bottom-bar {
+    position: absolute; bottom: 30px; left: 64px; right: 64px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; color: var(--ink-mute);
+    font-size: 17px; letter-spacing: 0.06em;
+  }
+  .dots { display: flex; gap: 11px; align-items: center; }
+  .dot {
+    width: 11px; height: 11px; border-radius: 50%;
+    border: 1px solid var(--ink-mute); cursor: pointer;
+    transition: all 0.3s; background: transparent;
+  }
+  .dot:hover { border-color: var(--vermillion); transform: scale(1.3); }
+  .dot.current { background: var(--vermillion); border-color: var(--vermillion); transform: scale(1.25); }
+  .page-ind strong { color: var(--vermillion); font-size: 24px; font-style: normal; }
+  .key-hint { font-family: 'Noto Sans SC', sans-serif; font-style: normal; font-size: 14px; letter-spacing: 0.15em; }
+  .key-hint kbd {
+    font-family: 'Cormorant Garamond', serif;
+    border: 1px solid var(--ink-mute);
+    padding: 1px 8px; margin: 0 2px; font-size: 14px;
+  }
+
+  /* ============ SLIDE 0 · 总览 ============ */
+  .overview-body {
+    position: absolute; top: 130px; left: 64px; right: 64px; bottom: 92px;
+    display: grid; grid-template-columns: 1.05fr 1fr; gap: 56px; align-items: center;
+  }
+  .ov-eyebrow {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px; letter-spacing: 0.35em;
+    color: var(--vermillion); margin-bottom: 24px;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .ov-title {
+    font-size: 80px; line-height: 1.12;
+    font-weight: 900; letter-spacing: 0.02em;
+    margin-bottom: 30px;
+  }
+  .ov-title em {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-weight: 600; color: var(--vermillion);
+  }
+  .ov-subtitle {
+    font-size: 23px; line-height: 1.85; color: var(--ink-soft);
+    border-left: 2px solid var(--vermillion);
+    padding-left: 22px; margin-bottom: 32px;
+  }
+  .ov-hint {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 16px; color: var(--ink-mute);
+    letter-spacing: 0.1em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .ov-hint .pulse {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--vermillion); border-radius: 50%;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.25); opacity: 1; }
+  }
+  .ov-stickers {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 26px 22px; align-content: center;
+  }
+  .ov-sticker {
+    cursor: pointer;
+    transition: all 0.45s cubic-bezier(.2,.8,.2,1);
+    user-select: none;
+  }
+  .ov-sticker:nth-child(1) { transform: rotate(-2.5deg); }
+  .ov-sticker:nth-child(2) { transform: rotate(1.8deg) translateY(14px); }
+  .ov-sticker:nth-child(3) { transform: rotate(-1.5deg); }
+  .ov-sticker:nth-child(4) { transform: rotate(2.2deg) translateY(-6px); }
+  .ov-sticker:nth-child(5) { transform: rotate(-2deg) translateY(10px); }
+  .ov-sticker:hover { transform: rotate(0deg) translateY(-8px) scale(1.05); z-index: 5; }
+  .ov-sticker-frame {
+    background: white; padding: 7px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 10px 22px rgba(40,30,20,0.13), 0 22px 44px rgba(40,30,20,0.09);
+    transition: box-shadow 0.45s;
+  }
+  .ov-sticker:hover .ov-sticker-frame {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 18px 36px rgba(40,30,20,0.2), 0 36px 72px rgba(40,30,20,0.14);
+  }
+  .ov-sticker-frame img { display: block; width: 100%; height: auto; }
+  .ov-sticker-cap { text-align: center; margin-top: 14px; }
+  .ov-sticker-cap::before {
+    content: ''; display: block; width: 22px; height: 1px;
+    background: var(--vermillion); margin: 0 auto 10px;
+  }
+  .ov-sticker-name { font-size: 24px; font-weight: 700; letter-spacing: 0.12em; }
+  .ov-sticker:hover .ov-sticker-name { color: var(--vermillion); }
+  .ov-sticker-years {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px; color: var(--ink-mute);
+    letter-spacing: 0.08em; margin-top: 3px;
+  }
+
+  /* ============ SLIDE 1-5 · 人物详情 ============
+     整体改为纵向一条龙（不再左右分栏）：
+     [ 第1行 · 贴纸（肖像 + 名字 + 金句） ]
+     [ 第2行 · 生平事迹 ]
+     [ 第3行 · 教育哲学贡献 ]
+     [ 第4行 · 经典文本 + 当代启示 ]
+  ================================================= */
+  .detail-body {
+    position: absolute;
+    top: 100px; left: 64px; right: 64px; bottom: 70px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+
+  /* === 第 1 行：贴纸 === */
+  .d-sticker-row {
+    display: grid;
+    grid-template-columns: 240px auto 1fr;
+    gap: 40px;
+    align-items: center;
+    padding-bottom: 18px;
+    border-bottom: 1px solid rgba(106, 94, 74, 0.3);
+  }
+  .d-portrait {
+    width: 240px;
+    background: white; padding: 7px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 14px 28px rgba(40,30,20,0.16), 0 26px 52px rgba(40,30,20,0.1);
+    transform: rotate(-1.8deg);
+  }
+  .d-portrait img { display: block; width: 100%; height: auto; }
+  .d-nameblock { padding-bottom: 4px; }
+  .d-nameblock .en {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic; font-size: 26px;
+    color: var(--vermillion);
+    letter-spacing: 0.04em; margin-bottom: 6px;
+  }
+  .d-nameblock .cn {
+    font-size: 64px; font-weight: 900;
+    letter-spacing: 0.08em; line-height: 1.1;
+  }
+  .d-nameblock .yr {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 21px; color: var(--ink-mute);
+    letter-spacing: 0.1em; margin-top: 10px;
+  }
+  .d-nameblock .kw {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 16.5px; color: var(--ink-soft);
+    letter-spacing: 0.05em; margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  /* 金句大字块 */
+  .d-quotes {
+    background: var(--paper);
+    border: 1px solid rgba(184, 57, 42, 0.3);
+    padding: 20px 26px 18px;
+    position: relative;
+  }
+  .d-quotes::before {
+    content: '\201C';
+    position: absolute;
+    top: -28px; left: 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 120px; line-height: 1;
+    color: var(--vermillion); opacity: 0.9;
+  }
+  .d-quotes-tag {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 17px; font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--vermillion); text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-left: 56px;
+  }
+  .d-quotes p {
+    font-size: 28px; line-height: 1.5;
+    font-weight: 600; color: var(--ink);
+    padding-left: 56px;
+    margin-bottom: 12px;
+  }
+  .d-quotes p:last-child { margin-bottom: 0; }
+  .d-quotes p::after {
+    content: '\201D';
+    font-family: 'Cormorant Garamond', serif;
+    color: var(--vermillion); font-size: 34px;
+    margin-left: 4px;
+  }
+
+  /* === 第 2-4 行：内容 === */
+  .d-sec-title {
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px; font-weight: 700;
+    color: var(--vermillion);
+    letter-spacing: 0.25em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .d-sec-title::before { content: ''; width: 32px; height: 1.5px; background: var(--vermillion); }
+  .d-sec-title .zh {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 19px; font-weight: 700;
+    color: var(--ink); letter-spacing: 0.2em;
+  }
+
+  /* 生平：默认收起，点击标题展开 */
+  .d-sec-title.clickable { cursor: pointer; user-select: none; }
+  .toggle-arrow {
+    display: inline-block; margin-left: auto;
+    font-size: 22px; color: var(--vermillion);
+    transition: transform 0.4s cubic-bezier(.2,.8,.2,1);
+  }
+  .d-bio.open .toggle-arrow { transform: rotate(90deg); }
+  .toggle-hint {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 14px; font-weight: 400;
+    color: var(--ink-mute); letter-spacing: 0.15em;
+    margin-left: 12px; text-transform: none;
+    transition: opacity 0.3s;
+  }
+  .d-bio.open .toggle-hint { opacity: 0; }
+  .d-bio-content {
+    max-height: 0; opacity: 0; overflow: hidden;
+    transition: max-height 0.6s cubic-bezier(.2,.8,.2,1), opacity 0.45s ease 0.1s;
+  }
+  .d-bio.open .d-bio-content { max-height: 220px; opacity: 1; }
+  .d-bio-content p {
+    font-size: 22px; line-height: 1.7;
+    color: var(--ink-soft); text-align: justify;
+  }
+
+  .d-contribs ul { list-style: none; }
+  .d-contribs li {
+    font-size: 22px; line-height: 1.55;
+    color: var(--ink-soft);
+    padding-left: 30px;
+    position: relative;
+    margin-bottom: 12px;
+  }
+  .d-contribs li::before {
+    content: '◆';
+    position: absolute; left: 0; top: 10px;
+    color: var(--vermillion); font-size: 12px;
+  }
+  .d-contribs b { color: var(--ink); }
+
+  /* === 第 4 行：经典文本 + 当代启示 === */
+  .d-bottom-row {
+    display: grid;
+    grid-template-columns: 0.85fr 1.4fr;
+    gap: 36px;
+    align-items: stretch;
+  }
+  .d-books { display: flex; flex-wrap: wrap; gap: 10px; }
+  .d-books span {
+    font-family: 'Noto Serif SC', serif;
+    font-size: 18px; padding: 10px 18px;
+    background: white; border: 1px solid var(--ink-mute);
+    letter-spacing: 0.03em;
+    transition: all 0.25s;
+  }
+  .d-books span:hover { background: var(--ink); color: white; }
+
+  .d-inspiration {
+    background: linear-gradient(135deg, rgba(184,57,42,0.08) 0%, rgba(44,58,90,0.08) 100%);
+    border: 1px solid rgba(184, 57, 42, 0.28);
+    padding: 16px 22px;
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+  .d-inspiration::before {
+    content: '✦'; color: var(--vermillion);
+    font-size: 26px; line-height: 1;
+  }
+  .d-inspiration p {
+    font-size: 20px; line-height: 1.65; color: var(--ink);
+  }
+  .d-inspiration strong { color: var(--vermillion); }
+
+  /* 返回按钮 */
+  .back-btn {
+    position: absolute; top: 96px; right: 64px;
+    font-family: 'Noto Sans SC', sans-serif;
+    font-size: 15px; letter-spacing: 0.2em;
+    color: var(--ink-mute);
+    background: transparent;
+    border: 1px solid var(--ink-mute);
+    padding: 10px 22px;
+    cursor: pointer;
+    transition: all 0.3s;
+    z-index: 20;
+  }
+  .back-btn:hover {
+    background: var(--vermillion);
+    border-color: var(--vermillion);
+    color: white;
+    letter-spacing: 0.28em;
+  }
+</style>
+</head>
+<body>
+<div id="viewport">
+  <div id="stage">
+
+    <section class="slide active" data-slide="0">
+      <div class="top-bar">
+        <div id="meta-chapter"></div>
+        <div id="meta-beat"></div>
+      </div>
+      <div class="overview-body">
+        <div class="ov-left">
+          <div class="ov-eyebrow" id="meta-eyebrow"></div>
+          <h1 class="ov-title" id="meta-title"></h1>
+          <p class="ov-subtitle" id="meta-subtitle"></p>
+          <div class="ov-hint"><span class="pulse"></span><span id="meta-hint"></span></div>
+        </div>
+        <div class="ov-stickers" id="ov-stickers"></div>
+      </div>
+      <div class="bottom-bar">
+        <div class="dots" id="dots"></div>
+        <div class="key-hint"><kbd>←</kbd><kbd>→</kbd> 翻页 · <kbd>Esc</kbd> 返回总览</div>
+        <div class="page-ind" id="meta-page-ind"><strong>01</strong> / 06</div>
+      </div>
+    </section>
+
+    <div id="detail-slides"></div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   scholar-stickers 模板 · 两个替换点
+   ① META：页面元信息（标题/副标题/章节号/提示语）
+   ② FIGURES：人物数据（每人五段式，字段与字数限制见 SKILL.md）
+   配色改 :root 变量；肖像存 portraits/{id}.png
+   ============================================================ */
+const META = {
+  eyebrow: 'Philosophy · From Wonder &amp; Doubt',       // 总览页眉（英文斜体行）
+  titleHtml: '哲学，从<em>惊讶</em><br>与<em>疑惑</em>开始',  // 大标题（em=朱红斜体强调）
+  subtitleHtml: '教育哲学把这种追问带进教育生活：<br>我们为何教育，又希望人成为<strong>什么样的人</strong>？',
+  chapterLeft: 'CHAPTER · 01',        // 顶部条左侧前半（chapterRight 以朱红 · 分隔）
+  chapterRight: '教育哲学的诞生',
+  beatLeft: 'BEAT 02',                // 顶部条右侧前半
+  beatRight: '追溯',
+  hint: '点击贴纸，遇见一位教育哲学家'                 // 总览页底部提示
+};
+
+const FIGURES = [
+  {
+    id: 'socrates', name: '苏格拉底', nameEn: 'Socrates', years: '470 BC – 399 BC',
+    keywords: '古希腊 · 街头追问 · 产婆术',
+    bio: '出生于雅典，父亲是石匠，母亲是助产士。一生未留下著作，思想经由弟子柏拉图、色诺芬的对话录传世。他终身在雅典街头与各色人对话，追问"什么是正义""什么是善"。公元前 399 年被法庭以"腐蚀青年"判处死刑，从容饮鸩而终。',
+    contribs: [
+      '<b>苏格拉底方法（产婆术）</b>：连续追问，让对话者自己发现矛盾，"诞生"出真正的知识。',
+      '<b>教师是"助产士"</b>：不灌输结论，帮真理从学习者心中出生。',
+      '<b>承认无知</b>：教学的起点是承认自己"不知道"。'
+    ],
+    quotes: ['未经省察的人生，是不值得过的。', '我只知道一件事，就是我一无所知。'],
+    books: ['《苏格拉底的申辩》', '《理想国》（前六卷）'],
+    inspiration: '提问比答案更重要——教师是"真理的助产士"。'
+  },
+  {
+    id: 'confucius', name: '孔子', nameEn: 'Confucius', years: '551 BC – 479 BC',
+    keywords: '鲁国 · 杏坛 · 有教无类 · 因材施教',
+    bio: '名丘，字仲尼，春秋末期鲁国人。三岁丧父，年轻时做过仓库小吏。30 岁起收徒讲学，55 岁周游列国 14 年，68 岁返鲁专心教学与整理典籍。弟子三千，身通六艺者七十二人，被后世尊为"万世师表"。',
+    contribs: [
+      '<b>有教无类</b>：打破贵族垄断——出身、贫富、地域都不该是受教育的门槛。',
+      '<b>因材施教</b>：针对不同弟子的性格与资质，给出不同的建议与方法。',
+      '<b>学而时习</b>：强调"学习—践行—再学习"的循环，反对死记硬背。'
+    ],
+    quotes: ['学而不思则罔，思而不学则殆。', '知之者不如好之者，好之者不如乐之者。'],
+    books: ['《论语》', '《学记》'],
+    inspiration: '教育公平是底线，教学必须因人而异。'
+  },
+  {
+    id: 'rousseau', name: '卢梭', nameEn: 'Jean-Jacques Rousseau', years: '1712 – 1778',
+    keywords: '日内瓦 · 启蒙 · 自然教育 · 爱弥儿',
+    bio: '出生于日内瓦钟表匠家庭，幼年丧母。16 岁起漂泊于意大利、法国、瑞士，做过学徒、家庭教师、秘书。1749 年凭《论科学与艺术》获第戎学院征文奖，一战成名。1762 年出版《爱弥儿》，因触怒当局被迫流亡多年。',
+    contribs: [
+      '<b>自然教育</b>：顺应儿童天性，反对用成人标准过早要求孩子。',
+      '<b>三阶段教育论</b>：婴儿期、儿童期、青春期各有不同的教育重点。',
+      '<b>发现式学习</b>：让孩子从感官经验中"发现"知识，而非被灌输。'
+    ],
+    quotes: ['出自造物主之手的东西都是好的，一到人手里就全坏了。', '儿童有他特有的看法、想法和感情——用我们的去代替，是最愚蠢的事情。'],
+    books: ['《爱弥儿：论教育》', '《社会契约论》'],
+    inspiration: '童年有自身的节奏，教育是为"发现"提供条件。'
+  },
+  {
+    id: 'dewey', name: '杜威', nameEn: 'John Dewey', years: '1859 – 1952',
+    keywords: '佛蒙特 · 芝加哥实验学校 · 做中学',
+    bio: '出生于美国佛蒙特州，1894 年任芝加哥大学教授并创办著名的"杜威学校"，1904 年起任哥伦比亚大学哲学教授 25 年。他是"进步主义教育运动"的代言人，1919—1921 年曾到中国讲学两年，深刻影响了胡适、陶行知等人。',
+    contribs: [
+      '<b>教育即生活</b>：教育不是为未来做准备，而是儿童当下的生活本身。',
+      '<b>做中学（Learning by Doing）</b>：从真实经验出发的探究式学习。',
+      '<b>儿童中心论</b>：学校的一切安排以儿童的兴趣与需要为出发点。'
+    ],
+    quotes: ['教育是生活的过程，而不是将来生活的预备。', '学校必须呈现现在的生活——即对于儿童来说是真实而生气勃勃的生活。'],
+    books: ['《民主主义与教育》', '《经验与教育》'],
+    inspiration: '学习必须连接真实经验——学校应是"小社会"。'
+  },
+  {
+    id: 'piaget', name: '皮亚杰', nameEn: 'Jean Piaget', years: '1896 – 1980',
+    keywords: '瑞士 · 发生认识论 · 认知发展 · 建构主义',
+    bio: '出生于瑞士纳沙泰尔，13 岁发表第一篇科学论文，大学主攻生物学后转向心理学。1921 年起任日内瓦卢梭研究所所长，毕生研究儿童思维发展，提出"发生认识论"，直接影响了 20 世纪后半叶全球的课程与教学改革。',
+    contribs: [
+      '<b>认知发展阶段论</b>：感知运动 → 前运算 → 具体运算 → 形式运算。',
+      '<b>同化—顺应—平衡</b>：儿童在与环境的互动中主动建构知识。',
+      '<b>儿童是主动的建构者</b>：颠覆"白板说"，儿童有内在的认知结构。'
+    ],
+    quotes: ['教育的目的，是造就能创造的，而不是简单重复前人所做过的事的人。', '教学的主要目的，是让学生学会自己思考。'],
+    books: ['《发生认识论原理》', '《教育科学与儿童心理学》'],
+    inspiration: '学习是主动建构，尊重儿童的发展时间表。'
+  }
+];
+
+const PORTRAITS = {
+  socrates: 'portraits/socrates.png',
+  confucius: 'portraits/confucius.png',
+  rousseau: 'portraits/rousseau.png',
+  dewey: 'portraits/dewey.png',
+  piaget: 'portraits/piaget.png'
+};
+
+const TOTAL = FIGURES.length + 1;
+
+/* 总览页元信息填充 */
+document.getElementById('meta-chapter').innerHTML = `${META.chapterLeft} <span class="accent">·</span> ${META.chapterRight}`;
+document.getElementById('meta-beat').innerHTML = `${META.beatLeft} <span class="accent">·</span> ${META.beatRight}`;
+document.getElementById('meta-eyebrow').innerHTML = META.eyebrow;
+document.getElementById('meta-title').innerHTML = META.titleHtml;
+document.getElementById('meta-subtitle').innerHTML = META.subtitleHtml;
+document.getElementById('meta-hint').textContent = META.hint;
+document.getElementById('meta-page-ind').innerHTML = `<strong>01</strong> / 0${TOTAL}`;
+
+document.getElementById('ov-stickers').innerHTML = FIGURES.map((p, i) => `
+  <div class="ov-sticker" onclick="goTo(${i + 1})">
+    <div class="ov-sticker-frame"><img src="${PORTRAITS[p.id]}" alt="${p.name}"></div>
+    <div class="ov-sticker-cap">
+      <div class="ov-sticker-name">${p.name}</div>
+      <div class="ov-sticker-years">${p.years}</div>
+    </div>
+  </div>
+`).join('');
+
+document.getElementById('detail-slides').innerHTML = FIGURES.map((p, i) => `
+  <section class="slide" data-slide="${i + 1}">
+    <div class="top-bar">
+      <div>${META.chapterLeft} <span class="accent">·</span> ${META.chapterRight}</div>
+      <div>${p.nameEn}</div>
+    </div>
+    <button class="back-btn" onclick="goTo(0)">← 返回总览</button>
+    <div class="detail-body">
+      <!-- Row 1: 贴纸 -->
+      <div class="d-sticker-row">
+        <div class="d-portrait"><img src="${PORTRAITS[p.id]}" alt="${p.name}"></div>
+        <div class="d-nameblock">
+          <div class="en">${p.nameEn}</div>
+          <div class="cn">${p.name}</div>
+          <div class="yr">${p.years}</div>
+          <div class="kw">${p.keywords}</div>
+        </div>
+        <div class="d-quotes">
+          <div class="d-quotes-tag">In His Own Words · 他说</div>
+          ${p.quotes.map(q => `<p>${q}</p>`).join('')}
+        </div>
+      </div>
+
+      <!-- Row 2: 生平（点击展开） -->
+      <div class="d-bio" id="bio-${i + 1}">
+        <div class="d-sec-title clickable" onclick="toggleBio(${i + 1})">
+          Biography <span class="zh">· 生平事迹</span>
+          <span class="toggle-hint">点击展开</span>
+          <span class="toggle-arrow">▸</span>
+        </div>
+        <div class="d-bio-content"><p>${p.bio}</p></div>
+      </div>
+
+      <!-- Row 3: 贡献 -->
+      <div class="d-contribs">
+        <div class="d-sec-title">Contributions <span class="zh">· 教育哲学贡献</span></div>
+        <ul>${p.contribs.map(c => `<li>${c}</li>`).join('')}</ul>
+      </div>
+
+      <!-- Row 4: 文本 + 启示 -->
+      <div class="d-bottom-row">
+        <div>
+          <div class="d-sec-title">Texts <span class="zh">· 经典文本</span></div>
+          <div class="d-books">${p.books.map(b => `<span>${b}</span>`).join('')}</div>
+        </div>
+        <div class="d-inspiration"><p><strong>当代启示</strong> —— ${p.inspiration}</p></div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <div class="dots" id="dots-${i + 1}"></div>
+      <div class="key-hint"><kbd>←</kbd><kbd>→</kbd> 翻页 · <kbd>Esc</kbd> 返回总览</div>
+      <div class="page-ind"><strong>0${i + 2}</strong> / 0${TOTAL}</div>
+    </div>
+  </section>
+`).join('');
+
+function renderDots() {
+  for (let s = 0; s < TOTAL; s++) {
+    const containers = s === 0 ? [document.getElementById('dots')] : [document.getElementById(`dots-${s}`)];
+    containers.forEach(c => {
+      if (!c) return;
+      c.innerHTML = Array.from({length: TOTAL}, (_, j) =>
+        `<div class="dot ${j === s ? 'current' : ''}" onclick="goTo(${j})" title="${j === 0 ? '总览' : FIGURES[j-1].name}"></div>`
+      ).join('');
+    });
+  }
+}
+renderDots();
+
+let current = 0;
+function toggleBio(n) {
+  document.getElementById('bio-' + n).classList.toggle('open');
+}
+window.toggleBio = toggleBio;
+function goTo(n) {
+  if (n < 0 || n >= TOTAL || n === current) return;
+  document.querySelectorAll('.d-bio').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.slide').forEach(sl => {
+    const idx = +sl.dataset.slide;
+    if (idx === current) {
+      sl.classList.remove('active');
+      sl.classList.toggle('exit-left', n > current);
+    } else if (idx === n) {
+      sl.classList.remove('exit-left');
+      sl.classList.add('active');
+    }
+  });
+  current = n;
+}
+window.goTo = goTo;
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') goTo(current + 1);
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') goTo(current - 1);
+  else if (e.key === 'Escape') goTo(0);
+  else if (e.key === 'Home') goTo(0);
+  else if (e.key === 'End') goTo(TOTAL - 1);
+});
+
+const DESIGN_W = 1600, DESIGN_H = 900;
+function fitStage() {
+  const stage = document.getElementById('stage');
+  const scale = Math.min(window.innerWidth / DESIGN_W, window.innerHeight / DESIGN_H);
+  stage.style.transform = `scale(${scale})`;
+}
+window.addEventListener('resize', fitStage);
+fitStage();
+</script>
+</body>
+</html>

@@ -60,10 +60,30 @@
 - 图片父级 `text-align:center` + 自身 `margin:0 auto;display:block` 双重兜底
 - `zhijian` 图片块与图注之间不额外设置块级 margin；紧凑距离由图注自身的 `line-height` 控制，避免带阴影或边框的截图下方出现一整行空白
 - 所有样式内联，不使用 `<style>` 标签或外部 CSS
+- 围栏代码块把源码换行编译为显式 `<br>`；微信保存会把 `<pre><code>` 中的纯文本 `\n` 折叠成空格，`white-space:pre-wrap` 不能阻止这一步
 - `<code>` / `<pre>` / `<svg>` 内容在 validate 时被剥离，避免误报
+
+## 围栏代码块换行
+
+不要输出依赖纯文本换行的结构：
+
+```html
+<pre><code>第一行
+第二行</code></pre>
+```
+
+公众号保存会把这类换行折叠成空格，并可能把连续空格改成 `&nbsp;`。稳定结构必须使用硬换行节点：
+
+```html
+<pre><code>第一行<br>第二行</code></pre>
+```
+
+`convert.mjs` 会直接生成 `<br>`；`inject-to-wechat.mjs` 还会在注入前加固旧 HTML。保存验收必须比较 `codeBlockCount` 与 `codeBlockBreakCount`，不能只看编辑器注入当下的视觉效果。
 
 ## SVG 动画特殊兼容
 
 SVG 内的 `<animate>` / `<animateTransform>` 标签在微信客户端可用（通过 opencli DOM 注入），validate 会跳过 SVG 内容不做检查。
+
+SVG 角色帧必须使用原生 `<path>` / `<rect>` 图形。公众号保存会删除 `<image>` 的 `href` / `xlink:href`，即使该引用是内嵌 PNG data URI；空 `<image>` 节点仍会保留，不能只检查节点数量判断图片有效。
 
 详见 `references/svg-animation-design.md` 和 `references/opencli-injection.md`。

@@ -6,7 +6,9 @@ import path from 'node:path';
 import { optimizeContentImages } from './wechat-image-pipeline.mjs';
 import {
   buildInjectScript,
+  buildInjectScripts,
   buildMetadataScript,
+  buildMetadataVerification,
   buildVerifyScript,
   extractArticleDocument,
 } from './wechat-publish-core.mjs';
@@ -138,6 +140,12 @@ function redactText(value) {
 }
 
 function recoveryForPhase(phase, error, options) {
+  if (phase === 'validate-input') {
+    return [
+      'Use the publishing-candidate HTML whose body images have absolute http(s) URLs.',
+      'Keep the relative-path HTML for local preview only; do not inject it into the WeChat editor.',
+    ];
+  }
   if (phase === 'cover') {
     const message = `${error instanceof Error ? error.message : ''} ${error instanceof OpencliError ? error.details : ''}`;
     if (/too large|compress|optimization failed/i.test(message)) {
@@ -164,6 +172,13 @@ function recoveryForPhase(phase, error, options) {
     ];
   }
   if (phase.includes('image') || phase === 'inject-body' || phase === 'verify-content') {
+    const message = error instanceof Error ? error.message : '';
+    if (/ffmpeg|animated GIF/i.test(message)) {
+      return [
+        'Install ffmpeg so the injector can preserve and compress oversized animated GIFs, then rerun the same command.',
+        'If the GIF still exceeds the configured limit, replace it or raise --max-image-bytes deliberately.',
+      ];
+    }
     return [
       'Inspect live.failedUrls and live.pendingImages in the report; qlogo/qpic URLs are already treated as settled.',
       'Retry with the default image optimization enabled, or replace the listed external image URLs.',
@@ -181,17 +196,38 @@ function assertLiveState(state, expected, metadata) {
   if (!state.ok) failures.push(state.reason || 'live verification failed');
   if (state.svgCount !== expected.svgCount) failures.push(`SVG count ${state.svgCount}/${expected.svgCount}`);
   if (state.animateCount !== expected.animateCount) failures.push(`animation count ${state.animateCount}/${expected.animateCount}`);
+  if (expected.xiaolanNativeFrameCount > 0) {
+    if (state.svgImageCount !== 0) failures.push(`Xiaolan SVG image nodes ${state.svgImageCount}/0`);
+    if (state.xiaolanNativeFrameCount !== expected.xiaolanNativeFrameCount) {
+      failures.push(`Xiaolan native frames ${state.xiaolanNativeFrameCount}/${expected.xiaolanNativeFrameCount}`);
+    }
+    if (!(state.svgPathCount > 0)) failures.push('Xiaolan native SVG paths are missing');
+  }
   if (state.imageCount !== expected.imageUrls.length) failures.push(`image count ${state.imageCount}/${expected.imageUrls.length}`);
+  if (state.codeBlockCount !== expected.codeBlockCount) {
+    failures.push(`code block count ${state.codeBlockCount}/${expected.codeBlockCount}`);
+  }
+  if (state.codeBlockBreakCount !== expected.codeBlockBreakCount) {
+    failures.push(`code block hard breaks ${state.codeBlockBreakCount}/${expected.codeBlockBreakCount}`);
+  }
   if (state.failedUrls.length > 0) failures.push(`${state.failedUrls.length} image transfers failed`);
   if (state.pendingImages.length > 0) failures.push(`${state.pendingImages.length} images are still pending`);
   if (metadata.title !== undefined && state.title !== metadata.title) failures.push('title did not persist');
-  if (metadata.summary !== undefined && state.summary !== metadata.summary) failures.push('summary did not persist');
+  if (buildMetadataVerification(state, metadata).summaryMatches === false) failures.push('summary did not persist');
   if (failures.length > 0) throw new Error(failures.join('; '));
 }
 
 async function injectAndSettle(options, content, title) {
-  const injected = evaluateJson(options.profile, options.session, buildInjectScript(content), 60000);
-  if (!injected.ok) throw new Error(injected.reason || 'body injection failed');
+  const scripts = buildInjectScripts(content);
+  let injected = null;
+  for (const script of scripts) {
+    injected = evaluateJson(options.profile, options.session, script, 60000);
+    if (!injected?.ok) break;
+  }
+  if (!injected?.ok) throw new Error(injected?.reason || 'body injection failed');
+  if (injected.chunkCount > 1) {
+    console.log(`  正文分段注入: ${injected.chunkCount} 段`);
+  }
   return await waitForImageSettlement({
     profile: options.profile,
     session: options.session,
@@ -205,6 +241,7 @@ const runtime = {
   phase: 'parse-options',
   sessionReady: false,
   liveState: null,
+  metadata: {},
 };
 
 async function main() {
@@ -217,12 +254,19 @@ async function main() {
   assertOptions(options);
   const sourceHtml = fs.readFileSync(options.input, 'utf8');
   const documentInfo = extractArticleDocument(sourceHtml);
+  runtime.phase = 'validate-input';
+  if (!options.verifyOnly && documentInfo.nonHttpImageUrls.length > 0) {
+    throw new Error(
+      `HTML contains ${documentInfo.nonHttpImageUrls.length} non-HTTP image source(s); use a publishing-candidate HTML with absolute image URLs`,
+    );
+  }
   const metadata = {
     title: options.title ?? (documentInfo.title || undefined),
     summary: options.summary ?? (documentInfo.summary || undefined),
     author: options.author,
   };
 
+  runtime.metadata = metadata;
   runtime.phase = 'prepare-session';
   prepareSession(options);
   runtime.sessionReady = true;
@@ -239,7 +283,9 @@ async function main() {
       evaluateJson(options.profile, options.session, buildVerifyScript(metadata.title || '')),
     );
     runtime.liveState = liveState;
-    const report = { mode: 'verify-only', phase: 'complete', live: sanitizeLiveState(liveState) };
+    const verification = buildMetadataVerification(liveState, metadata);
+    const report = { mode: 'verify-only', phase: 'complete', verification, live: sanitizeLiveState(liveState) };
+    if (verification.summaryMatches === false) process.exitCode = 1;
     writeReport(options.report, report);
     console.log(JSON.stringify(report, null, 2));
     return;
@@ -325,8 +371,12 @@ async function main() {
       images: expected.imageUrls.length,
       svg: expected.svgCount,
       animations: expected.animateCount,
+      xiaolanNativeFrames: expected.xiaolanNativeFrameCount,
+      codeBlocks: expected.codeBlockCount,
+      codeBlockHardBreaks: expected.codeBlockBreakCount,
     },
     cover: coverState,
+    verification: buildMetadataVerification(liveState, runtime.metadata),
     live: sanitizeLiveState(liveState),
     save: saveState ? sanitizeLiveState(saveState) : null,
   };
@@ -355,6 +405,7 @@ main().catch((error) => {
       details: redactText(error instanceof OpencliError ? error.details : ''),
     },
     recovery: recoveryForPhase(runtime.phase, error, options),
+    verification: buildMetadataVerification(liveState, runtime.metadata),
     live: sanitizeLiveState(liveState),
   };
   if (options?.report) {

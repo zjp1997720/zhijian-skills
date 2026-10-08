@@ -1,5 +1,34 @@
 # wechat-styler Changelog
 
+## Unreleased
+
+- Expose summary comparison in success, failure, and read-only verification reports, including explicit clearing and omitted-summary states.
+- Warn at conversion time when images still require hosting and document the local-preview to publishing-candidate handoff without automatic uploads.
+
+- Strip generated HTML line-end whitespace and emit one terminal newline; preserve source Markdown, code indentation, and explicit hard breaks.
+- Add side-effect-free `--help` / `-h` to conversion, density audit, and mobile QA commands; support density checks through installed Skill symlinks.
+
+- Fix `xiaolan-terminal` mixed-script copy disappearing in the published iOS WeChat reader. Mixed Chinese and Latin lines are now segmented by glyph capability: supported Latin runs compile to native 5×7 SVG `<rect>` geometry, unsupported CJK runs keep a static font-backed baseline, and the full sentence remains available through semantic labels. Add the exact `让 WorkBuddy 持续接住你的项目` reader regression so future changes cannot silently restore the whole-line font fallback.
+- Preserve fenced-code and prompt line breaks through real WeChat draft persistence. The renderer now emits explicit `<br>` nodes, the injector hardens legacy HTML before writing, and post-save verification rejects any code-block or hard-break count drift after the editor rewrites the DOM.
+- Add `xiaolan-terminal`, a brand-specific opening template inspired by the reference article's character-plus-terminal composition. It derives open-eye, closed-eye, and two waving high-density pixel frames from the QA-approved ZhiJian Xiaolan v2 pet asset instead of redrawing the IP with coarse SVG blocks, and restores the canonical `>_` terminal prompt on the face screen. The whole character greets readers with a two-beat discrete hand wave every six seconds, uses restrained 1–3px sprite motion and a three-second blink, while the two-colour 5×7 terminal line repeats a four-second type–hold–right-to-left erase cycle with a static semantic fallback. Unsupported scripts fall back to readable terminal text instead of missing glyphs.
+- Preserve oversized animated GIFs during WeChat injection: compress them through bounded `ffmpeg` width, frame-rate, and palette profiles, upload with a stable `.gif` hash name, and retry transfer without degrading the animation to JPEG.
+- Report an actionable `ffmpeg` recovery path when animated GIF optimization is unavailable or cannot reach the configured byte limit.
+
+## 1.11.1 — 2026-08-31
+
+- Restore a real character-by-character `typewriter` effect without reintroducing hidden semantic text. A background-coloured reveal cover advances in discrete glyph steps while the complete title remains the animation-free fallback.
+- Make reveal covers and cursors transparent by default. If WeChat strips, disables, or misses SMIL state, readers see the complete line instead of missing words or opaque masks.
+- Position visible character tspans and reveal boundaries from the same measurements, preventing partial next-character leaks during each step; only the active line shows a blinking cursor.
+- Add a regression that fails when the typewriter degenerates into a full static line plus cursor-only movement while retaining the stripped-animation visibility checks.
+
+## 1.11.0 — 2026-08-31
+
+- Make semantic cover text statically visible across all five opening templates. Titles, subtitles, tags, dates, authors, and reading hints no longer depend on SMIL `fill="freeze"` state to appear.
+- Rework `typewriter` from per-character hidden text nodes into whole-line visible text, with a decorative cursor animation. This prevents real WeChat readers from permanently hiding early words such as `WorkBuddy` when early animation state is lost.
+- Reserve animation for decorative cursors, lines, ink blots, spotlight effects, and arrows; deleting every animation element now leaves all semantic text readable.
+- Add regressions for the published failure case and all cover templates: stripped/disabled animations must not hide text, Latin words must not be split per character, and hidden semantic baselines are rejected.
+- Document the 2026-08-31 reader-side incident, why editor counts and local Chrome cannot prove reader compatibility, and the required real-reader smoke check after opening changes.
+
 ## 1.10.0 — 2026-07-27
 
 - Establish `editorial-weighted-2026-07` as the Zhijian visual baseline: restore Tsanger JinKai headings, 18px/600 H3 hierarchy, 15px/450/1.68 body rhythm, 13px sans-serif metadata, and warm terracotta emphasis while retaining trust-blue links and quotation cards.
