@@ -201,6 +201,21 @@
       ]
     },
     {
+      "name": "scholar-stickers",
+      "source": "./plugins/scholar-stickers",
+      "description": "输入人物或学科概念，自动查证史料、生成统一素描贴纸肖像，产出 16:9 课堂投影级交互幻灯片（总览贴纸墙 + 人物详情页，零滚动、键盘翻页、后排可读）。",
+      "version": "1.0.0",
+      "author": {
+        "name": "智见 AI"
+      },
+      "homepage": "https://github.com/zjp1997720/zhijian-skills/blob/main/docs/skills/scholar-stickers/README.zh-CN.md",
+      "repository": "https://github.com/zjp1997720/zhijian-skills",
+      "strict": true,
+      "skills": [
+        "./skills/scholar-stickers"
+      ]
+    },
+    {
       "name": "skill-open-sourcer",
       "source": "./plugins/skill-open-sourcer",
       "description": "把本地 Agent Skill 做成完整、经过验证、进入智见 Skills 的公开版本。",

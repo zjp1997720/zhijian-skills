@@ -1,0 +1,23 @@
+{
+  "version": "2026-09-12-v4",
+  "default": "auto",
+  "duration_ms": 2400,
+  "assets": {
+    "opening": {
+      "file": "zhijian-cta-opening-094cbecddef5.gif",
+      "sha256": "094cbecddef59a59618ffc7f976c8e21b5f3833251000d18e864e3f0a6fee9a3",
+      "width": 2000,
+      "height": 400,
+      "alt": "关注大鹏，把 AI 用进真实工作",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-094cbecddef5.gif"
+    },
+    "ending": {
+      "file": "zhijian-cta-ending-12ac690644ff.gif",
+      "sha256": "12ac690644ffb4350a1e1c608eaa2e44b9c6a5b5958e1555fb2cc1036a63c578",
+      "width": 2000,
+      "height": 500,
+      "alt": "有用，就留一份：点赞、收藏、转给需要的人",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-12ac690644ff.gif"
+    }
+  }
+}

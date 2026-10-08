@@ -72,6 +72,7 @@ The manifests and repository-local symlinks under `plugins/` are generated; edit
 | Information design | [`html-express`](docs/skills/html-express/README.md) | Turn dense material into a clear, self-contained HTML report | [Docs](docs/skills/html-express/README.md) |
 | Long-form writing | [`leadbook`](docs/skills/leadbook/README.md) | Produce evidence-backed Chinese business books and white papers with auditable quality gates | [Docs](docs/skills/leadbook/README.md) |
 | Workflow orchestration | [`light-plan-and-work`](docs/skills/light-plan-and-work/README.md) | Plan bounded work briefly, execute immediately, and escalate only on heavy conditions | [Docs](docs/skills/light-plan-and-work/README.md) |
+| Classroom slides | [`scholar-stickers`](docs/skills/scholar-stickers/README.md) | Generate interactive 16:9 scholar and concept sticker presentations for classroom teaching | [Docs](docs/skills/scholar-stickers/README.md) |
 | Release governance | [`skill-open-sourcer`](docs/skills/skill-open-sourcer/README.md) | Audit, package, document, verify, and publish Agent Skills | [Docs](docs/skills/skill-open-sourcer/README.md) |
 | Content research | [`wechat-article-search`](docs/skills/wechat-article-search/README.md) | Discover WeChat public-account articles as structured JSON | [Docs](docs/skills/wechat-article-search/README.md) |
 | Editorial publishing | [`wechat-styler`](docs/skills/wechat-styler/README.md) | Convert Markdown into polished, WeChat-compatible inline HTML | [Docs](docs/skills/wechat-styler/README.md) |

@@ -36,6 +36,7 @@ test('verifies an existing editor through the CLI without writing', () => {
   fs.writeFileSync(htmlPath, '<html><body><section data-wechat-root="article"><p>正文</p></section></body></html>');
   const fakeOpencli = `#!/bin/sh
 case "$*" in
+  *"JSON.stringify({url: window.location.href})"*) printf '%s\\n' '{"url":"https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit_v2"}' ;;
   *" state") printf 'URL: https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit\\n' ;;
   *"hasTitleEditor"*) printf '%s\\n' '{"readyState":"complete","hasTitleEditor":true,"hasBodyEditor":true,"editorCount":2,"bodyHeight":500}' ;;
   *) printf '%s\\n' '{"ok":true,"title":"测试标题","visibleTitle":"测试标题","summary":"","svgCount":0,"animateCount":0,"imageCount":0,"failedUrls":[],"pendingImages":[],"textLength":2,"firstText":"正文","lastText":"正文","titleOccurrencesInBody":0,"saved":true,"url":"https://mp.weixin.qq.com/cgi-bin/appmsg?token=secret"}' ;;
@@ -79,6 +80,7 @@ test('replaces an existing cover from a local file and confirms a saved draft wi
   fs.writeFileSync(coverPath, Buffer.from([0xff, 0xd8, 0xff, 0xd9]));
   const fakeOpencli = `#!/bin/sh
 case "$*" in
+  *"JSON.stringify({url: window.location.href})"*) printf '%s\\n' '{"url":"https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit_v2"}' ;;
   *" state") printf 'URL: https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit\\n' ;;
   *"hasTitleEditor"*) printf '%s\\n' '{"readyState":"complete","hasTitleEditor":true,"hasBodyEditor":true,"editorCount":2,"bodyHeight":500}' ;;
   *"bodyEditor.innerHTML"*) printf '%s\\n' '{"ok":true,"svgCount":0,"animateCount":0,"imageCount":1,"textLength":2}' ;;
@@ -119,6 +121,8 @@ esac
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
   assert.equal(report.mode, 'saved-draft');
+  assert.equal(report.verification.summaryMatches, true);
+  assert.equal(report.verification.expectedSummary, '测试摘要');
   assert.equal(report.expected.images, 1);
   assert.equal(report.cover.strategy, 'uploaded-file');
   assert.deepEqual(report.save.history, []);
@@ -136,6 +140,7 @@ test('writes an actionable failure report when cover selection cannot continue',
   fs.writeFileSync(htmlPath, '<html><body><section data-wechat-root="article"><p>正文</p></section></body></html>');
   const fakeOpencli = `#!/bin/sh
 case "$*" in
+  *"JSON.stringify({url: window.location.href})"*) printf '%s\\n' '{"url":"https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit_v2"}' ;;
   *" state") printf 'URL: https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit\\n' ;;
   *"hasTitleEditor"*) printf '%s\\n' '{"readyState":"complete","hasTitleEditor":true,"hasBodyEditor":true,"editorCount":2,"bodyHeight":500}' ;;
   *"bodyEditor.innerHTML"*) printf '%s\\n' '{"ok":true,"svgCount":0,"animateCount":0,"imageCount":0,"textLength":2}' ;;
@@ -174,3 +179,37 @@ esac
   assert.equal(report.live.url.includes('secret'), false);
   fs.rmSync(workDir, { recursive: true, force: true });
 });
+
+for (const [label, expected, actual, matches, exitCode] of [
+  ['matched', '目标摘要', '目标摘要', true, 0],
+  ['mismatched', '目标摘要', '旧摘要', false, 1],
+  ['omitted', undefined, '保留摘要', null, 0],
+  ['cleared', '', '', true, 0],
+]) {
+  test(`verify-only reports summary ${label} without writing the editor`, () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-summary-'));
+    try {
+      const bin = path.join(dir, 'bin'); fs.mkdirSync(bin);
+      const html = path.join(dir, 'article.html');
+      const reportPath = path.join(dir, 'report.json');
+      fs.writeFileSync(html, '<section data-wechat-root="article"><p>正文</p></section>');
+      const live = JSON.stringify({ ok: true, summary: actual, failedUrls: [], pendingImages: [] });
+      fs.writeFileSync(path.join(bin, 'opencli'), `#!/bin/sh
+case "$*" in
+  *"JSON.stringify({url: window.location.href})"*) printf '%s\n' '{"url":"https://mp.weixin.qq.com/cgi-bin/appmsg?t=media/appmsg_edit_v2"}' ;;
+  *"hasTitleEditor"*) printf '%s\n' '{"readyState":"complete","hasTitleEditor":true,"hasBodyEditor":true,"editorCount":2,"bodyHeight":500}' ;;
+  *"pendingImages"*) printf '%s\n' '${live}' ;;
+  *) echo 'unexpected operation' >&2; exit 9 ;;
+esac
+`, { mode: 0o755 });
+      const args = [path.join(skillRoot, 'scripts/inject-to-wechat.mjs'), html, '--profile', 'test', '--reuse-current', '--verify-only', '--editor-timeout', '1000', '--report', reportPath];
+      if (expected !== undefined) args.push('--summary', expected);
+      const result = spawnSync(process.execPath, args, { encoding: 'utf8', env: { ...process.env, PATH: `${bin}:${process.env.PATH}` } });
+      assert.equal(result.status, exitCode, result.stderr || result.stdout);
+      const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+      assert.equal(report.mode, 'verify-only');
+      assert.equal(report.verification.summaryMatches, matches);
+      assert.equal(report.verification.summaryChecked, expected !== undefined);
+    } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+  });
+}

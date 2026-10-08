@@ -155,7 +155,19 @@ async function inspect(page, options) {
 
 let browser;
 try {
-  const options = parseArgs(process.argv.slice(2));
+  const args = process.argv.slice(2);
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`Usage: node scripts/mobile-visual-qa.mjs <article.html> [options]
+  --viewport <WxH>           Viewport (default: 390x844)
+  --screenshot <path>        Screenshot (default: system temp directory)
+  --expect-zhijian            Check Zhijian visual baseline
+  --strict-image-uniqueness   Fail on unexpected repeated image URLs
+  -h, --help                 Show help without launching a browser
+Environment: CHROME_CHANNEL selects browser channel (default: chrome)
+Outputs: JSON report and full-page screenshot; exits 1 on QA failure`);
+    process.exit(0);
+  }
+  const options = parseArgs(args);
   const input = path.resolve(options.input);
   if (!fs.existsSync(input)) throw new Error(`HTML file not found: ${input}`);
   const screenshot = path.resolve(

@@ -182,6 +182,14 @@ export function formatDensityReport(report) {
 
 function main() {
   const args = process.argv.slice(2);
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`Usage: node scripts/content-density-audit.mjs <article.md|html> [options]
+  --strict                   Exit 1 when density audit fails
+  --json                     Print the report as JSON
+  -h, --help                 Show help without reading input`);
+    process.exit(0);
+  }
+
   const strict = args.includes('--strict');
   const json = args.includes('--json');
   const input = args.find(arg => !arg.startsWith('--'));
@@ -197,5 +205,5 @@ function main() {
   if (strict && report.status === 'fail') process.exit(1);
 }
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url);
 if (isMain) main();

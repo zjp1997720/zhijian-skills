@@ -72,6 +72,7 @@ zjp1997720/zhijian-skills
 | 信息设计 | [`html-express`](docs/skills/html-express/README.zh-CN.md) | 把高密度材料做成自包含 HTML 报告 | [文档](docs/skills/html-express/README.zh-CN.md) |
 | 长篇写作 | [`leadbook`](docs/skills/leadbook/README.zh-CN.md) | 生产有证据、有状态和可审计质量门的中文商业书与白皮书 | [文档](docs/skills/leadbook/README.zh-CN.md) |
 | 工作流编排 | [`light-plan-and-work`](docs/skills/light-plan-and-work/README.zh-CN.md) | 用短计划完成边界清楚的任务，只在重条件出现时升级 | [文档](docs/skills/light-plan-and-work/README.zh-CN.md) |
+| 课堂幻灯片 | [`scholar-stickers`](docs/skills/scholar-stickers/README.zh-CN.md) | 生成 16:9 课堂投影级知识人物与概念贴纸交互幻灯片 | [文档](docs/skills/scholar-stickers/README.zh-CN.md) |
 | 发布治理 | [`skill-open-sourcer`](docs/skills/skill-open-sourcer/README.zh-CN.md) | 审计、打包、文档化、验证并发布 Agent Skill | [文档](docs/skills/skill-open-sourcer/README.zh-CN.md) |
 | 内容调研 | [`wechat-article-search`](docs/skills/wechat-article-search/README.zh-CN.md) | 把公众号关键词搜索结果输出为结构化 JSON | [文档](docs/skills/wechat-article-search/README.zh-CN.md) |
 | 内容发布 | [`wechat-styler`](docs/skills/wechat-styler/README.zh-CN.md) | 把 Markdown 转成公众号兼容的精排内联 HTML | [文档](docs/skills/wechat-styler/README.zh-CN.md) |

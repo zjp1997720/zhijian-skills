@@ -15,6 +15,8 @@ import yaml from 'js-yaml';
 import { glob } from 'tinyglobby';
 import { validateHtml, formatReport } from './validate.mjs';
 import { applyComponentsPreMarkdown, applyComponentsPostMarkdown, applyPureFallback, applyHighlightPreMarkdown } from './components.mjs';
+import { applyBrandCta } from './brand-cta.mjs';
+import { extractArticleDocument } from './wechat-publish-core.mjs';
 import { generateCoverAnimation } from './generate-cover-animation.mjs';
 import { analyzeContentDensity, formatDensityReport } from './content-density-audit.mjs';
 
@@ -25,6 +27,31 @@ const SKILL_ROOT = path.resolve(__dirname, '..');
 // Parse command line arguments
 function parseArgs() {
   const args = process.argv.slice(2);
+  if (args.includes('--help') || args.includes('-h')) {
+    console.log(`Usage: node scripts/convert.mjs <input.md|glob> [options]
+  --theme <name>              Theme (default: zhijian)
+  --output <path>             Output HTML (default: <input>_wechat.html)
+  --font-size <px>            Body font size
+  --line-height <number>      Body line height
+  --accent-color <hex>        Accent color
+  --background-color <hex>    Background color
+  --max-width <px>            Content width (default: 640)
+  --components [false|0|no]   Enable component rendering
+  --strict-density           Stop if paragraph density fails
+  --cover [false|0|no]        Enable SVG opening animation
+  --cover-template <name>     Animation template (default: ink-wash)
+  --cover-title <text>        Opening title (default: frontmatter.title)
+  --cover-subtitle <text>     Opening subtitle (default: frontmatter.summary)
+  --cover-tags <a,b,c>        Opening tags
+  --top-label <text|none>     Top label + cover brand label (default: theme.top_label);
+                              "none" hides the top label section and cover label
+  --cover-author <text|none>  Cover byline, used verbatim (scroll-painting);
+                              default "<top label> 出品"; "none" hides it
+  --brand-cta <mode>          auto | ending | none (default: auto)
+  -h, --help                 Show help without converting files`);
+    process.exit(0);
+  }
+
   const options = {
     input: null,
     theme: 'zhijian',
@@ -40,6 +67,9 @@ function parseArgs() {
     coverTitle: null,
     coverSubtitle: null,
     coverTags: null,
+    topLabel: null,
+    coverAuthor: null,
+    brandCta: 'auto',
     strictDensity: false
   };
 
@@ -85,6 +115,10 @@ function parseArgs() {
     const value = args[++i];
 
     switch (key) {
+      case 'brand-cta':
+        if (!['auto','ending','none'].includes(value)) throw new Error('--brand-cta requires auto, ending, or none');
+        options.brandCta = value;
+        break;
       case 'theme':
         options.theme = value;
         break;
@@ -117,6 +151,12 @@ function parseArgs() {
         break;
       case 'cover-template':
         options.coverTemplate = value;
+        break;
+      case 'top-label':
+        options.topLabel = value ?? '';
+        break;
+      case 'cover-author':
+        options.coverAuthor = value ?? '';
         break;
     }
   }
@@ -335,6 +375,11 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;');
 }
 
+function escapeBlockCode(value) {
+  return escapeHtml(String(value).replace(/\r\n?/g, '\n'))
+    .replaceAll('\n', '<br>');
+}
+
 function escapeAttr(value = '') {
   return escapeHtml(value).replaceAll('"', '&quot;');
 }
@@ -471,7 +516,7 @@ function createBaseRenderer(theme) {
   };
 
   renderer.code = (code) => {
-    const escapedCode = escapeHtml(code);
+    const escapedCode = escapeBlockCode(code);
     return `<pre style="font-family:${theme.code_font};font-size:${scale.code}px;color:${theme.code_color};background-color:${theme.code_bg};padding:14px 16px;border-radius:6px;overflow-x:auto;margin:0 0 ${rhythm.paragraph_margin}px;line-height:1.5;white-space:pre-wrap;word-break:break-word;"><code style="font-family:${theme.code_font};background-color:${theme.code_bg};color:${theme.code_color};">${escapedCode}</code></pre>\n`;
   };
 
@@ -670,7 +715,7 @@ function createMagazineEditorialRenderer(theme) {
   };
 
   renderer.code = (code) => {
-    const escapedCode = escapeHtml(code);
+    const escapedCode = escapeBlockCode(code);
     if (variant === 'indigo-research') {
       return `<pre style="font-family:${theme.code_font};font-size:${scale.code}px;color:${theme.code_color};background-color:${theme.code_bg};border:1px solid ${theme.border_color};padding:13px 15px;border-radius:6px;overflow-x:auto;margin:0 0 ${rhythm.paragraph_margin}px;line-height:1.5;white-space:pre-wrap;word-break:break-word;"><code style="font-family:${theme.code_font};background-color:${theme.code_bg};color:${theme.code_color};">${escapedCode}</code></pre>\n`;
     }
@@ -815,7 +860,7 @@ function createModernTechnicalRenderer(theme) {
   };
 
   renderer.code = (code) => {
-    const escapedCode = escapeHtml(code);
+    const escapedCode = escapeBlockCode(code);
     return `<pre style="font-family:${theme.code_font};font-size:${scale.code}px;color:${theme.code_color};background-color:${theme.code_bg};border:1px solid ${theme.border_color};padding:14px 16px;border-radius:8px;overflow-x:auto;margin:0 0 ${rhythm.paragraph_margin}px;line-height:1.5;white-space:pre-wrap;word-break:break-word;"><code style="font-family:${theme.code_font};background-color:${theme.code_bg};color:${theme.code_color};">${escapedCode}</code></pre>\n`;
   };
 
@@ -904,7 +949,7 @@ function createZhijianWarmPaperRenderer(theme) {
   };
 
   renderer.code = (code) => {
-    const escapedCode = escapeHtml(code);
+    const escapedCode = escapeBlockCode(code);
     return `<pre style="font-family:${theme.code_font};font-size:${scale.code}px;color:${theme.code_color};background-color:${theme.code_bg};padding:16px 18px;border-radius:12px;overflow-x:auto;margin:0 0 ${rhythm.paragraph_margin}px;line-height:1.55;white-space:pre-wrap;word-break:break-word;"><code style="font-family:${theme.code_font};background-color:${theme.code_bg};color:${theme.code_color};">${escapedCode}</code></pre>\n`;
   };
 
@@ -1003,13 +1048,13 @@ function generateHTML(markdown, theme, frontmatter, options = {}) {
 <!-- 微信公众号复制容器：背景色使用 solid hex，并在外层、内容层、文本层重复声明，降低粘贴后丢失风险 -->
 <section data-wechat-root="article" style="background-color:${theme.background_color};padding:0;margin:0;">
 
-<!-- 顶部标签 -->
+${theme.top_label ? `<!-- 顶部标签 -->
 <section style="max-width:${theme.max_width}px;margin:0 auto;padding:28px 16px 12px;background-color:${theme.background_color};">
-    <p style="font-family:${theme.ui_font};font-size:12px;font-weight:${theme.name === 'zhijian' ? 500 : 600};color:${theme.accent_color};letter-spacing:1px;text-transform:uppercase;margin:0 0 8px;background-color:${theme.background_color};"><span style="background-color:${theme.tag_bg};padding:2px 8px;border-radius:3px;">${theme.top_label}</span></p>
+    <p style="font-family:${theme.ui_font};font-size:12px;font-weight:${theme.name === 'zhijian' ? 500 : 600};color:${theme.accent_color};letter-spacing:1px;text-transform:uppercase;margin:0 0 8px;background-color:${theme.background_color};"><span style="background-color:${theme.tag_bg};padding:2px 8px;border-radius:3px;">${escapeHtml(theme.top_label)}</span></p>
     ${softRule(theme, { width: '56px', maxWidth: null, margin: '10px 0 0', align: 'left' })}
 </section>
 
-`;
+` : ''}`;
 
   // Add sections
   sections.forEach((section, index) => {
@@ -1024,6 +1069,11 @@ function generateHTML(markdown, theme, frontmatter, options = {}) {
         subtitle: options.coverSubtitle || frontmatter.summary || '',
         tags: options.coverTags || '',
       };
+      if (options.coverAuthor !== null) {
+        const author = options.coverAuthor.trim();
+        // 显式署名原样使用(不追加「出品」);none 或空值隐藏署名。转义在生成器内完成。
+        coverOpts.author = (!author || /^none$/i.test(author)) ? false : author;
+      }
       const svg = generateCoverAnimation(theme, coverOpts);
       coverSvg = `\n<!-- 开场 SVG 动画 (${coverOpts.template}) -->\n<section style="margin:0;padding:0;line-height:0;">${svg}</section>\n`;
     }
@@ -1047,7 +1097,7 @@ ${section}
 </body>
 </html>`;
 
-  return html;
+  return applyBrandCta(html, { mode: options.brandCta || 'auto', cover: options.cover, maxWidth: theme.max_width });
 }
 
 // Convert single file
@@ -1067,7 +1117,9 @@ function convertFile(inputPath, theme, options) {
   }
 
   // Generate HTML
-  const html = generateHTML(markdown, theme, frontmatter, options);
+  const html = generateHTML(markdown, theme, frontmatter, options)
+    .replace(/[ \t]+(?=\r?$)/gm, '')
+    .replace(/\s*$/, '\n');
 
   // Determine output path
   const outputPath = options.output || inputPath.replace(/\.md$/, '_wechat.html');
@@ -1076,6 +1128,10 @@ function convertFile(inputPath, theme, options) {
   fs.writeFileSync(outputPath, html, 'utf8');
 
   console.log(`✓ Generated: ${outputPath}`);
+  const { nonHttpImageUrls } = extractArticleDocument(html);
+  if (nonHttpImageUrls.length > 0) {
+    console.warn(`⚠ 检测到 ${nonHttpImageUrls.length} 个非 HTTP(S) 图片引用：当前 HTML 可用于本地预览，尚不能注入公众号。请按 references/conversion-workflow.md 的“图片从预览到注入”处理，再按 references/opencli-injection.md 验收；本次未上传或替换图片。`);
+  }
 
   // 软门校验:文件照常生成,但打印兼容性报告(ERROR 不阻断,用户能先看效果)
   const report = validateHtml(html);
@@ -1105,6 +1161,12 @@ async function main() {
   if (options.accentColor) theme.accent_color = options.accentColor;
   if (options.backgroundColor) theme.background_color = options.backgroundColor;
   if (options.maxWidth) theme.max_width = options.maxWidth;
+  // 非智见AI账号:覆盖顶部标签(同时作用于开场动画的品牌标签与默认署名)。
+  // 在 normalizeTheme 之后赋值,避免空值被 defaults.top_label 回填。
+  if (options.topLabel !== null) {
+    const label = options.topLabel.trim();
+    theme.top_label = /^none$/i.test(label) ? '' : label;
+  }
 
   // Check if input contains glob pattern
   if (options.input.includes('*')) {

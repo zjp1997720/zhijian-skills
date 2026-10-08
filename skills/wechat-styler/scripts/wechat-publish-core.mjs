@@ -51,6 +51,24 @@ function extractImageUrls(content) {
     .map((match) => decodeHtml(match[1]));
 }
 
+export function hardenCodeBlockLineBreaks(html) {
+  return String(html).replace(
+    /(<pre\b[^>]*>\s*<code\b[^>]*>)([\s\S]*?)(<\/code>\s*<\/pre>)/gi,
+    (_, opening, code, closing) => `${opening}${code.replace(/\r\n?|\n/g, '<br>')}${closing}`,
+  );
+}
+
+function extractCodeBlockMetrics(content) {
+  const blocks = content.match(/<pre\b[^>]*>[\s\S]*?<\/pre>/gi) || [];
+  return {
+    codeBlockCount: blocks.length,
+    codeBlockBreakCount: blocks.reduce(
+      (total, block) => total + (block.match(/<br\b[^>]*>/gi) || []).length,
+      0,
+    ),
+  };
+}
+
 export function extractArticleDocument(html) {
   const titleMatch = html.match(/<title>([\s\S]*?)<\/title>/i);
   const rawTitle = titleMatch?.[1] ? decodeHtml(titleMatch[1].trim()) : '';
@@ -68,14 +86,21 @@ export function extractArticleDocument(html) {
       ? extractBalancedSection(body, legacyMatch.index)
       : body.trim();
   }
+  content = hardenCodeBlockLineBreaks(content);
   const imageUrls = extractImageUrls(content);
+  const nonHttpImageUrls = imageUrls.filter((source) => !/^https?:\/\//i.test(source));
+  const codeBlockMetrics = extractCodeBlockMetrics(content);
   return {
     content,
     title,
     summary,
     imageUrls,
+    nonHttpImageUrls,
     svgCount: (content.match(/<svg\b/gi) || []).length,
     animateCount: (content.match(/<animate(?:Transform)?\b/gi) || []).length,
+    svgImageCount: (content.match(/<image\b/gi) || []).length,
+    xiaolanNativeFrameCount: (content.match(/data-xiaolan-render=["']native-svg-pixels["']/gi) || []).length,
+    ...codeBlockMetrics,
   };
 }
 
@@ -93,7 +118,7 @@ ${editorLookupSource}
 }
 
 export function buildInjectScript(content) {
-  const encoded = Buffer.from(content, 'utf8').toString('base64');
+  const encoded = Buffer.from(hardenCodeBlockLineBreaks(content), 'utf8').toString('base64');
   return `(() => {
 ${editorLookupSource}
   if (!bodyEditor) return JSON.stringify({ ok: false, reason: "body editor not found" });
@@ -115,9 +140,68 @@ ${editorLookupSource}
     svgCount: bodyEditor.querySelectorAll("svg").length,
     animateCount: bodyEditor.querySelectorAll("animate,animateTransform").length,
     imageCount: [...bodyEditor.querySelectorAll("img")].filter((image) => !image.classList.contains("ProseMirror-separator")).length,
+    codeBlockCount: bodyEditor.querySelectorAll("pre").length,
+    codeBlockBreakCount: [...bodyEditor.querySelectorAll("pre")]
+      .reduce((total, block) => total + block.querySelectorAll("br").length, 0),
     textLength: (bodyEditor.innerText || bodyEditor.textContent || "").trim().length
   });
 })()`;
+}
+
+// 长文章的单参数体积会超过系统 argv 上限（E2BIG）。分段把 base64 推进页面缓冲区，
+// 最后一次性赋值 innerHTML，保持"一次写入、不做后续 DOM 操作"的编辑器约束。
+export function buildInjectScripts(content, chunkSize = 48000) {
+  const encoded = Buffer.from(hardenCodeBlockLineBreaks(content), 'utf8').toString('base64');
+  const chunks = [];
+  for (let index = 0; index < encoded.length; index += chunkSize) {
+    chunks.push(encoded.slice(index, index + chunkSize));
+  }
+
+  const scripts = [`(() => {
+  window.__wechatStylerChunks = [];
+  return JSON.stringify({ ok: true, phase: "reset", chunks: ${chunks.length} });
+})()`];
+
+  chunks.forEach((chunk, index) => {
+    scripts.push(`(() => {
+  if (!Array.isArray(window.__wechatStylerChunks)) window.__wechatStylerChunks = [];
+  window.__wechatStylerChunks.push("${chunk}");
+  return JSON.stringify({ ok: true, phase: "chunk", index: ${index} });
+})()`);
+  });
+
+  scripts.push(`(() => {
+${editorLookupSource}
+  const chunks = Array.isArray(window.__wechatStylerChunks) ? window.__wechatStylerChunks : [];
+  window.__wechatStylerChunks = [];
+  if (!bodyEditor) return JSON.stringify({ ok: false, reason: "body editor not found" });
+  const binary = atob(chunks.join(""));
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  const html = new TextDecoder("utf-8").decode(bytes);
+  window.getSelection()?.removeAllRanges();
+  bodyEditor.innerHTML = html;
+  for (const paragraph of [...bodyEditor.querySelectorAll("p")]) {
+    const text = paragraph.textContent.trim();
+    const empty = text === "" || text === "\\u00a0" || paragraph.innerHTML === "<br>";
+    if (empty && paragraph.querySelectorAll("svg,img").length === 0) paragraph.remove();
+  }
+  bodyEditor.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: null }));
+  bodyEditor.dispatchEvent(new Event("change", { bubbles: true }));
+  window.getSelection()?.removeAllRanges();
+  return JSON.stringify({
+    ok: true,
+    svgCount: bodyEditor.querySelectorAll("svg").length,
+    animateCount: bodyEditor.querySelectorAll("animate,animateTransform").length,
+    imageCount: [...bodyEditor.querySelectorAll("img")].filter((image) => !image.classList.contains("ProseMirror-separator")).length,
+    codeBlockCount: bodyEditor.querySelectorAll("pre").length,
+    codeBlockBreakCount: [...bodyEditor.querySelectorAll("pre")]
+      .reduce((total, block) => total + block.querySelectorAll("br").length, 0),
+    textLength: (bodyEditor.innerText || bodyEditor.textContent || "").trim().length,
+    chunkCount: chunks.length
+  });
+})()`);
+
+  return scripts;
 }
 
 export function buildMetadataScript(metadata) {
@@ -183,6 +267,14 @@ ${editorLookupSource}
     .map((row) => (row.innerText || "").trim())
     .filter(Boolean);
   const text = (bodyEditor.innerText || bodyEditor.textContent || "").trim();
+  const svgImageCount = bodyEditor.querySelectorAll("svg image").length;
+  const xiaolanNativeFrameCount = bodyEditor.querySelectorAll('[data-xiaolan-render="native-svg-pixels"]').length;
+  const svgPathCount = bodyEditor.querySelectorAll("svg path").length;
+  const codeBlocks = [...bodyEditor.querySelectorAll("pre")];
+  const codeBlockBreakCount = codeBlocks.reduce(
+    (total, block) => total + block.querySelectorAll("br").length,
+    0,
+  );
   const expectedTitle = ${JSON.stringify(expectedTitle)};
   const url = window.location.href;
   const saved = (document.body?.innerText || "").includes("已保存");
@@ -193,6 +285,11 @@ ${editorLookupSource}
     summary: document.querySelector("#js_description")?.value || "",
     svgCount: bodyEditor.querySelectorAll("svg").length,
     animateCount: bodyEditor.querySelectorAll("animate,animateTransform").length,
+    svgImageCount,
+    xiaolanNativeFrameCount,
+    svgPathCount,
+    codeBlockCount: codeBlocks.length,
+    codeBlockBreakCount,
     imageCount: images.length,
     failedUrls,
     pendingImages,
@@ -226,4 +323,14 @@ export function parseOpencliJson(output) {
     }
   }
   throw new Error(`opencli did not return JSON: ${output.slice(0, 300)}`);
+}
+
+// Omitted summaries preserve the editor value; an explicit empty string clears it.
+export function buildMetadataVerification(state, metadata = {}) {
+  const summaryChecked = metadata.summary !== undefined;
+  return {
+    summaryChecked,
+    expectedSummary: summaryChecked ? metadata.summary : null,
+    summaryMatches: summaryChecked ? state?.summary === metadata.summary : null,
+  };
 }

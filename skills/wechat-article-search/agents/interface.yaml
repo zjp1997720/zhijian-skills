@@ -1,0 +1,18 @@
+interface:
+  display_name: "公众号文章搜索"
+  short_description: "按关键词查找公众号文章。"
+  default_prompt: "Use $wechat-article-search to find articles for the supplied topic, using the default result count unless specified."
+compatibility:
+  canonical_format: "agent-skills"
+  adapter_targets: ["openai"]
+  activation:
+    mode: "model"
+  execution:
+    context: "inline"
+    shell: "bash"
+  trust:
+    source_tier: "local"
+    remote_inline_execution: "forbid"
+    remote_metadata_policy: "allow-metadata-only"
+  degradation:
+    openai: "metadata-adapter"

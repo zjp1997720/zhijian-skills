@@ -1,17 +1,27 @@
 ---
 name: enterprise-clone-builder
-description: |
-  企业数字分身建库工具。从企业名称 + 本地资料 + 公开信息出发，一次性构建一个完整的、标准化的企业分身仓库（AGENTS.md + 企业画像 + 内容资产 + 文风样本 + 调研记录），该仓库可直接被 enterprise-clone-writer 消费进行内容写作。
+description: >
+  企业数字分身建库工具。从企业名称 + 本地资料 + 公开信息出发，一次性构建一个完整的、标准化的企业分身仓库（AGENTS.md + 企业画像 + 内容资产
+  + 文风样本 + 调研记录），该仓库可直接被 enterprise-clone-writer 消费进行内容写作。
+
 
   **强触发场景**：
+
   - 「给这家企业建一个数字分身」「构建企业分身仓库」
+
   - 「把这家企业的资料整理成 AI 能用的分身」
+
   - 交付团队需要标准化地给客户企业建分身
 
+
   **不要用在**：
+
   - 分身仓库已建好后的写作任务（用 enterprise-clone-writer）
+
   - 个人创作者写作分身（用 writing-clone-profile）
+
   - 只是整理企业资料但不建分身仓库
+disable-model-invocation: true
 ---
 
 # Enterprise Clone Builder
