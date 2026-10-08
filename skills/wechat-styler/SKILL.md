@@ -2,7 +2,7 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.13.1
+version: 1.14.0
 description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
 summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
 tags:
@@ -57,6 +57,7 @@ disable-model-invocation: true
 - `:::compare`、`:::flow`、`:::timeline` 独占一行且前后留空行；矩阵对比保留 table。
 - 卡片只放短文本；组件数量、横向布局和完整语法按 `references/component-guide.md`。
 - 从正文推断开场标题、副标题和不超过 3 个标签；模板选择与 SVG 技术边界按 `references/svg-animation-design.md`。
+- 话题标签：frontmatter 没有 `topics` 时，从正文选 3–4 个写入转换用的 frontmatter（或传 `--topics`）：栏目/合集标签固定在首位，再加 2–3 个对准目标读者或本篇主题的话题；不用「人工智能」「AI」这类泛词，品牌或产品名只在正文确实展示该产品时使用，不超过公众号上限 10 个。用户指定标签或明确不要时照办（`--topics none`）。
 - `xiaolan-terminal` 只在用户明确要求小蓝、智见小蓝或品牌 IP 时使用。
 - 生成前完成组件 reference 中的检查清单，然后运行转换与移动端视觉 QA。
 
@@ -84,6 +85,7 @@ disable-model-invocation: true
 - 占位图、参数、主题、输出路径和命令见 `references/conversion-workflow.md`。
 - 品牌 GIF 位于文章首尾，正文中间使用静态组件。明确启用 SVG 开场动画时只保留结尾 GIF。
 - 开场动画承担文章标题：启用 `--cover` 时自动移除正文开头的一级标题（首个非空行的 `# 标题`），动画标题依次取 `--cover-title`、frontmatter.title、该一级标题；正文中段的一级标题不受影响，确需保留时传 `--keep-h1`。
+- 话题标签渲染在正文末尾（结尾 GIF 之前），结构复刻公众号编辑器原生 `a.wx_topic_link`，斜体 14px；注入后编辑器识别为话题，保存即生效。
 
 ## References
 

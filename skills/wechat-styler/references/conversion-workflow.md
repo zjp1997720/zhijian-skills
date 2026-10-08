@@ -71,6 +71,7 @@ node scripts/convert.mjs /tmp/rewritten.md \
 | `--keep-h1` | 启用开场动画时仍保留正文开头的一级标题；默认移除以免与动画标题重复 | `false` |
 | `--cover-subtitle` | 动画副标题 | frontmatter.summary |
 | `--cover-tags` | 逗号分隔标签 | 无 |
+| `--topics` | 文末公众号话题标签，逗号/顿号/空格分隔，可带或不带 `#`，自动去重；渲染为编辑器原生话题链接（斜体 14px），上限 10 个；`none` 关闭 | frontmatter.topics |
 | `--top-label` | 顶部标签，同时作为开场动画品牌标签与默认署名来源；`none` 隐藏顶部标签区和动画标签；拉丁字母会被大写显示 | theme.top_label（zhijian 为 `智见AI`） |
 | `--cover-author` | 开场署名（scroll-painting 右下），原样输出、不加「出品」；`none` 隐藏 | `<top_label> 出品` |
 

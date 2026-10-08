@@ -50,6 +50,9 @@ function parseArgs() {
   --cover-author <text|none>  Cover byline, used verbatim (scroll-painting);
                               default "<top label> 出品"; "none" hides it
   --brand-cta <mode>          auto | ending | none (default: auto)
+  --topics <a,b,c|none>       WeChat topic tags at the end of the body, rendered
+                              as editor-native #topic links, italic 14px
+                              (default: frontmatter.topics; "none" disables)
   -h, --help                 Show help without converting files`);
     process.exit(0);
   }
@@ -72,6 +75,7 @@ function parseArgs() {
     topLabel: null,
     coverAuthor: null,
     brandCta: 'auto',
+    topics: null,
     strictDensity: false,
     keepH1: false
   };
@@ -156,6 +160,9 @@ function parseArgs() {
         break;
       case 'cover-tags':
         options.coverTags = value;
+        break;
+      case 'topics':
+        options.topics = value ?? '';
         break;
       case 'cover-template':
         options.coverTemplate = value;
@@ -1026,6 +1033,45 @@ function splitLeadingH1(markdown) {
   return { title: match[1].trim(), markdown: markdown.slice(match[0].length) };
 }
 
+// 公众号话题标签上限 10 个。
+const MAX_TOPICS = 10;
+
+// 解析话题:接受数组或以逗号/顿号/空白分隔的字符串,去掉前导 #,去重。
+function normalizeTopics(value) {
+  if (value === null || value === undefined || value === false) return [];
+  const raw = Array.isArray(value) ? value.map(String) : String(value).split(/[,，、\s]+/);
+  if (raw.length === 1 && /^none$/i.test(raw[0].trim())) return [];
+  const seen = new Set();
+  const topics = [];
+  for (const item of raw) {
+    const topic = item.trim().replace(/^#+/, '').trim();
+    if (!topic || seen.has(topic)) continue;
+    seen.add(topic);
+    topics.push(topic);
+  }
+  return topics;
+}
+
+function topicId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8).padEnd(6, '0')}`;
+}
+
+// 文末话题行:复刻公众号编辑器原生话题标签结构(a.wx_topic_link + data-topic),
+// 注入后编辑器识别为 topic mark,保存即生效;样式为斜体 14px。
+function renderTopicTags(topics, theme) {
+  if (!topics.length) return '';
+  const textStyle = 'font-size: 14px; font-style: italic';
+  const links = topics.map((topic) => (
+    `<a class="wx_topic_link" topic-id="${topicId()}" style="color: #576B95 !important;" data-topic="1" data-recommend=""><span textstyle="" style="${textStyle}">#${escapeHtml(topic)}</span></a>`
+  )).join(`<span textstyle="" style="${textStyle}">&nbsp;</span>`);
+  return `<!-- 话题标签 -->
+<section style="max-width:${theme.max_width}px;margin:0 auto;padding:0 16px ${theme.rhythm.section_padding}px;background-color:${theme.background_color};">
+<p data-wechat-topics="${topics.length}" style="font-family:${theme.font_family_cn};font-size:14px;line-height:1.75;text-align:left;margin:0;padding:0;word-break:break-word;background-color:${theme.background_color};"><span leaf="">${links}</span></p>
+</section>
+
+`;
+}
+
 // Generate HTML
 function generateHTML(markdown, theme, frontmatter, options = {}) {
   let leadingH1 = null;
@@ -1115,6 +1161,8 @@ ${section}
     // Section rhythm is handled by padding and theme-specific headings, not automatic full-width rules.
   });
 
+  html += renderTopicTags(options.resolvedTopics || [], theme);
+
   html += `</section>
 <!-- 整体背景容器结束 -->
 
@@ -1140,8 +1188,15 @@ function convertFile(inputPath, theme, options) {
     return false;
   }
 
+  const topics = normalizeTopics(options.topics !== null ? options.topics : frontmatter.topics);
+  if (topics.length > MAX_TOPICS) {
+    console.warn(`⚠ 话题标签 ${topics.length} 个，超过公众号上限 ${MAX_TOPICS}，只保留前 ${MAX_TOPICS} 个`);
+    topics.length = MAX_TOPICS;
+  }
+  if (topics.length) console.log(`✓ 话题标签: ${topics.map((t) => `#${t}`).join(' ')}`);
+
   // Generate HTML
-  const html = generateHTML(markdown, theme, frontmatter, options)
+  const html = generateHTML(markdown, theme, frontmatter, { ...options, resolvedTopics: topics })
     .replace(/[ \t]+(?=\r?$)/gm, '')
     .replace(/\s*$/, '\n');
 

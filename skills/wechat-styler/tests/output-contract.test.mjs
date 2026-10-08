@@ -205,3 +205,36 @@ test('without an opening animation the leading H1 is unchanged', () => {
   const html = convertWith(h1Article, ['--brand-cta', 'none']);
   assert.equal(countH1(html), 2);
 });
+
+const topicLinks = (html) => [...html.matchAll(/<a class="wx_topic_link" topic-id="([a-z0-9]+-[a-z0-9]{6})" style="color: #576B95 !important;" data-topic="1" data-recommend=""><span textstyle="" style="font-size: 14px; font-style: italic">#([^<]+)<\/span><\/a>/g)];
+
+test('frontmatter topics render as editor-native italic 14px topic links at the end of the body', () => {
+  const html = convertWith('---\ntitle: 标题\ntopics: [学校AI落地, "#AI教育", 校长, AI教育]\n---\n\n正文第一段。\n\n## 小节\n\n最后一段。\n', ['--brand-cta', 'none']);
+  const links = topicLinks(html);
+  assert.deepEqual(links.map((m) => m[2]), ['学校AI落地', 'AI教育', '校长'], 'strips # and de-duplicates');
+  assert.equal(new Set(links.map((m) => m[1])).size, 3, 'each topic gets its own id');
+  assert.ok(html.indexOf('最后一段') < html.indexOf('wx_topic_link'), 'topics follow the last paragraph');
+  assert.match(html, /data-wechat-topics="3"/);
+});
+
+test('--topics overrides frontmatter and "none" disables topics', () => {
+  const md = '---\ntopics: 甲, 乙\n---\n\n正文。\n';
+  assert.deepEqual(topicLinks(convertWith(md, ['--topics', '丙，丁、戊', '--brand-cta', 'none'])).map((m) => m[2]), ['丙', '丁', '戊']);
+  assert.equal(topicLinks(convertWith(md, ['--topics', 'none', '--brand-cta', 'none'])).length, 0);
+  assert.doesNotMatch(convertWith('正文。\n', ['--brand-cta', 'none']), /wx_topic_link/, 'no topics without frontmatter or flag');
+});
+
+test('topic links pass WeChat validation while other class attributes still fail', () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-topics-validate-'));
+  try {
+    const input = path.join(workDir, 'article.md');
+    const output = path.join(workDir, 'article.html');
+    fs.writeFileSync(input, '---\ntopics: 学校AI落地\n---\n\n正文。\n');
+    const result = spawnSync(process.execPath, [path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', output, '--brand-cta', 'none'], { encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const check = (file) => spawnSync(process.execPath, [path.join(skillRoot, 'scripts/validate.mjs'), file], { encoding: 'utf8' });
+    assert.equal(check(output).status, 0, check(output).stdout);
+    fs.writeFileSync(output, fs.readFileSync(output, 'utf8').replace('<p data-wechat-topics', '<p class="x" data-wechat-topics'));
+    assert.notEqual(check(output).status, 0);
+  } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
+});
