@@ -2,7 +2,7 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.12.0
+version: 1.13.0
 description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
 summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
 tags:
@@ -98,4 +98,4 @@ disable-model-invocation: true
 
 ---
 
-**版本：** 1.12.0 · **作者：** 大鹏
+**版本：** 1.13.0 · **作者：** 大鹏

@@ -857,100 +857,281 @@ function buildTypewriter(text, cx, y, fontSize, fill, font, startDelay, interval
   };
 }
 
+// ─── 手机优先排版 ───────────────────────────────────────
+// 公众号几乎都在手机上读：390px 屏宽时正文列约 358px。viewBox 宽度取 360，
+// 让 1 个 viewBox 单位约等于手机上的 1 CSS px，字号即所见；桌面端仍以
+// width:100% + max-width:480px 等比放大（标题约 37px，不压过正文 H1 太多）。
+const COVER_W = 360;
+const COVER_MAX_W = 480;
+const COVER_MARGIN = 24;
+const COVER_CONTENT_W = COVER_W - COVER_MARGIN * 2;
+
+function n1(value) {
+  return Number(value.toFixed(1));
+}
+
+function coverSvgOpen(W, H, bg, extraAttrs = '') {
+  return `<svg${extraAttrs} xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${n1(H)}" preserveAspectRatio="xMidYMin meet" style="display:block;width:100%;max-width:${COVER_MAX_W}px;margin:0 auto;"><rect x="0" y="0" width="${W}" height="${n1(H)}" fill="${bg}"/>`;
+}
+
+function isCjkChar(ch) {
+  return /[⺀-鿿豈-﫿　-〿＀-￯“”‘’—…]/.test(ch);
+}
+
+// 比例字体的保守估宽：中文 1em，拉丁字母和数字按常见中文字体里的西文字宽估计。
+function measureCoverText(text, fontSize, letterSpacing = 0) {
+  const chars = [...String(text)];
+  let width = 0;
+  for (const ch of chars) {
+    let factor = 0.6;
+    if (isCjkChar(ch)) factor = 1;
+    else if (ch === ' ') factor = 0.33;
+    else if (/[A-Z]/.test(ch)) factor = 0.7;
+    else if (/[0-9]/.test(ch)) factor = 0.58;
+    else if (/[a-z]/.test(ch)) factor = 0.56;
+    width += factor * fontSize;
+  }
+  return width + letterSpacing * chars.length;
+}
+
+const NO_LINE_START = /[，。、：；！？）」』”’》,.;:!?)\]]/;
+const NO_LINE_END = /[（「『“‘《(\[]/;
+const PUNCT_BREAK_AFTER = /[，。、：；！？,;:!?的]/;
+const WORD_CHAR = /[A-Za-z0-9.%+\-_'&]/;
+
+function twoLineCandidates(text) {
+  const chars = [...text];
+  const seen = new Set();
+  const out = [];
+  for (let i = 1; i < chars.length; i += 1) {
+    const prev = chars[i - 1];
+    const next = chars[i];
+    if (WORD_CHAR.test(prev) && WORD_CHAR.test(next)) continue; // 不拆英文单词和数字
+    if (NO_LINE_START.test(next) || NO_LINE_END.test(prev)) continue;
+    const first = chars.slice(0, i).join('').trimEnd();
+    const second = chars.slice(i).join('').trimStart();
+    // 不留单字孤行
+    if ([...first.replace(/\s/g, '')].length < 2 || [...second.replace(/\s/g, '')].length < 2) continue;
+    const key = `${first}\n${second}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const tier = PUNCT_BREAK_AFTER.test(prev) ? 0 : (prev === ' ' || next === ' ') ? 1 : 2;
+    out.push({ lines: [first, second], tier });
+  }
+  return out;
+}
+
+function bestTwoLineSplit(text, fontSize, maxWidth, measure) {
+  const total = measure(text, fontSize);
+  const candidates = twoLineCandidates(text)
+    .map(candidate => ({ ...candidate, widest: Math.max(...candidate.lines.map(line => measure(line, fontSize))) }))
+    .filter(candidate => candidate.widest <= maxWidth);
+  if (!candidates.length) return null;
+  // 优先在标点 /「的」后断行，其次空格，最后才在汉字之间按宽度均衡断行。
+  for (const tier of [0, 1]) {
+    const pool = candidates.filter(candidate => candidate.tier === tier && candidate.widest <= total * 0.72);
+    if (pool.length) return pool.reduce((best, candidate) => candidate.widest < best.widest ? candidate : best).lines;
+  }
+  return candidates.reduce((best, candidate) => candidate.widest < best.widest ? candidate : best).lines;
+}
+
+// 标题优先换成两行而不是缩字；副标题先缩到下限再换行。最多两行。
+function layoutLines(text, { fontSize, minFontSize, maxWidth, measure = measureCoverText, prefer = 'wrap' }) {
+  const value = String(text || '').trim();
+  if (!value) return { lines: [], fontSize, text: '' };
+  const fits = size => measure(value, size) <= maxWidth;
+  if (fits(fontSize)) return { lines: [value], fontSize, text: value };
+  if (prefer === 'shrink') {
+    for (let size = fontSize - 0.5; size >= minFontSize; size -= 0.5) {
+      if (fits(size)) return { lines: [value], fontSize: size, text: value };
+    }
+  }
+  for (let size = fontSize; size >= minFontSize; size -= 0.5) {
+    const lines = bestTwoLineSplit(value, size, maxWidth, measure);
+    if (lines) return { lines, fontSize: size, text: value };
+  }
+  const lines = bestTwoLineSplit(value, minFontSize, Number.POSITIVE_INFINITY, measure) || [value];
+  const widest = Math.max(...lines.map(line => measure(line, minFontSize)));
+  return { lines, fontSize: Math.max(1, Math.floor(minFontSize * maxWidth / widest * 10) / 10), text: value };
+}
+
+// 一个语义 <text>，每行一个 <tspan leaf="">；多行时在元素上保留完整语义。
+function coverText(layout, { x, y, lineHeight = 0, fill, font, anchor = 'middle', weight = '', letterSpacing = 0 }) {
+  const { lines, fontSize } = layout;
+  if (!lines.length) return '';
+  const full = layout.text || lines.join('');
+  const semantic = lines.length > 1
+    ? ` data-semantic-text="${escapeSvgAttribute(full)}" aria-label="${escapeSvgAttribute(full)}"`
+    : '';
+  const attrs = `x="${n1(x)}" y="${n1(y)}" text-anchor="${anchor}" font-size="${n1(fontSize)}"${weight ? ` font-weight="${weight}"` : ''} fill="${fill}" font-family="${font}"${letterSpacing ? ` letter-spacing="${letterSpacing}"` : ''}${semantic}`;
+  if (lines.length === 1) return `<text ${attrs}><tspan leaf="">${escapeSvgAttribute(lines[0])}</tspan></text>`;
+  const spans = lines
+    .map((line, index) => `<tspan leaf="" x="${n1(x)}" y="${n1(y + index * lineHeight)}">${escapeSvgAttribute(line)}</tspan>`)
+    .join('');
+  return `<text ${attrs}>${spans}</text>`;
+}
+
+// 文字块高度：首行基线 = top + 0.86em，末行下沿 = 末行基线 + 0.24em。
+function textBlockMetrics(layout, top, lineHeight) {
+  if (!layout.lines.length) return { baseline: top, bottom: top };
+  const baseline = top + layout.fontSize * 0.86;
+  const bottom = baseline + (layout.lines.length - 1) * lineHeight + layout.fontSize * 0.24;
+  return { baseline, bottom };
+}
+
+// 向下箭头：外层 <g> 定位，内部只做相对位移，避免动画期间坐标被叠加两次。
+function scrollArrow(cx, baseline, fontSize, fill, begin) {
+  return `<g transform="translate(${n1(cx)},${n1(baseline)})"><text x="0" y="0" text-anchor="middle" font-size="${fontSize}" fill="${fill}" font-family="sans-serif"><tspan leaf="">↓</tspan><animateTransform attributeName="transform" type="translate" values="0 0;0 6;0 0" dur="1.5s" begin="${begin}" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></text></g>`;
+}
+
+function openCover(C, W, H, extraAttrs = '') {
+  return coverSvgOpen(W, H, C.bg, extraAttrs);
+}
+
 // ─── 模板 1: 墨韵开篇 ──────────────────────────────────
 function templateInkWash(C, opts) {
   const tagList = opts.tags ? opts.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-  const W = 640, H = 400, cx = W / 2;
-
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin meet" style="display:block;width:100%;max-width:${W}px;margin:0 auto;">`;
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
-
-  // 墨点晕染
-  svg += `<circle cx="${cx}" cy="180" r="0" fill="${C.accent}" opacity="0.08"><animate attributeName="r" values="0;120;180" dur="0.8s" begin="0.2s" fill="freeze" calcMode="spline" keyTimes="0;0.6;1" keySplines="0.25 0.1 0.25 1;0.4 0 0.6 1"/><animate attributeName="opacity" values="0.08;0.04;0" dur="0.8s" begin="0.2s" fill="freeze"/></circle>`;
+  const W = COVER_W, cx = W / 2;
+  let body = '';
+  let cursor = 24;
 
   // 顶部标签
+  let label = '';
   if (C.topLabel) {
-    svg += `<text x="${cx}" y="60" text-anchor="middle" font-size="13" font-weight="600" fill="${C.accent}" letter-spacing="4" font-family="${C.uiFont}"><tspan leaf="">${C.topLabel}</tspan></text>`;
+    const labelBase = cursor + 11;
+    label = `<text x="${cx}" y="${n1(labelBase)}" text-anchor="middle" font-size="12" font-weight="600" fill="${C.accent}" letter-spacing="3" font-family="${C.uiFont}"><tspan leaf="">${C.topLabel}</tspan></text>`;
+    cursor = labelBase + 20;
   }
 
   // 主标题
-  if (opts.title) {
-    svg += `<text x="${cx}" y="170" text-anchor="middle" font-size="48" font-weight="500" fill="${C.text}" font-family="${C.headingFont}"><tspan leaf="">${opts.title}</tspan></text>`;
-  }
+  const title = layoutLines(opts.title, { fontSize: 28, minFontSize: 24, maxWidth: COVER_CONTENT_W });
+  const titleLH = title.fontSize * 1.32;
+  const titleBox = textBlockMetrics(title, cursor, titleLH);
+  const titleSvg = coverText(title, { x: cx, y: titleBox.baseline, lineHeight: titleLH, weight: '500', fill: C.text, font: C.headingFont });
+  const inkCy = (cursor + titleBox.bottom) / 2;
+
+  // 墨点晕染
+  body += `<circle cx="${cx}" cy="${n1(inkCy)}" r="0" fill="${C.accent}" opacity="0.08"><animate attributeName="r" values="0;70;100" dur="0.8s" begin="0.2s" fill="freeze" calcMode="spline" keyTimes="0;0.6;1" keySplines="0.25 0.1 0.25 1;0.4 0 0.6 1"/><animate attributeName="opacity" values="0.08;0.04;0" dur="0.8s" begin="0.2s" fill="freeze"/></circle>`;
+  body += label + titleSvg;
 
   // 分隔线(rect + animate width,微信保留)
-  svg += `<rect x="${cx - 50}" y="198" width="0" height="3" rx="1.5" fill="${C.accent}" opacity="0"><animate attributeName="width" values="0;100" dur="0.5s" begin="1.9s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/><animate attributeName="opacity" values="0;1" dur="0.05s" begin="1.9s" fill="freeze"/></rect>`;
+  const dividerY = titleBox.bottom + 12;
+  body += `<rect x="${cx - 32}" y="${n1(dividerY)}" width="0" height="3" rx="1.5" fill="${C.accent}" opacity="0"><animate attributeName="width" values="0;64" dur="0.5s" begin="1.9s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/><animate attributeName="opacity" values="0;1" dur="0.05s" begin="1.9s" fill="freeze"/></rect>`;
+  cursor = dividerY + 3 + 14;
 
   // 副标题
-  if (opts.subtitle) {
-    svg += `<text x="${cx}" y="245" text-anchor="middle" font-size="18" fill="${C.tertiary}" font-family="${C.serifFont}"><tspan leaf="">${opts.subtitle}</tspan></text>`;
-  }
+  const subtitle = layoutLines(opts.subtitle, { fontSize: 15, minFontSize: 14, maxWidth: COVER_CONTENT_W, prefer: 'shrink' });
+  const subtitleLH = subtitle.fontSize * 1.5;
+  const subtitleBox = textBlockMetrics(subtitle, cursor, subtitleLH);
+  body += coverText(subtitle, { x: cx, y: subtitleBox.baseline, lineHeight: subtitleLH, fill: C.tertiary, font: C.serifFont });
+  cursor = subtitle.lines.length ? subtitleBox.bottom : cursor - 14;
 
   // 特性标签
   if (tagList.length > 0) {
-    const tagW = 80, tagH = 28, tagGap = 20;
-    const totalTagW = tagList.length * tagW + (tagList.length - 1) * tagGap;
-    const startTagX = cx - totalTagW / 2;
+    const tagH = 26, tagGap = 10, tagFont = 12;
+    const widths = tagList.map(tag => Math.max(64, measureCoverText(tag, tagFont) + 24));
+    const totalTagW = widths.reduce((sum, width) => sum + width, 0) + (tagList.length - 1) * tagGap;
+    const tagY = cursor + 18;
     const tagColors = [C.accent, C.secondary, C.tertiary];
+    let x = cx - totalTagW / 2;
     tagList.forEach((tag, i) => {
-      const x = startTagX + i * (tagW + tagGap);
       const color = tagColors[i % tagColors.length];
-      const delay = 3.0 + i * 0.3;
-      svg += `<g><rect x="${x}" y="290" width="${tagW}" height="${tagH}" rx="14" fill="none" stroke="${color}" stroke-width="1.2"/><text x="${x + tagW / 2}" y="308" text-anchor="middle" font-size="12" fill="${color}" font-family="${C.uiFont}"><tspan leaf="">${tag}</tspan></text></g>`;
+      body += `<g><rect x="${n1(x)}" y="${n1(tagY)}" width="${n1(widths[i])}" height="${tagH}" rx="13" fill="none" stroke="${color}" stroke-width="1.2"/><text x="${n1(x + widths[i] / 2)}" y="${n1(tagY + 17.5)}" text-anchor="middle" font-size="${tagFont}" fill="${color}" font-family="${C.uiFont}"><tspan leaf="">${escapeSvgAttribute(tag)}</tspan></text></g>`;
+      x += widths[i] + tagGap;
     });
+    cursor = tagY + tagH;
   }
 
   // 底部提示 + 箭头
-  svg += `<g><circle cx="${cx - 15}" cy="360" r="3" fill="${C.accent}"/><circle cx="${cx}" cy="360" r="3" fill="${C.light}"/><circle cx="${cx + 15}" cy="360" r="3" fill="${C.light}"/><text x="${cx}" y="388" text-anchor="middle" font-size="11" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="2"><tspan leaf="">向下滑动开始阅读</tspan></text></g>`;
-  svg += `<g transform="translate(${cx},340)"><text x="0" y="0" text-anchor="middle" font-size="16" fill="${C.hint}" font-family="sans-serif"><tspan leaf="">↓</tspan><animateTransform attributeName="transform" type="translate" values="${cx} 340;${cx} 348;${cx} 340" dur="1.5s" begin="4.5s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></text></g>`;
-  svg += `</svg>`;
-  return svg;
+  const arrowBase = cursor + 32;
+  const dotsY = arrowBase + 12;
+  const hintBase = dotsY + 20;
+  body += `<g><circle cx="${cx - 12}" cy="${n1(dotsY)}" r="2.5" fill="${C.accent}"/><circle cx="${cx}" cy="${n1(dotsY)}" r="2.5" fill="${C.light}"/><circle cx="${cx + 12}" cy="${n1(dotsY)}" r="2.5" fill="${C.light}"/><text x="${cx}" y="${n1(hintBase)}" text-anchor="middle" font-size="12" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="2"><tspan leaf="">向下滑动开始阅读</tspan></text></g>`;
+  body += scrollArrow(cx, arrowBase, 14, C.hint, '4.5s');
+  const H = hintBase + 18;
+
+  return `${openCover(C, W, H)}${body}</svg>`;
 }
 
 // ─── 模板 2: 打字机流 ──────────────────────────────────
+function buildTypewriterLines(layout, cx, firstBaseline, lineHeight, fontSize, fill, font, startDelay, interval, accentColor, backgroundColor, role) {
+  const { lines } = layout;
+  let delay = startDelay;
+  let svg = '';
+  const built = lines.map((line, index) => {
+    const lineRole = index === 0 ? role : `${role}-${index + 1}`;
+    const result = buildTypewriter(line, cx, n1(firstBaseline + index * lineHeight), fontSize, fill, font, delay, interval, accentColor, backgroundColor, lineRole);
+    delay = result.endDelay + 0.05;
+    svg += result.svg;
+    return result;
+  });
+  if (built.length > 1) {
+    const full = layout.text;
+    svg = `<g data-typewriter-lines="${role}" data-semantic-text="${escapeSvgAttribute(full)}" aria-label="${escapeSvgAttribute(full)}">${svg}</g>`;
+  }
+  const last = built.at(-1);
+  const widest = built.reduce((best, item) => item.totalW > best.totalW ? item : best, built[0] || { sx: cx, totalW: 0 });
+  return {
+    svg,
+    endDelay: last ? last.endDelay : startDelay,
+    sx: widest.sx,
+    totalW: widest.totalW,
+    last,
+  };
+}
+
 function templateTypewriter(C, opts) {
-  const W = 640, H = 280, cx = W / 2;
+  const W = COVER_W, cx = W / 2;
 
   // 品牌标签去掉（zhijian 主题左上角已有智见AI，重复）
-  // 主标题紧贴顶部，压缩纵向空档
   const titleStart = 0.3;
-  const titleText = opts.title || '';
-  const titleFontSize = fitTypewriterFontSize(titleText, 48, W - 80);
-  const title = buildTypewriter(titleText, cx, 65, titleFontSize, C.text, C.monoFont, titleStart, 0.13, C.accent, C.bg, 'title');
-  const lineDelay = title.endDelay + 0.3;
+  const title = layoutLines(opts.title, { fontSize: 28, minFontSize: 22, maxWidth: COVER_CONTENT_W, measure: measureTypewriterWidth });
+  const titleLH = title.fontSize * 1.3;
+  const titleBox = textBlockMetrics(title, 18, titleLH);
+  const titleLines = buildTypewriterLines(title, cx, titleBox.baseline, titleLH, title.fontSize, C.text, C.monoFont, titleStart, 0.13, C.accent, C.bg, 'title');
+  const lineDelay = titleLines.endDelay + 0.3;
+  const underlineY = (title.lines.length ? titleBox.bottom : 18) + 8;
+
   const subStart = lineDelay + 0.8 + 0.2;
-  const subtitleText = opts.subtitle || '';
-  const subtitleFontSize = fitTypewriterFontSize(subtitleText, 26, W - 64);
   // 逐字定位依赖稳定字宽。副标题混排中英文时使用等宽字体栈，
   // 避免比例衬线字体里的 M/W 等宽字符侵入后一个字母。
-  const subtitle = buildTypewriter(subtitleText, cx, 140, subtitleFontSize, C.tertiary, C.monoFont, subStart, 0.08, C.accent, C.bg, 'subtitle');
+  const subtitle = layoutLines(opts.subtitle, { fontSize: 16, minFontSize: 14, maxWidth: COVER_CONTENT_W, measure: measureTypewriterWidth, prefer: 'shrink' });
+  const subtitleLH = subtitle.fontSize * 1.5;
+  const subtitleBox = textBlockMetrics(subtitle, underlineY + 2.5 + 16, subtitleLH);
+  const subtitleLines = buildTypewriterLines(subtitle, cx, subtitleBox.baseline, subtitleLH, subtitle.fontSize, C.tertiary, C.monoFont, subStart, 0.08, C.accent, C.bg, 'subtitle');
+  let cursor = subtitle.lines.length ? subtitleBox.bottom : underlineY + 2.5;
+
   const tagText = opts.tags
     ? opts.tags.split(',').map(tag => tag.trim()).filter(Boolean).join(' · ')
     : '';
-  const tagFontSize = fitTypewriterFontSize(tagText, 13, W - 80);
-  const tagDelay = subtitle.endDelay + 0.25;
-  const hintStart = (tagText ? tagDelay + 0.55 : subtitle.endDelay) + 0.3;
-  const hintY = 220;
-  const hintFontSize = 18;
+  const tagFontSize = fitTypewriterFontSize(tagText, 13, COVER_CONTENT_W);
+  const tagBase = cursor + 14 + tagFontSize * 0.86;
+  if (tagText) cursor = tagBase + tagFontSize * 0.24;
+  const subtitleEnd = subtitle.lines.length ? subtitleLines.endDelay : subStart;
+  const tagDelay = subtitleEnd + 0.25;
+  const hintStart = (tagText ? tagDelay + 0.55 : subtitleEnd) + 0.3;
+  const hintFontSize = 14;
+  const hintY = n1(cursor + 22 + hintFontSize * 0.86);
   const hint = buildTypewriter('> 向下滑动继续阅读', cx, hintY, hintFontSize, C.accent, C.monoFont, hintStart, 0.07, C.accent, C.bg, 'hint');
   const hintCursorBlink = hint.lastCursorX + 2;
   const arrowDelay = hint.endDelay + 0.5;
+  const arrowBase = hintY + 26;
+  const H = arrowBase + 14;
 
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin meet" style="display:block;width:100%;max-width:${W}px;margin:0 auto;">`;
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
-  svg += title.svg;
-  // 横线:rect + animate width(dur 0.8s) — y 跟随标题底部（标题 y=65，font-size=48）
-  svg += `<rect x="${title.sx.toFixed(1)}" y="85" width="0" height="2.5" rx="1.25" fill="${C.accent}" opacity="0"><animate attributeName="width" values="0;${title.totalW.toFixed(1)}" dur="0.8s" begin="${lineDelay.toFixed(2)}s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/><animate attributeName="opacity" values="0;1" dur="0.05s" begin="${lineDelay.toFixed(2)}s" fill="freeze"/></rect>`;
-  svg += subtitle.svg;
+  let svg = openCover(C, W, H);
+  svg += titleLines.svg;
+  // 横线:rect + animate width(dur 0.8s)，宽度跟随最宽的标题行
+  svg += `<rect x="${titleLines.sx.toFixed(1)}" y="${n1(underlineY)}" width="0" height="2.5" rx="1.25" fill="${C.accent}" opacity="0"><animate attributeName="width" values="0;${titleLines.totalW.toFixed(1)}" dur="0.8s" begin="${lineDelay.toFixed(2)}s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/><animate attributeName="opacity" values="0;1" dur="0.05s" begin="${lineDelay.toFixed(2)}s" fill="freeze"/></rect>`;
+  svg += subtitleLines.svg;
   if (tagText) {
-    svg += `<text x="${cx}" y="178" text-anchor="middle" font-size="${tagFontSize}" font-weight="600" fill="${C.secondary}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${tagText}</tspan></text>`;
+    svg += `<text x="${cx}" y="${n1(tagBase)}" text-anchor="middle" font-size="${tagFontSize}" font-weight="600" fill="${C.secondary}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${escapeSvgAttribute(tagText)}</tspan></text>`;
   }
   svg += hint.svg;
   // 提示光标:亮0.6s 灭0.6s — y 跟随提示文字底部
   const hintCursorY = hintY - hintFontSize * 0.7;
-  svg += `<rect x="${hintCursorBlink.toFixed(1)}" y="${hintCursorY.toFixed(1)}" width="2" height="18" fill="${C.accent}" opacity="0"><animate attributeName="opacity" values="0;1" dur="0.05s" begin="${hint.endDelay.toFixed(2)}s" fill="freeze"/><animate attributeName="opacity" values="1;1;0;0" dur="1.2s" begin="${(hint.endDelay + 0.1).toFixed(2)}s" repeatCount="indefinite"/></rect>`;
+  svg += `<rect x="${hintCursorBlink.toFixed(1)}" y="${hintCursorY.toFixed(1)}" width="2" height="${hintFontSize}" fill="${C.accent}" opacity="0"><animate attributeName="opacity" values="0;1" dur="0.05s" begin="${hint.endDelay.toFixed(2)}s" fill="freeze"/><animate attributeName="opacity" values="1;1;0;0" dur="1.2s" begin="${(hint.endDelay + 0.1).toFixed(2)}s" repeatCount="indefinite"/></rect>`;
   // 箭头（提示文字下方）
-  svg += `<g transform="translate(${cx},255)"><text x="0" y="0" text-anchor="middle" font-size="18" fill="${C.hint}" font-family="sans-serif"><tspan leaf="">↓</tspan><animateTransform attributeName="transform" type="translate" values="${cx} 255;${cx} 263;${cx} 255" dur="1.5s" begin="${(arrowDelay + 0.2).toFixed(2)}s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></text></g>`;
+  svg += scrollArrow(cx, arrowBase, 16, C.hint, `${(arrowDelay + 0.2).toFixed(2)}s`);
   svg += `</svg>`;
   return svg;
 }
@@ -994,73 +1175,140 @@ function buildXiaolanTerminalSprite(C) {
   </g>`;
 }
 
+// 终端文字估宽：纯像素行按 5×7 栅格，中英混排按像素段 + 等宽字体段。
+function measureTerminalText(text, fontSize, cellRatio) {
+  const cellSize = fontSize * cellRatio;
+  if (canRenderPixelText(text)) return measurePixelText(text, cellSize);
+  const chars = [...text];
+  if (!chars.length) return 0;
+  const advances = chars.map(ch => isMixedPixelCharacter(ch)
+    ? cellSize * 6
+    : getCharWidth(ch, fontSize) + getCharGap(ch));
+  const trailing = isMixedPixelCharacter(chars.at(-1)) ? cellSize : getCharGap(chars.at(-1));
+  return Math.max(0, advances.reduce((sum, width) => sum + width, 0) - trailing);
+}
+
+function buildTerminalLines(layout, x, firstBaseline, lineHeight, maxWidth, fontSize, cellRatio, fill, font, startDelay, interval, accentColor, backgroundColor, role) {
+  const { lines } = layout;
+  let delay = startDelay;
+  let svg = '';
+  const built = lines.map((line, index) => {
+    const lineRole = index === 0 ? role : `${role}-${index + 1}`;
+    const result = buildTerminalText(
+      line, x, n1(firstBaseline + index * lineHeight), maxWidth, fontSize, fontSize * cellRatio,
+      fill, font, delay, interval, accentColor, backgroundColor, lineRole,
+    );
+    delay = result.endDelay + 0.05;
+    svg += result.svg;
+    return result;
+  });
+  if (built.length > 1) {
+    const full = layout.text;
+    svg = `<g data-terminal-lines="${role}" data-semantic-text="${escapeSvgAttribute(full)}" aria-label="${escapeSvgAttribute(full)}">${svg}</g>`;
+  }
+  return { svg, built, last: built.at(-1), endDelay: built.length ? built.at(-1).endDelay : startDelay };
+}
+
 // ─── 模板 3: 小蓝终端 ──────────────────────────────────
 function templateXiaolanTerminal(C, opts) {
-  const W = 640, H = 230;
-  const textX = 198;
-  const maxTextWidth = W - textX - 26;
-  const titleText = opts.title || '';
-  const subtitleText = opts.subtitle || '';
+  const W = COVER_W;
+  // 左侧角色 + 右侧终端：角色缩到约 84×89，给右侧文字留出约 240 宽的终端栏。
+  const spriteScale = 0.5;
+  const spriteW = 168 * spriteScale;
+  const spriteH = 177 * spriteScale;
+  const spriteX = 12;
+  const textX = spriteX + spriteW + 12;
+  const maxTextWidth = W - textX - 12;
+  const pad = 16;
+  const titleText = (opts.title || '').trim();
+  const subtitleText = (opts.subtitle || '').trim();
   const tagText = opts.tags
     ? opts.tags.split(',').map(tag => tag.trim()).filter(Boolean).join(' / ')
     : '';
-  const inlineGap = subtitleText ? 18 : 0;
+  const TITLE_CELL_RATIO = 4.7 / 34;
+  const SUBTITLE_CELL_RATIO = 3.8 / 23;
+  const maxInlineCell = 3.6;
+  const inlineGap = subtitleText ? 12 : 0;
   const bothPixel = canRenderPixelText(titleText)
     && (!subtitleText || canRenderPixelText(subtitleText));
   const combinedPixelLength = [...titleText, ...subtitleText].length;
   const fittedInlineCell = combinedPixelLength > 0
-    ? Math.min(4.6, (maxTextWidth - inlineGap + 4.6) / (combinedPixelLength * 6))
-    : 4.6;
-  const inline = !subtitleText || (bothPixel && fittedInlineCell >= 3.1);
+    ? Math.min(maxInlineCell, (maxTextWidth - inlineGap + maxInlineCell) / (combinedPixelLength * 6))
+    : maxInlineCell;
+  // 纯像素短句同一行循环打字；像素格低于 2.2 时改为分行，避免手机上看不清。
+  const loopMode = Boolean(titleText) && bothPixel && fittedInlineCell >= 2.2;
 
-  const titleY = inline ? 126 : 99;
-  const subtitleY = inline ? titleY : 149;
-  const titleStart = 0.6;
-  const terminalLoop = inline && bothPixel
-    ? buildPixelTerminalLoop(
-      titleText, subtitleText, textX, titleY, fittedInlineCell,
-      C.text, C.accent, C.light, C.bg, inlineGap,
-    )
-    : null;
-  const title = terminalLoop
-    ? { svg: '', totalW: terminalLoop.titleW, endDelay: terminalLoop.endDelay }
-    : buildTerminalText(
-      titleText, textX, titleY, maxTextWidth, 34, 4.7,
-      C.text, C.monoFont, titleStart, 0.11, C.accent, C.bg, 'title',
-    );
-  const subtitleX = terminalLoop
-    ? terminalLoop.subtitleX
-    : inline ? textX + title.totalW + inlineGap : textX;
-  const subtitleMaxWidth = inline ? Math.max(1, maxTextWidth - title.totalW - inlineGap) : maxTextWidth;
-  const subtitleStart = titleText ? title.endDelay + 0.14 : titleStart;
-  const subtitle = terminalLoop
-    ? { svg: '', totalW: terminalLoop.subtitleW, endDelay: terminalLoop.endDelay }
-    : buildTerminalText(
-      subtitleText, subtitleX, subtitleY, subtitleMaxWidth, 23, 3.8,
-      C.accent, C.monoFont, subtitleStart, 0.08, C.accent, C.bg, 'subtitle',
-    );
-  const finalLine = subtitleText ? subtitle : title;
-  const finalDelay = finalLine.endDelay;
-  const finalCursorX = finalLine.lastCursorX + 3;
-  const finalCursorY = finalLine.cursorY;
-  const finalCursorW = Math.max(3, finalLine.cursorW);
-  const finalCursorH = finalLine.cursorH;
+  const tagIsPixel = Boolean(tagText) && canRenderPixelText(tagText);
+  const tagCell = tagIsPixel ? fitPixelCellSize(tagText, 2.2, maxTextWidth) : 0;
+  const tagSize = tagText && !tagIsPixel ? fitTypewriterFontSize(tagText, 13, maxTextWidth) : 0;
+  const tagRowH = tagText ? (tagIsPixel ? tagCell * 7 : tagSize * 1.1) : 0;
+  const tagGap = tagText ? 12 : 0;
 
-  let svg = `<svg data-template="xiaolan-terminal" xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin meet" style="display:block;width:100%;max-width:${W}px;margin:0 auto;">`;
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
-  svg += buildXiaolanTerminalSprite(C);
-  svg += terminalLoop ? terminalLoop.svg : title.svg + subtitle.svg;
+
+  let blockH = 0;
+  let layoutText;
+  let finalLine = null;
+
+  if (loopMode) {
+    const rowH = fittedInlineCell * 7;
+    blockH = rowH + tagGap + tagRowH;
+    layoutText = top => {
+      const loop = buildPixelTerminalLoop(
+        titleText, subtitleText, textX, top + rowH, fittedInlineCell,
+        C.text, C.accent, C.light, C.bg, inlineGap,
+      );
+      return { svg: loop.svg, tagTop: top + rowH + tagGap };
+    };
+  } else {
+    const measureTitle = (text, size) => measureTerminalText(text, size, TITLE_CELL_RATIO);
+    const measureSubtitle = (text, size) => measureTerminalText(text, size, SUBTITLE_CELL_RATIO);
+    const title = layoutLines(titleText, { fontSize: 26, minFontSize: 20, maxWidth: maxTextWidth, measure: measureTitle });
+    const subtitle = layoutLines(subtitleText, { fontSize: 16, minFontSize: 14, maxWidth: maxTextWidth, measure: measureSubtitle, prefer: 'shrink' });
+    const titleLH = title.fontSize * 1.3;
+    const subtitleLH = subtitle.fontSize * 1.45;
+    const titleH = title.lines.length ? title.fontSize + (title.lines.length - 1) * titleLH : 0;
+    const subtitleH = subtitle.lines.length ? subtitle.fontSize + (subtitle.lines.length - 1) * subtitleLH : 0;
+    const titleSubGap = title.lines.length && subtitle.lines.length ? 12 : 0;
+    blockH = titleH + titleSubGap + subtitleH + tagGap + tagRowH;
+    layoutText = top => {
+      const titleStart = 0.6;
+      const titleBuilt = buildTerminalLines(
+        title, textX, top + title.fontSize * 0.92, titleLH, maxTextWidth, title.fontSize, TITLE_CELL_RATIO,
+        C.text, C.monoFont, titleStart, 0.11, C.accent, C.bg, 'title',
+      );
+      const subtitleTop = top + titleH + titleSubGap;
+      const subtitleStart = title.lines.length ? titleBuilt.endDelay + 0.14 : titleStart;
+      const subtitleBuilt = buildTerminalLines(
+        subtitle, textX, subtitleTop + subtitle.fontSize * 0.92, subtitleLH, maxTextWidth, subtitle.fontSize, SUBTITLE_CELL_RATIO,
+        C.accent, C.monoFont, subtitleStart, 0.08, C.accent, C.bg, 'subtitle',
+      );
+      finalLine = subtitleBuilt.last || titleBuilt.last || null;
+      return { svg: titleBuilt.svg + subtitleBuilt.svg, tagTop: subtitleTop + subtitleH + tagGap };
+    };
+  }
+
+  const H = Math.max(spriteH, blockH) + pad * 2;
+  const blockTop = (H - blockH) / 2;
+  const spriteTop = (H - spriteH) / 2;
+  const laidOut = layoutText(blockTop);
+
+
+  let svg = openCover(C, W, H, ' data-template="xiaolan-terminal"');
+  // 角色帧坐标系里身体位于 translate(20 18)，整体缩放后再平移到左侧。
+  svg += `<g data-xiaolan-layout="mobile" transform="translate(${n1(spriteX - 20 * spriteScale)} ${n1(spriteTop - 18 * spriteScale)}) scale(${spriteScale})">${buildXiaolanTerminalSprite(C)}</g>`;
+  svg += laidOut.svg;
   if (tagText) {
-    if (canRenderPixelText(tagText)) {
-      const tagCell = fitPixelCellSize(tagText, 2.2, maxTextWidth);
-      svg += renderPixelGlyphs(tagText, textX, 178, tagCell, C.secondary, 'tags');
+    if (tagIsPixel) {
+      svg += renderPixelGlyphs(tagText, textX, n1(laidOut.tagTop), tagCell, C.secondary, 'tags');
     } else {
-      const tagSize = fitTypewriterFontSize(tagText, 14, maxTextWidth);
-      svg += `<text x="${textX}" y="190" text-anchor="start" font-size="${tagSize}" font-weight="600" fill="${C.secondary}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${tagText}</tspan></text>`;
+      svg += `<text x="${textX}" y="${n1(laidOut.tagTop + tagSize * 0.88)}" text-anchor="start" font-size="${tagSize}" font-weight="600" fill="${C.secondary}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${escapeSvgAttribute(tagText)}</tspan></text>`;
     }
   }
-  if (!terminalLoop && (titleText || subtitleText)) {
-    svg += `<rect data-typewriter-cursor="final" x="${finalCursorX.toFixed(1)}" y="${finalCursorY.toFixed(1)}" width="${finalCursorW.toFixed(1)}" height="${finalCursorH.toFixed(1)}" fill="${C.accent}" opacity="0"><animate attributeName="opacity" values="0;1" dur="0.05s" begin="${finalDelay.toFixed(2)}s" fill="freeze"/><animate attributeName="opacity" values="1;1;0;0" dur="1.2s" begin="${(finalDelay + 0.1).toFixed(2)}s" repeatCount="indefinite"/></rect>`;
+  if (finalLine) {
+    const finalDelay = finalLine.endDelay;
+    const finalCursorX = finalLine.lastCursorX + 3;
+    const finalCursorW = Math.max(2, finalLine.cursorW);
+    svg += `<rect data-typewriter-cursor="final" x="${finalCursorX.toFixed(1)}" y="${finalLine.cursorY.toFixed(1)}" width="${finalCursorW.toFixed(1)}" height="${finalLine.cursorH.toFixed(1)}" fill="${C.accent}" opacity="0"><animate attributeName="opacity" values="0;1" dur="0.05s" begin="${finalDelay.toFixed(2)}s" fill="freeze"/><animate attributeName="opacity" values="1;1;0;0" dur="1.2s" begin="${(finalDelay + 0.1).toFixed(2)}s" repeatCount="indefinite"/></rect>`;
   }
   svg += `</svg>`;
   return svg;
@@ -1068,30 +1316,36 @@ function templateXiaolanTerminal(C, opts) {
 
 // ─── 模板 4: 画卷展开 ──────────────────────────────────
 function templateScrollPainting(C, opts) {
-  const W = 640, H = 380, cx = W / 2;
-
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin meet" style="display:block;width:100%;max-width:${W}px;margin:0 auto;">`;
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
+  const W = COVER_W, cx = W / 2;
+  const left = COVER_MARGIN, right = W - COVER_MARGIN;
+  let body = '';
 
   // 上方横线:从左到右
-  svg += `<rect x="60" y="119" width="0" height="1.5" rx="0.75" fill="${C.tertiary}"><animate attributeName="width" values="0;520" dur="0.6s" begin="0.2s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/></rect>`;
+  const topLineY = 22;
+  body += `<rect x="${left}" y="${topLineY}" width="0" height="1.5" rx="0.75" fill="${C.tertiary}"><animate attributeName="width" values="0;${COVER_CONTENT_W}" dur="0.6s" begin="0.2s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/></rect>`;
 
-  // 主标题上浮
-  if (opts.title) {
-    svg += `<text x="${cx}" y="170" text-anchor="middle" font-size="40" font-weight="500" fill="${C.text}" font-family="${C.headingFont}"><tspan leaf="">${opts.title}</tspan></text>`;
-  }
+  // 主标题
+  const title = layoutLines(opts.title, { fontSize: 28, minFontSize: 24, maxWidth: COVER_CONTENT_W });
+  const titleLH = title.fontSize * 1.32;
+  const titleBox = textBlockMetrics(title, topLineY + 1.5 + 20, titleLH);
+  body += coverText(title, { x: cx, y: titleBox.baseline, lineHeight: titleLH, weight: '500', fill: C.text, font: C.headingFont });
 
   // 下方横线:从右到左
-  svg += `<rect x="60" y="199" width="0" height="1.5" rx="0.75" fill="${C.tertiary}"><animate attributeName="width" values="0;520" dur="0.5s" begin="1.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/><animate attributeName="x" values="580;60" dur="0.5s" begin="1.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/></rect>`;
+  const bottomLineY = titleBox.bottom + 16;
+  body += `<rect x="${left}" y="${n1(bottomLineY)}" width="0" height="1.5" rx="0.75" fill="${C.tertiary}"><animate attributeName="width" values="0;${COVER_CONTENT_W}" dur="0.5s" begin="1.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/><animate attributeName="x" values="${right};${left}" dur="0.5s" begin="1.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/></rect>`;
+  let cursor = bottomLineY + 1.5;
 
   // 副标题
-  if (opts.subtitle) {
-    svg += `<text x="${cx}" y="245" text-anchor="middle" font-size="17" fill="${C.tertiary}" font-family="${C.serifFont}"><tspan leaf="">${opts.subtitle}</tspan></text>`;
-  }
+  const subtitle = layoutLines(opts.subtitle, { fontSize: 15, minFontSize: 14, maxWidth: COVER_CONTENT_W, prefer: 'shrink' });
+  const subtitleLH = subtitle.fontSize * 1.5;
+  const subtitleBox = textBlockMetrics(subtitle, cursor + 16, subtitleLH);
+  body += coverText(subtitle, { x: cx, y: subtitleBox.baseline, lineHeight: subtitleLH, fill: C.tertiary, font: C.serifFont });
+  if (subtitle.lines.length) cursor = subtitleBox.bottom;
 
-  // 日期标记
+  // 日期标记 + 作者标记
+  const metaBase = cursor + 30;
   const dateStr = opts.date || new Date().toISOString().slice(0, 7).replace('-', '.');
-  svg += `<g><text x="60" y="310" font-size="11" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${dateStr}</tspan></text><rect x="60" y="316" width="100" height="1" fill="${C.light}"/></g>`;
+  body += `<g><text x="${left}" y="${n1(metaBase)}" font-size="12" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${escapeSvgAttribute(dateStr)}</tspan></text><rect x="${left}" y="${n1(metaBase + 6)}" width="72" height="1" fill="${C.light}"/></g>`;
 
   // 作者标记:显式 author 原样使用;未传时沿用「<topLabel> 出品」;author === false 隐藏
   const derived = (C.topLabel || '').replace(/[·].*/, '').trim();
@@ -1099,81 +1353,116 @@ function templateScrollPainting(C, opts) {
     : opts.author ? opts.author
     : derived ? `${derived} 出品` : '';
   if (byline) {
-    svg += `<g><text x="580" y="310" text-anchor="end" font-size="11" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${byline}</tspan></text><rect x="480" y="316" width="100" height="1" fill="${C.light}"/></g>`;
+    const bylineMax = COVER_CONTENT_W - measureCoverText(dateStr, 12, 1) - 24;
+    const bylineSize = Math.max(11, Math.min(12, Math.floor(12 * bylineMax / Math.max(1, measureCoverText(byline, 12, 1)) * 10) / 10));
+    body += `<g><text x="${right}" y="${n1(metaBase)}" text-anchor="end" font-size="${bylineSize}" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="1"><tspan leaf="">${byline}</tspan></text><rect x="${right - 72}" y="${n1(metaBase + 6)}" width="72" height="1" fill="${C.light}"/></g>`;
   }
 
   // 向下滑动
-  svg += `<text x="${cx}" y="350" text-anchor="middle" font-size="11" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="2"><tspan leaf="">向下滑动查看全文</tspan></text><g transform="translate(${cx},360)"><text x="0" y="0" text-anchor="middle" font-size="14" fill="${C.hint}" font-family="sans-serif"><tspan leaf="">↓</tspan><animateTransform attributeName="transform" type="translate" values="${cx} 360;${cx} 368;${cx} 360" dur="1.5s" begin="3.3s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></text></g>`;
-  svg += `</svg>`;
-  return svg;
+  const hintBase = metaBase + 6 + 30;
+  const arrowBase = hintBase + 20;
+  body += `<text x="${cx}" y="${n1(hintBase)}" text-anchor="middle" font-size="12" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="2"><tspan leaf="">向下滑动查看全文</tspan></text>`;
+  body += scrollArrow(cx, arrowBase, 14, C.hint, '3.3s');
+  const H = arrowBase + 12;
+
+  return `${openCover(C, W, H)}${body}</svg>`;
 }
 
 // ─── 模板 5: 聚焦聚光灯 ────────────────────────────────
 function templateSpotlight(C, opts) {
-  const W = 640, H = 400, cx = W / 2;
+  const W = COVER_W, cx = W / 2;
   const tagList = opts.tags ? opts.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
-
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin meet" style="display:block;width:100%;max-width:${W}px;margin:0 auto;">`;
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
-
-  // 聚光灯渐变
-  svg += `<defs><radialGradient id="spotlight-${Date.now()}"><stop offset="0%" stop-color="${C.accent}" stop-opacity="0.12"/><stop offset="60%" stop-color="${C.accent}" stop-opacity="0.04"/><stop offset="100%" stop-color="${C.accent}" stop-opacity="0"/></radialGradient></defs>`;
-  svg += `<circle cx="${cx}" cy="170" r="0" fill="url(#spotlight-${Date.now()})"><animate attributeName="r" values="0;200" dur="0.8s" begin="0.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/></circle>`;
+  let cursor = 22;
 
   // 品牌标签
+  let label = '';
   if (C.topLabel) {
-    svg += `<text x="${cx}" y="60" text-anchor="middle" font-size="13" font-weight="600" fill="${C.accent}" letter-spacing="4" font-family="${C.uiFont}"><tspan leaf="">${C.topLabel} · 深度评测</tspan></text>`;
+    const labelBase = cursor + 11;
+    label = `<text x="${cx}" y="${n1(labelBase)}" text-anchor="middle" font-size="12" font-weight="600" fill="${C.accent}" letter-spacing="3" font-family="${C.uiFont}"><tspan leaf="">${C.topLabel} · 深度评测</tspan></text>`;
+    cursor = labelBase + 22;
   }
 
-  // 主标题:缩放放大
-  if (opts.title) {
-    svg += `<g transform="translate(${cx},170)"><text x="0" y="0" text-anchor="middle" font-size="44" font-weight="500" fill="${C.text}" font-family="${C.headingFont}"><tspan leaf="">${opts.title}</tspan></text></g>`;
+  // 主标题
+  const title = layoutLines(opts.title, { fontSize: 30, minFontSize: 24, maxWidth: COVER_CONTENT_W });
+  const titleLH = title.fontSize * 1.3;
+  const titleBox = textBlockMetrics(title, cursor, titleLH);
+  const spotCy = (cursor + titleBox.bottom) / 2;
+
+  // 聚光灯渐变
+  const gradientId = `spotlight-${Date.now()}`;
+  let body = `<defs><radialGradient id="${gradientId}"><stop offset="0%" stop-color="${C.accent}" stop-opacity="0.12"/><stop offset="60%" stop-color="${C.accent}" stop-opacity="0.04"/><stop offset="100%" stop-color="${C.accent}" stop-opacity="0"/></radialGradient></defs>`;
+  body += `<circle cx="${cx}" cy="${n1(spotCy)}" r="0" fill="url(#${gradientId})"><animate attributeName="r" values="0;130" dur="0.8s" begin="0.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.25 0.1 0.25 1"/></circle>`;
+  body += label;
+  if (title.lines.length) {
+    const baseline = titleBox.baseline;
+    body += `<g transform="translate(${cx},${n1(baseline)})">${coverText(title, { x: 0, y: 0, lineHeight: titleLH, weight: '500', fill: C.text, font: C.headingFont })}</g>`;
   }
 
   // 粗短线
-  svg += `<rect x="${cx - 50}" y="208" width="0" height="4" rx="2" fill="${C.accent}" opacity="0"><animate attributeName="width" values="0;100" dur="0.3s" begin="2.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/><animate attributeName="opacity" values="0;1" dur="0.05s" begin="2.5s" fill="freeze"/></rect>`;
+  const barY = (title.lines.length ? titleBox.bottom : cursor) + 12;
+  body += `<rect x="${cx - 32}" y="${n1(barY)}" width="0" height="4" rx="2" fill="${C.accent}" opacity="0"><animate attributeName="width" values="0;64" dur="0.3s" begin="2.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/><animate attributeName="opacity" values="0;1" dur="0.05s" begin="2.5s" fill="freeze"/></rect>`;
+  cursor = barY + 4;
 
   // 副标题
-  if (opts.subtitle) {
-    svg += `<text x="${cx}" y="255" text-anchor="middle" font-size="18" fill="${C.tertiary}" font-family="${C.serifFont}"><tspan leaf="">${opts.subtitle}</tspan></text>`;
-  }
+  const subtitle = layoutLines(opts.subtitle, { fontSize: 15, minFontSize: 14, maxWidth: COVER_CONTENT_W, prefer: 'shrink' });
+  const subtitleLH = subtitle.fontSize * 1.5;
+  const subtitleBox = textBlockMetrics(subtitle, cursor + 16, subtitleLH);
+  body += coverText(subtitle, { x: cx, y: subtitleBox.baseline, lineHeight: subtitleLH, fill: C.tertiary, font: C.serifFont });
+  if (subtitle.lines.length) cursor = subtitleBox.bottom;
 
   // 判断标签
   if (tagList.length >= 2) {
-    svg += `<g><rect x="${cx - 110}" y="300" width="100" height="30" rx="4" fill="${C.accent}"/><text x="${cx - 60}" y="319" text-anchor="middle" font-size="12" font-weight="600" fill="#fff" font-family="${C.uiFont}"><tspan leaf="">${tagList[0]}</tspan></text></g>`;
-    svg += `<g><rect x="${cx + 10}" y="300" width="100" height="30" rx="4" fill="none" stroke="${C.secondary}" stroke-width="1.5"/><text x="${cx + 60}" y="319" text-anchor="middle" font-size="12" font-weight="600" fill="${C.secondary}" font-family="${C.uiFont}"><tspan leaf="">${tagList[1]}</tspan></text></g>`;
+    const tagFont = 12, tagH = 28, gap = 12;
+    const widths = tagList.slice(0, 2).map(tag => Math.max(84, measureCoverText(tag, tagFont) + 28));
+    const tagY = cursor + 18;
+    const x0 = cx - gap / 2 - widths[0];
+    const x1 = cx + gap / 2;
+    body += `<g><rect x="${n1(x0)}" y="${n1(tagY)}" width="${n1(widths[0])}" height="${tagH}" rx="4" fill="${C.accent}"/><text x="${n1(x0 + widths[0] / 2)}" y="${n1(tagY + 18.5)}" text-anchor="middle" font-size="${tagFont}" font-weight="600" fill="#fff" font-family="${C.uiFont}"><tspan leaf="">${escapeSvgAttribute(tagList[0])}</tspan></text></g>`;
+    body += `<g><rect x="${n1(x1)}" y="${n1(tagY)}" width="${n1(widths[1])}" height="${tagH}" rx="4" fill="none" stroke="${C.secondary}" stroke-width="1.5"/><text x="${n1(x1 + widths[1] / 2)}" y="${n1(tagY + 18.5)}" text-anchor="middle" font-size="${tagFont}" font-weight="600" fill="${C.secondary}" font-family="${C.uiFont}"><tspan leaf="">${escapeSvgAttribute(tagList[1])}</tspan></text></g>`;
+    cursor = tagY + tagH;
   }
 
   // 向下滑动
-  svg += `<text x="${cx}" y="370" text-anchor="middle" font-size="11" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="2"><tspan leaf="">向下滑动查看深度分析</tspan></text><g transform="translate(${cx},380)"><text x="0" y="0" text-anchor="middle" font-size="14" fill="${C.hint}" font-family="sans-serif"><tspan leaf="">↓</tspan><animateTransform attributeName="transform" type="translate" values="${cx} 380;${cx} 388;${cx} 380" dur="1.5s" begin="4.3s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></text></g>`;
-  svg += `</svg>`;
-  return svg;
+  const hintBase = cursor + 34;
+  const arrowBase = hintBase + 20;
+  body += `<text x="${cx}" y="${n1(hintBase)}" text-anchor="middle" font-size="12" fill="${C.hint}" font-family="${C.uiFont}" letter-spacing="2"><tspan leaf="">向下滑动查看深度分析</tspan></text>`;
+  body += scrollArrow(cx, arrowBase, 14, C.hint, '4.3s');
+  const H = arrowBase + 12;
+
+  return `${openCover(C, W, H)}${body}</svg>`;
 }
 
 // ─── 模板 6: 极简白描 ──────────────────────────────────
 function templateMinimalSketch(C, opts) {
-  const W = 640, H = 480, cx = W / 2;
+  const W = COVER_W, cx = W / 2;
+  let body = '';
+  let cursor = 52;
 
-  let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMin meet" style="display:block;width:100%;max-width:${W}px;margin:0 auto;">`;
-  svg += `<rect x="0" y="0" width="${W}" height="${H}" fill="${C.bg}"/>`;
-
-  // 主标题:直接淡入,延迟0.5s
-  if (opts.title) {
-    svg += `<text x="${cx}" y="220" text-anchor="middle" font-size="36" font-weight="400" fill="${C.text}" font-family="${C.headingFont}"><tspan leaf="">${opts.title}</tspan></text>`;
-  }
+  // 主标题:静态可见，大留白
+  const title = layoutLines(opts.title, { fontSize: 28, minFontSize: 24, maxWidth: COVER_CONTENT_W });
+  const titleLH = title.fontSize * 1.36;
+  const titleBox = textBlockMetrics(title, cursor, titleLH);
+  body += coverText(title, { x: cx, y: titleBox.baseline, lineHeight: titleLH, weight: '400', fill: C.text, font: C.headingFont });
+  if (title.lines.length) cursor = titleBox.bottom;
 
   // 细线
-  svg += `<rect x="${cx - 40}" y="249" width="0" height="1" rx="0.5" fill="${C.tertiary}" opacity="0.6"><animate attributeName="width" values="0;80" dur="0.8s" begin="1.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/></rect>`;
+  const lineY = cursor + 18;
+  body += `<rect x="${cx - 28}" y="${n1(lineY)}" width="0" height="1" rx="0.5" fill="${C.tertiary}" opacity="0.6"><animate attributeName="width" values="0;56" dur="0.8s" begin="1.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"/></rect>`;
+  cursor = lineY + 1;
 
   // 副标题
-  if (opts.subtitle) {
-    svg += `<text x="${cx}" y="290" text-anchor="middle" font-size="16" fill="${C.tertiary}" font-family="${C.serifFont}"><tspan leaf="">${opts.subtitle}</tspan></text>`;
-  }
+  const subtitle = layoutLines(opts.subtitle, { fontSize: 15, minFontSize: 14, maxWidth: COVER_CONTENT_W, prefer: 'shrink' });
+  const subtitleLH = subtitle.fontSize * 1.6;
+  const subtitleBox = textBlockMetrics(subtitle, cursor + 18, subtitleLH);
+  body += coverText(subtitle, { x: cx, y: subtitleBox.baseline, lineHeight: subtitleLH, fill: C.tertiary, font: C.serifFont });
+  if (subtitle.lines.length) cursor = subtitleBox.bottom;
 
   // 呼吸圆点
-  svg += `<circle cx="${cx}" cy="400" r="5" fill="${C.accent}" opacity="0"><animate attributeName="opacity" values="0;0.3;0.8;0.3;0" dur="2s" begin="2.8s" repeatCount="indefinite"/><animate attributeName="r" values="5;7;5" dur="2s" begin="2.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></circle>`;
-  svg += `</svg>`;
-  return svg;
+  const dotY = cursor + 48;
+  body += `<circle cx="${cx}" cy="${n1(dotY)}" r="4" fill="${C.accent}" opacity="0"><animate attributeName="opacity" values="0;0.3;0.8;0.3;0" dur="2s" begin="2.8s" repeatCount="indefinite"/><animate attributeName="r" values="4;6;4" dur="2s" begin="2.8s" repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1" keySplines="0.4 0 0.6 1;0.4 0 0.6 1"/></circle>`;
+  const H = dotY + 40;
+
+  return `${openCover(C, W, H)}${body}</svg>`;
 }
 
 // ─── 主入口:从主题生成开场动画 ────────────────────────
