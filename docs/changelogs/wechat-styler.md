@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Prefer punctuation line breaks over font size in opening titles (1.14.2): when the half after a comma does not fit at the preferred size, the layout now shrinks within the existing floor (titles 22px, xiaolan-terminal 20px) to keep the break after the punctuation mark or 「的」, instead of falling back to a balanced break inside a word (「学校找 AI 培训方，先 / 看他敢不敢…」). Space breaks are tried next, and balanced CJK breaks only when neither fits.
+
 - Stop test runs from flooding the browser with blank tabs (1.14.1): conversion no longer auto-opens the result under `node --test` (`NODE_TEST_CONTEXT`), `CI`, `WECHAT_STYLER_NO_OPEN=1`, or the new `--no-open` flag. Previously every spawned conversion in the suite opened a tab pointing at a temp file that was deleted moments later. The opener-safety test now uses a fake `open` on `PATH` and asserts the exact path it receives, and a new test proves none of the four skip paths call the opener.
 
 - Add WeChat topic tags (1.14.0): `topics` in frontmatter or `--topics a,b,c` renders a closing line of `#topic` links after the last paragraph, before the ending GIF. Each link reproduces the editor's native `a.wx_topic_link[data-topic]` structure in italic 14px, so the live editor parses it as a `topic` mark (verified against the real editor) and saving keeps the tags. Topics accept comma, 、, or whitespace separators with or without `#`, are de-duplicated, capped at WeChat's 10, and `--topics none` disables them. SKILL.md now tells agents to pick 3–4 topics (column tag first, then 2–3 audience/topic tags, no generic words, product names only when the article shows the product) when the source has none.

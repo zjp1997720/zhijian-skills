@@ -921,9 +921,10 @@ function twoLineCandidates(text) {
   return out;
 }
 
-function bestTwoLineSplit(text, fontSize, maxWidth, measure) {
+function bestTwoLineSplit(text, fontSize, maxWidth, measure, maxTier = 2) {
   const total = measure(text, fontSize);
   const candidates = twoLineCandidates(text)
+    .filter(candidate => candidate.tier <= maxTier)
     .map(candidate => ({ ...candidate, widest: Math.max(...candidate.lines.map(line => measure(line, fontSize))) }))
     .filter(candidate => candidate.widest <= maxWidth);
   if (!candidates.length) return null;
@@ -946,9 +947,13 @@ function layoutLines(text, { fontSize, minFontSize, maxWidth, measure = measureC
       if (fits(size)) return { lines: [value], fontSize: size, text: value };
     }
   }
-  for (let size = fontSize; size >= minFontSize; size -= 0.5) {
-    const lines = bestTwoLineSplit(value, size, maxWidth, measure);
-    if (lines) return { lines, fontSize: size, text: value };
+  // 断点质量优先于字号:先在字号区间内找标点 /「的」断点,其次空格,最后才在汉字之间断。
+  // 否则较长的后半句在首选字号放不下时,会退成「…培训方，先 / 看他…」这种把词拆开的断行。
+  for (const maxTier of [0, 1, 2]) {
+    for (let size = fontSize; size >= minFontSize; size -= 0.5) {
+      const lines = bestTwoLineSplit(value, size, maxWidth, measure, maxTier);
+      if (lines) return { lines, fontSize: size, text: value };
+    }
   }
   const lines = bestTwoLineSplit(value, minFontSize, Number.POSITIVE_INFINITY, measure) || [value];
   const widest = Math.max(...lines.map(line => measure(line, minFontSize)));
