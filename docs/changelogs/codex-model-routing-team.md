@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 4.0.0 - 2026-09-30
+
+- Route specified, mechanically verifiable execution to GPT-6 Luna XHigh by default and complex specified execution to Luna Max; use GPT-6.1 Sol Medium/High for unresolved judgment, Sol High for high-risk work, and Sol XHigh for critical independent review.
+- Require every automatic route to carry a `task_contract` with decision state and concrete acceptance evidence; prompt length and file count no longer justify a stronger reasoning model by themselves.
+- Add a validated native-team quick path that compiles dispatch arguments and the initial audit ledger without creating Workers.
+- Add GPT-6 Astra as an explicit-only route and replace legacy GPT-5.6/GPT-6 Sol routing with GPT-6.1 Sol; keep all Workers leaf-only and Ultra forbidden.
+- Add an explicit, read-only, fresh-context CLI surface for user-requested DeepSeek 4.1 Flash and Gemini 3.8 Flash, guarded by current help/catalog evidence and host authorization.
+- Preserve Provider, live-schema, speed, lifecycle, attempt, ownership, and lead-only final-verification gates; no measured speed or cost superiority is claimed.
+
 ## 3.1.0 - 2026-09-05
 
 - Default ordinary execution to native Sol Medium Standard; route complex/high-risk work to Sol High, critical review to Sol XHigh, and mechanically verifiable batches to Luna XHigh.

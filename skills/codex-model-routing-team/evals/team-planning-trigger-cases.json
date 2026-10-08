@@ -16,6 +16,10 @@
     {
       "text": "用 Luna Worker 并行做四份可独立验收的调研，速度和成本都有净收益。",
       "family": "luna_workers"
+    },
+    {
+      "text": "请用 DeepSeek 4.1 Flash 和 Gemini 3.8 Flash 两个独立 Worker 分别写同题文章，再由主 Agent 评审。",
+      "family": "explicit_flash_cli_workers"
     }
   ],
   "should_not_trigger": [

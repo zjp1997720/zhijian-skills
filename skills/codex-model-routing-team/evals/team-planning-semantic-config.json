@@ -14,6 +14,7 @@
         "并行核验",
         "并行完成",
         "并行做",
+        "两个独立 worker",
         "parallel work",
         "independent deliverables"
       ]
@@ -27,6 +28,8 @@
         "luna worker",
         "grok worker",
         "gemini worker",
+        "deepseek 4.1 flash",
+        "gemini 3.8 flash",
         "model routing",
         "background workers"
       ]

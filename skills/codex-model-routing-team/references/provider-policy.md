@@ -24,7 +24,7 @@
 
 ## OpenAI 基线
 
-`gpt-5.6-luna` 与 `gpt-5.6-sol` 使用当前 Codex 已配置的 OpenAI 路径。自动路由按 registry 画像选择，常规默认 Sol Medium，复杂/高风险升 Sol High/XHigh；规则明确、可机械验收的批量任务使用 Luna XHigh。当前 live Surface 没有 `service_tier=priority` 字段时保持 Standard；Sol/Terra 只有用户明确要求且精确 live tuple 通过时才使用 Fast。没有同任务速度或成本实验时，不宣称某路线更快或更省。当前项目若有更窄的数据规则，以项目规则为准。
+`gpt-6-luna` 与 `gpt-6.1-sol` 使用当前 Codex 已配置的 OpenAI 路径。自动路由按 registry 画像选择，决策已定且可验收的执行默认 Luna XHigh，复杂执行用 Luna Max；未决判断用 Sol Medium/High，高风险和关键审查用 Sol High/XHigh。当前 live Surface 没有 `service_tier=priority` 字段时保持 Standard；Sol/Terra 只有用户明确要求且精确 live tuple 通过时才使用 Fast。没有同任务速度或成本实验时，不宣称某路线更快或更省。当前项目若有更窄的数据规则，以项目规则为准。
 
 ## xAI / Grok 4.5
 
@@ -36,6 +36,12 @@
 - confidential 数据只有在项目 allowlist 明确包含 xAI 时才能发送。
 
 官方参考：[Grok 4.5 文档](https://docs.x.ai/developers/grok-4-5)、[Grok 使用与周配额说明](https://docs.x.ai/grok/faq)。
+
+## Explicit ephemeral CLI routes
+
+`opencode-go/deepseek-v4.1-flash` and `antigravity/gemini-3.8-flash` are exact, non-automatic entries for [`ephemeral_codex_cli`](ephemeral-cli-surface.md). DeepSeek uses the per-run state `manual_authorized`; Gemini 3.8 uses `experimental_authorized`. Both require a current explicit user request, task-data allowlist, fresh CLI help/catalog evidence, and host policy that permits the CLI Surface.
+
+These states record who authorized the current execution. They do not assert that Provider terms were independently verified or changed to `allowed`, do not erase known Provider or credential-path restrictions, and create no standing authorization for later runs. This section defines only the current run boundary. A future automatic route must pass a separately reviewed Provider gate and change the registry entry; a successful CLI process or renamed model entry does not open that gate.
 
 ## Google Antigravity / Gemini 3.6 Flash
 

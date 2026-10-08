@@ -50,16 +50,16 @@ class SkillContractTests(unittest.TestCase):
             (SKILL_ROOT / "references/model-registry.json").read_text(encoding="utf-8")
         )
         models = {item["id"]: item for item in registry["models"]}
-        self.assertTrue(models["gpt-5.6-luna"]["automatic"])
-        self.assertTrue(models["gpt-5.6-sol"]["automatic"])
+        self.assertTrue(models["gpt-6-luna"]["automatic"])
+        self.assertTrue(models["gpt-6.1-sol"]["automatic"])
         self.assertEqual(
             registry["policy"]["fast_routing_models"],
-            ["gpt-5.6-luna", "gpt-5.6-sol", "gpt-5.6-terra"],
+            ["gpt-6-luna", "gpt-6.1-sol", "gpt-5.6-terra"],
         )
         self.assertEqual(registry["policy"]["default_fast_models"], [])
         self.assertEqual(
             registry["policy"]["fast_requires_explicit_models"],
-            ["gpt-5.6-sol", "gpt-5.6-terra"],
+            ["gpt-6.1-sol", "gpt-5.6-terra"],
         )
         self.assertEqual(registry["policy"]["app_thread_only_models"], [])
         self.assertEqual(registry["policy"]["default_surface"], "native_subagent")
@@ -67,8 +67,8 @@ class SkillContractTests(unittest.TestCase):
             registry["policy"]["default_openai_route"],
             {
                 "surface": "native_subagent",
-                "model": "gpt-5.6-sol",
-                "thinking": "medium",
+                "model": "gpt-6-luna",
+                "thinking": "xhigh",
                 "speed": "standard",
                 "fork_turns": "none",
             },
@@ -95,14 +95,14 @@ class SkillContractTests(unittest.TestCase):
             },
         )
         self.assertEqual(
-            models["gpt-5.6-luna"]["surface_thinking"]["native_subagent"],
+            models["gpt-6-luna"]["surface_thinking"]["native_subagent"],
             ["xhigh", "max"],
         )
-        self.assertEqual(models["gpt-5.6-luna"]["multi_agent_version"], "v1")
-        self.assertEqual(models["gpt-5.6-luna"]["native_role"], "leaf")
-        self.assertEqual(models["gpt-5.6-luna"]["thinking"], ["xhigh", "max"])
+        self.assertEqual(models["gpt-6-luna"]["multi_agent_version"], "v2")
+        self.assertEqual(models["gpt-6-luna"]["native_role"], "leaf")
+        self.assertEqual(models["gpt-6-luna"]["thinking"], ["xhigh", "max"])
         self.assertEqual(
-            models["gpt-5.6-sol"]["thinking"], ["medium", "high", "xhigh", "max"]
+            models["gpt-6.1-sol"]["thinking"], ["medium", "high", "xhigh", "max"]
         )
         self.assertEqual(models["gpt-5.6-terra"]["status"], "opt_in")
         self.assertFalse(models["gpt-5.6-terra"]["automatic"])
@@ -151,6 +151,14 @@ class SkillContractTests(unittest.TestCase):
 
     def test_initial_skill_body_preserves_router_contract_after_slimming(self) -> None:
         body = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        contract = body + "\n" + "\n".join(
+            (SKILL_ROOT / relative).read_text(encoding="utf-8")
+            for relative in (
+                "references/route-compiler.md",
+                "references/team-plan.md",
+                "references/native-subagent-lifecycle.md",
+            )
+        )
         for marker in (
             "native_subagent",
             "App Thread",
@@ -169,14 +177,14 @@ class SkillContractTests(unittest.TestCase):
             "task_id",
             "TeamPlan",
             "scripts/validate_team_plan.py",
-            "reserved slots",
+            "reserved_slots",
             "同波写冲突",
             "RELEASED",
             "scripts/validate_route_plan.py",
             "scripts/validate_team_ledger.py",
         ):
             with self.subTest(marker=marker):
-                self.assertIn(marker, body)
+                self.assertIn(marker, contract)
         self.assertLessEqual(len(body), 3_000)
 
     def test_orchestrator_does_not_pin_itself_to_luna(self) -> None:
@@ -190,7 +198,7 @@ class SkillContractTests(unittest.TestCase):
             encoding="utf-8"
         )
         for case in (
-            "默认 Native Sol",
+            "默认 Native Luna",
             "Native Luna Fast 缺少 schema",
             "Sol thinking 与 Fast",
             "Durable App",
@@ -493,7 +501,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "app_thread",
             "--model",
-            "gpt-5.6-sol",
+            "gpt-6.1-sol",
             "--thinking",
             "low",
         )
@@ -504,7 +512,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "native_subagent",
             "--model",
-            "gpt-5.6-sol",
+            "gpt-6.1-sol",
             "--thinking",
             "low",
             "--runtime-confirmed",
@@ -521,7 +529,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "native_subagent",
             "--model",
-            "gpt-5.6-sol",
+            "gpt-6.1-sol",
             "--thinking",
             "high",
             "--runtime-confirmed",
@@ -538,7 +546,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "native_subagent",
             "--model",
-            "gpt-5.6-sol",
+            "gpt-6.1-sol",
             "--thinking",
             "high",
             "--runtime-confirmed",
@@ -613,7 +621,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "native_subagent",
             "--model",
-            "gpt-5.6-luna",
+            "gpt-6-luna",
             "--thinking",
             "xhigh",
             "--runtime-confirmed",
@@ -633,7 +641,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "native_subagent",
             "--model",
-            "gpt-5.6-sol",
+            "gpt-6.1-sol",
             "--thinking",
             "high",
             "--speed",
@@ -653,7 +661,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "native_subagent",
             "--model",
-            "gpt-5.6-sol",
+            "gpt-6.1-sol",
             "--thinking",
             "high",
             "--speed",
@@ -678,7 +686,7 @@ class SkillContractTests(unittest.TestCase):
             "--surface",
             "app_thread",
             "--model",
-            "gpt-5.6-luna",
+            "gpt-6-luna",
             "--thinking",
             "xhigh",
             "--speed",
@@ -726,7 +734,7 @@ class SkillContractTests(unittest.TestCase):
         catalog = {
             "models": [
                 {
-                    "slug": "gpt-5.6-luna",
+                    "slug": "gpt-6-luna",
                     "supported_reasoning_levels": [{"effort": "xhigh"}],
                     "service_tiers": [],
                 }
@@ -737,7 +745,7 @@ class SkillContractTests(unittest.TestCase):
             path.write_text(json.dumps(catalog), encoding="utf-8")
             missing = self.run_preflight(
                 "--model",
-                "gpt-5.6-luna",
+                "gpt-6-luna",
                 "--thinking",
                 "xhigh",
                 "--speed",
@@ -938,7 +946,7 @@ class SkillContractTests(unittest.TestCase):
 
     def live_spawn_evidence(
         self,
-        model: str = "gpt-5.6-sol",
+        model: str = "gpt-6.1-sol",
         thinking: str = "high",
         speed: str | None = None,
         **overrides: object,
@@ -961,7 +969,7 @@ class SkillContractTests(unittest.TestCase):
 
     def live_app_speed_evidence(
         self,
-        model: str = "gpt-5.6-luna",
+        model: str = "gpt-6-luna",
         thinking: str = "xhigh",
         **overrides: object,
     ) -> dict[str, object]:
@@ -981,7 +989,7 @@ class SkillContractTests(unittest.TestCase):
 
     def live_app_evidence(
         self,
-        model: str = "gpt-5.6-sol",
+        model: str = "gpt-6.1-sol",
         thinking: str = "medium",
         **overrides: object,
     ) -> dict[str, object]:
@@ -999,7 +1007,7 @@ class SkillContractTests(unittest.TestCase):
 
     def native_candidate(
         self,
-        model: str = "gpt-5.6-sol",
+        model: str = "gpt-6.1-sol",
         thinking: str = "high",
         **overrides: object,
     ) -> dict[str, object]:
@@ -1025,7 +1033,7 @@ class SkillContractTests(unittest.TestCase):
             "risk_acknowledged": False,
             "candidates": [
                 {"model": "xai/grok-4.5", "thinking": "high"},
-                {"model": "gpt-5.6-sol", "thinking": "high"},
+                {"model": "gpt-6.1-sol", "thinking": "high"},
             ],
             "max_worker_threads": 2,
             "max_followups_per_thread": 1,
@@ -1068,7 +1076,7 @@ class SkillContractTests(unittest.TestCase):
             "data_allowed_providers": ["openai"],
             "explicit_user_request": True,
             "risk_acknowledged": True,
-            "candidates": [{"model": "gpt-5.6-sol", "thinking": "medium"}],
+            "candidates": [{"model": "gpt-6.1-sol", "thinking": "medium"}],
             "max_worker_threads": 1,
             "max_followups_per_thread": 1,
         }
@@ -1088,7 +1096,7 @@ class SkillContractTests(unittest.TestCase):
             "candidates": [
                 {
                     "surface": "app_thread",
-                    "model": "gpt-5.6-luna",
+                    "model": "gpt-6-luna",
                     "thinking": "xhigh",
                     "speed": "fast",
                     "speed_evidence": self.live_app_speed_evidence(),
@@ -1100,8 +1108,8 @@ class SkillContractTests(unittest.TestCase):
         luna_fast = self.run_route_validator(plan)
         self.assertEqual(luna_fast.returncode, 0, luna_fast.stderr or luna_fast.stdout)
 
-        plan["candidates"][0]["model"] = "gpt-5.6-sol"
-        plan["candidates"][0]["speed_evidence"]["model"] = "gpt-5.6-sol"
+        plan["candidates"][0]["model"] = "gpt-6.1-sol"
+        plan["candidates"][0]["speed_evidence"]["model"] = "gpt-6.1-sol"
         sol_fast = self.run_route_validator(plan)
         self.assertEqual(sol_fast.returncode, 2, sol_fast.stderr or sol_fast.stdout)
         self.assertIn("model requires explicit_user_request for Fast", sol_fast.stdout)
@@ -1117,6 +1125,7 @@ class SkillContractTests(unittest.TestCase):
     def test_route_plan_validator_accepts_native_luna_with_v3_context_evidence(self) -> None:
         plan = {
             "schema_version": "3.0",
+            "task_contract": {"decision_state": "specified", "acceptance": "Compare output with declared source"},
             "surface_intent": "parent_integrated",
             "task_class": "DEFAULT_GENERAL",
             "minimum_thinking": "high",
@@ -1128,12 +1137,12 @@ class SkillContractTests(unittest.TestCase):
             "candidates": [
                 {
                     "surface": "native_subagent",
-                    "model": "gpt-5.6-luna",
+                    "model": "gpt-6-luna",
                     "thinking": "xhigh",
                     "speed": "standard",
                     "fork_turns": "none",
                     "runtime_evidence": self.live_spawn_evidence(
-                        model="gpt-5.6-luna", thinking="xhigh"
+                        model="gpt-6-luna", thinking="xhigh"
                     ),
                 }
             ],
@@ -1181,7 +1190,7 @@ class SkillContractTests(unittest.TestCase):
             "candidates": [
                 {
                     "surface": "app_thread",
-                    "model": "gpt-5.6-luna",
+                    "model": "gpt-6-luna",
                     "thinking": "xhigh",
                     "speed": "fast",
                 }
@@ -1203,7 +1212,7 @@ class SkillContractTests(unittest.TestCase):
             "data_allowed_providers": ["openai"],
             "explicit_user_request": False,
             "risk_acknowledged": False,
-            "candidates": [{"model": "gpt-5.6-sol", "thinking": "high"}],
+            "candidates": [{"model": "gpt-6.1-sol", "thinking": "high"}],
             "max_worker_threads": 1,
             "max_followups_per_thread": 1,
         }
@@ -1254,12 +1263,13 @@ class SkillContractTests(unittest.TestCase):
     ) -> dict[str, object]:
         if evidence is None:
             evidence = [
-                self.live_spawn_evidence("gpt-5.6-sol", "medium"),
-                self.live_spawn_evidence("gpt-5.6-sol", "high"),
+                self.live_spawn_evidence("gpt-6-luna", "xhigh"),
+                self.live_spawn_evidence("gpt-6.1-sol", "medium"),
             ]
         request: dict[str, object] = {
             "workload": workload,
             "risk": risk,
+            "task_contract": {"decision_state": "specified", "acceptance": "Run target tests and check declared output scope"},
             "surface_intent": surface_intent,
             "provider_allowlist": ["openai"],
             "provider_status": {"openai": "allowed"},
@@ -1271,6 +1281,39 @@ class SkillContractTests(unittest.TestCase):
         request.update(overrides)
         return request
 
+    def test_route_compiler_accepts_explicit_astra_high(self) -> None:
+        request = self.compact_request(
+            workload="complex",
+            explicit_user_request=True,
+            routes=[{
+                "surface": "native_subagent",
+                "model": "gpt-6-astra",
+                "thinking": "high",
+                "speed": "standard",
+                "fresh_context": True,
+            }],
+            evidence=[self.live_spawn_evidence("gpt-6-astra", "high")],
+        )
+        result = self.run_route_compiler(request)
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload["dispatch"]["ready"])
+        self.assertFalse(payload["dispatch"]["auto_dispatch"])
+        candidate = payload["dispatch"]["candidates"][0]
+        self.assertEqual(candidate["model"], "gpt-6-astra")
+        self.assertEqual(candidate["reasoning_effort"], "high")
+        self.assertEqual(candidate["speed"], "standard")
+
+        request["explicit_user_request"] = False
+        implicit = self.run_route_compiler(request)
+        self.assertNotEqual(implicit.returncode, 0)
+        self.assertIn("requires explicit_user_request", implicit.stdout)
+
+        request["explicit_user_request"] = True
+        request["live_evidence"] = []
+        missing_evidence = self.run_route_compiler(request)
+        self.assertNotEqual(missing_evidence.returncode, 0)
+
     def test_route_compiler_builds_registry_default_without_dispatching(self) -> None:
         result = self.run_route_compiler(self.compact_request())
         self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
@@ -1281,7 +1324,7 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(plan["schema_version"], "3.0")
         self.assertEqual(
             [(item["model"], item["thinking"]) for item in plan["candidates"]],
-            [("gpt-5.6-sol", "medium"), ("gpt-5.6-sol", "high")],
+            [("gpt-6-luna", "xhigh"), ("gpt-6.1-sol", "medium")],
         )
         self.assertEqual(payload["validation"]["status"], "pass")
         self.assertTrue(payload["dispatch"]["ready"])
@@ -1293,8 +1336,8 @@ class SkillContractTests(unittest.TestCase):
             self.compact_request(
                 workload="mechanical",
                 evidence=[
-                    self.live_spawn_evidence("gpt-5.6-luna", "xhigh"),
-                    self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+                    self.live_spawn_evidence("gpt-6-luna", "xhigh"),
+                    self.live_spawn_evidence("gpt-6.1-sol", "medium"),
                 ],
             )
         )
@@ -1303,14 +1346,14 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(mechanical_payload["selected_profile"], "mechanical")
         self.assertEqual(
             mechanical_payload["route_plan"]["candidates"][0]["model"],
-            "gpt-5.6-luna",
+            "gpt-6-luna",
         )
         high_risk = self.run_route_compiler(
             self.compact_request(
                 risk="high",
                 evidence=[
-                    self.live_spawn_evidence("gpt-5.6-sol", "high"),
-                    self.live_spawn_evidence("gpt-5.6-sol", "xhigh"),
+                    self.live_spawn_evidence("gpt-6.1-sol", "high"),
+                    self.live_spawn_evidence("gpt-6.1-sol", "xhigh"),
                 ],
             )
         )
@@ -1326,9 +1369,9 @@ class SkillContractTests(unittest.TestCase):
         result = self.run_route_compiler(
             self.compact_request(
                 risk="high",
-                route_profile="default",
+                route_profile="judgment",
                 include_fallback=False,
-                evidence=self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+                evidence=self.live_spawn_evidence("gpt-6.1-sol", "medium"),
             )
         )
         self.assertEqual(result.returncode, 2, result.stdout)
@@ -1337,11 +1380,12 @@ class SkillContractTests(unittest.TestCase):
     def test_route_compiler_downgrades_fast_without_live_priority_evidence(self) -> None:
         result = self.run_route_compiler(
             self.compact_request(
+                route_profile="judgment",
                 speed="fast",
                 explicit_user_request=True,
                 evidence=[
-                    self.live_spawn_evidence("gpt-5.6-sol", "medium"),
-                    self.live_spawn_evidence("gpt-5.6-sol", "high"),
+                    self.live_spawn_evidence("gpt-6.1-sol", "medium"),
+                    self.live_spawn_evidence("gpt-6.1-sol", "high"),
                 ],
             )
         )
@@ -1355,11 +1399,12 @@ class SkillContractTests(unittest.TestCase):
     def test_route_compiler_keeps_fast_only_with_exact_live_priority_evidence(self) -> None:
         result = self.run_route_compiler(
             self.compact_request(
+                route_profile="judgment",
                 speed="fast",
                 explicit_user_request=True,
                 evidence=[
-                    self.live_spawn_evidence("gpt-5.6-sol", "medium", speed="fast"),
-                    self.live_spawn_evidence("gpt-5.6-sol", "high", speed="fast"),
+                    self.live_spawn_evidence("gpt-6.1-sol", "medium", speed="fast"),
+                    self.live_spawn_evidence("gpt-6.1-sol", "high", speed="fast"),
                 ],
             )
         )
@@ -1376,11 +1421,12 @@ class SkillContractTests(unittest.TestCase):
 
     def test_route_compiler_rejects_incomplete_fast_evidence(self) -> None:
         evidence = self.live_spawn_evidence(
-            "gpt-5.6-sol", "medium", speed="fast"
+            "gpt-6.1-sol", "medium", speed="fast"
         )
         evidence.pop("service_tier")
         result = self.run_route_compiler(
             self.compact_request(
+                route_profile="judgment",
                 speed="fast",
                 explicit_user_request=True,
                 include_fallback=False,
@@ -1391,7 +1437,7 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("runtime evidence does not match", result.stdout)
 
     def test_route_compiler_reports_unaccepted_evidence_and_provider_block(self) -> None:
-        evidence = self.live_spawn_evidence("gpt-5.6-sol", "medium")
+        evidence = self.live_spawn_evidence("gpt-6.1-sol", "medium")
         evidence.pop("accepted")
         missing_acceptance = self.run_route_compiler(
             self.compact_request(evidence=evidence, include_fallback=False)
@@ -1408,7 +1454,7 @@ class SkillContractTests(unittest.TestCase):
             self.compact_request(
                 include_fallback=False,
                 provider_status={"openai": "blocked"},
-                evidence=self.live_spawn_evidence("gpt-5.6-sol", "medium"),
+                evidence=self.live_spawn_evidence("gpt-6.1-sol", "medium"),
             )
         )
         self.assertEqual(blocked.returncode, 2, blocked.stdout)
@@ -1426,8 +1472,8 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("host_authorization", no_app_evidence.stdout)
 
         app_evidence = [
-            self.live_app_evidence("gpt-5.6-sol", "medium"),
-            self.live_app_evidence("gpt-5.6-sol", "high"),
+            self.live_app_evidence("gpt-6-luna", "xhigh"),
+            self.live_app_evidence("gpt-6.1-sol", "medium"),
         ]
         app = self.run_route_compiler(
             self.compact_request(
@@ -1484,12 +1530,12 @@ class SkillContractTests(unittest.TestCase):
             "candidates": [
                 {
                     "surface": "app_thread",
-                    "model": "gpt-5.6-luna",
+                    "model": "gpt-6-luna",
                     "thinking": "xhigh",
                 },
                 {
                     "surface": "native_subagent",
-                    "model": "gpt-5.6-sol",
+                    "model": "gpt-6.1-sol",
                     "thinking": "high",
                     "runtime_evidence": self.live_spawn_evidence(),
                 },
@@ -1514,7 +1560,7 @@ class SkillContractTests(unittest.TestCase):
             "data_allowed_providers": ["openai"],
             "explicit_user_request": False,
             "risk_acknowledged": False,
-            "candidates": [{"model": "gpt-5.6-sol", "thinking": "high"}],
+            "candidates": [{"model": "gpt-6.1-sol", "thinking": "high"}],
             "max_worker_threads": 1,
             "max_followups_per_thread": 1,
         }
@@ -1573,7 +1619,7 @@ class SkillContractTests(unittest.TestCase):
         plan["candidates"] = [
             self.native_candidate(
                 model="gpt-5.6-terra",
-                runtime_evidence=self.live_spawn_evidence(model="gpt-5.6-sol"),
+                runtime_evidence=self.live_spawn_evidence(model="gpt-6.1-sol"),
             )
         ]
         mismatched = self.run_route_validator(plan)
@@ -1652,9 +1698,9 @@ class SkillContractTests(unittest.TestCase):
             "turn_status": "completed",
             "last_observed_at": "2026-07-25T00:00:00+08:00",
             "role": "reviewer",
-            "model": "gpt-5.6-sol",
-            "requested_model": "gpt-5.6-sol",
-            "platform_accepted_model": "gpt-5.6-sol",
+            "model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "platform_accepted_model": "gpt-6.1-sol",
             "observed_runtime_model": "unknown",
             "thinking": "xhigh",
             "route_plan": {},
@@ -1682,9 +1728,9 @@ class SkillContractTests(unittest.TestCase):
             "last_observed_at": "2026-07-27T00:00:00+08:00",
             "fork_mode": "fresh",
             "role": "scout",
-            "model": "gpt-5.6-sol",
-            "requested_model": "gpt-5.6-sol",
-            "platform_accepted_model": "gpt-5.6-sol",
+            "model": "gpt-6.1-sol",
+            "requested_model": "gpt-6.1-sol",
+            "platform_accepted_model": "gpt-6.1-sol",
             "observed_runtime_model": "unknown",
             "thinking": "high",
             "route_plan": {},
@@ -1982,14 +2028,14 @@ class SkillContractTests(unittest.TestCase):
     def test_ledger_validator_requires_speed_identity_for_schema_21(self) -> None:
         route_plan = self.route_plan_21(
             surface="app_thread",
-            model="gpt-5.6-luna",
+            model="gpt-6-luna",
             thinking="high",
             speed="standard",
         )
         valid_record = self.ledger_record(
-            model="gpt-5.6-luna",
-            requested_model="gpt-5.6-luna",
-            platform_accepted_model="gpt-5.6-luna",
+            model="gpt-6-luna",
+            requested_model="gpt-6-luna",
+            platform_accepted_model="gpt-6-luna",
             thinking="high",
             requested_speed="standard",
             platform_accepted_speed="standard",
@@ -2008,14 +2054,14 @@ class SkillContractTests(unittest.TestCase):
     def test_ledger_validator_distinguishes_default_and_explicit_fast(self) -> None:
         route_plan = self.route_plan_21(
             surface="app_thread",
-            model="gpt-5.6-luna",
+            model="gpt-6-luna",
             thinking="xhigh",
             speed="fast",
         )
         luna_fast = self.ledger_record(
-            model="gpt-5.6-luna",
-            requested_model="gpt-5.6-luna",
-            platform_accepted_model="gpt-5.6-luna",
+            model="gpt-6-luna",
+            requested_model="gpt-6-luna",
+            platform_accepted_model="gpt-6-luna",
             thinking="xhigh",
             requested_speed="fast",
             platform_accepted_speed="fast",
@@ -2026,12 +2072,12 @@ class SkillContractTests(unittest.TestCase):
         self.assertEqual(valid.returncode, 0, valid.stdout)
 
         sol_fast = dict(luna_fast)
-        sol_fast["model"] = "gpt-5.6-sol"
-        sol_fast["requested_model"] = "gpt-5.6-sol"
-        sol_fast["platform_accepted_model"] = "gpt-5.6-sol"
+        sol_fast["model"] = "gpt-6.1-sol"
+        sol_fast["requested_model"] = "gpt-6.1-sol"
+        sol_fast["platform_accepted_model"] = "gpt-6.1-sol"
         sol_fast["route_plan"] = self.route_plan_21(
             surface="app_thread",
-            model="gpt-5.6-sol",
+            model="gpt-6.1-sol",
             thinking="xhigh",
             speed="fast",
         )
@@ -2041,7 +2087,7 @@ class SkillContractTests(unittest.TestCase):
 
         sol_fast["route_plan"] = self.route_plan_21(
             surface="app_thread",
-            model="gpt-5.6-sol",
+            model="gpt-6.1-sol",
             thinking="xhigh",
             speed="fast",
             explicit_user_request=True,
@@ -2083,7 +2129,7 @@ class SkillContractTests(unittest.TestCase):
             "candidates": [
                 {
                     "surface": "native_subagent",
-                    "model": "gpt-5.6-sol",
+                    "model": "gpt-6.1-sol",
                     "thinking": "high",
                     "speed": "standard",
                     "fork_turns": "none",
@@ -2179,7 +2225,7 @@ class SkillContractTests(unittest.TestCase):
 
     def test_adapter_keeps_verifier_before_reviewer(self) -> None:
         adapter = (SKILL_ROOT / "references/upstream-skill-adapter.md").read_text(encoding="utf-8")
-        self.assertLess(adapter.index("verifier：1 个"), adapter.index("reviewer：1 个"))
+        self.assertLess(adapter.index("- verifier："), adapter.index("- reviewer："))
         self.assertIn("每次调用 `create_thread` 前", adapter)
         self.assertIn("返回正式 id 或 pending id 后写入对应字段", adapter)
 

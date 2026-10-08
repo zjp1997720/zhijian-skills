@@ -7,7 +7,7 @@
 - 当前 host 必须暴露 `spawn_agent`、`wait_agent`、`send_message`/follow-up 与 `list_agents`；close/interrupt 只按 live schema 使用。
 - live `spawn_agent` schema 必须接受 RoutePlan 的精确 `model`、`reasoning_effort` 与 `fork_turns`。Fast 还必须接受 `service_tier=priority`。禁止静默继承父模型、默认 reasoning 或默认速度来冒充路由成功。
 - 新 v3 任务的 fresh context 写 `fork_turns="none"`；少量上下文写正整数字符串。显式模型覆盖禁止 `fork_turns="all"`。旧 V1 工具若仍使用 `fork_context`，只作为 v2.1 run 的兼容映射。
-- Luna 是 leaf Worker：V2 父 Agent 可以创建它，但 Luna 本身不获得协作工具。任务包必须独立包含工作目录、目标、约束、输出、Provider 数据边界和“禁止创建任何后台任务、线程或子 Agent”。
+- GPT-6 Luna 的官方能力为 V2；本 Skill 仍将它限制为 leaf Worker，禁止下级派遣。任务包必须独立包含工作目录、目标、约束、输出、Provider 数据边界和“禁止创建任何后台任务、线程或子 Agent”。
 
 ## 控制状态
 

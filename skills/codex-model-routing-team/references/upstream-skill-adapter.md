@@ -45,9 +45,9 @@
 standard: researcher_count + 1 verifier + 1 reviewer + retry_reserve <= 8
 ```
 
-- researcher：按 registry 画像使用 Native Sol Medium/High；规则明确、可机械验收的批量材料可用 Luna XHigh。live spawn schema 接受 priority 时可用 Fast，否则保持 Standard。公开技术研究可在 Provider 门通过后使用 Grok Medium。
-- verifier：1 个 Native Sol High，在 draft 存在后创建；关键核验升 XHigh。
-- reviewer：1 个 Native Sol High，在 cited 存在并通过检查后创建；需要异构工程复核时可按 RoutePlan 使用 Grok High。
+- researcher：明确问题、来源范围和证据格式时用 Luna XHigh，复杂交叉核对用 Luna Max；问题尚未成形或需裁决冲突证据时用 Sol Medium/High。live spawn schema 接受 priority 时可用 Fast，否则保持 Standard。公开技术研究可在 Provider 门通过后使用 Grok Medium。
+- verifier：draft 存在后，对照明确来源/清单的核验用 Luna XHigh/Max；高风险核验 Sol High，关键独立核验 Sol XHigh。
+- reviewer：cited 存在并通过检查后，按上游必需质量门复核；开放判断用 Sol High，关键独立审查 Sol XHigh，需要异构工程复核时可按 RoutePlan 使用 Grok High。不得仅因上游使用 Luna 就额外创建 Sol 审查层。
 - FATAL 复审：最多一次 Sol X High，使用 retry reserve。
 - 所有任务绑定包含 `01_项目/调研` 的 vault project。
 - 每个 researcher 写唯一的 T1/T2/T3/T4 文件。
@@ -72,15 +72,15 @@ standard: researcher_count + 1 verifier + 1 reviewer + retry_reserve <= 8
   "turn_status": null,
   "last_observed_at": null,
   "role": "researcher",
-  "model": "gpt-5.6-sol",
-  "requested_model": "gpt-5.6-sol",
+  "model": "gpt-6.1-sol",
+  "requested_model": "gpt-6.1-sol",
   "platform_accepted_model": null,
   "observed_runtime_model": "unknown",
   "thinking": "xhigh",
   "requested_speed": "standard",
   "platform_accepted_speed": null,
   "observed_runtime_speed": "unknown",
-  "route_plan": {"schema_version": "3.0", "surface_intent": "durable_app", "candidates": [{"surface": "app_thread", "model": "gpt-5.6-sol", "thinking": "medium", "speed": "standard"}]},
+  "route_plan": {"schema_version": "3.0", "surface_intent": "durable_app", "candidates": [{"surface": "app_thread", "model": "gpt-6.1-sol", "thinking": "medium", "speed": "standard"}]},
   "provider_policy": {},
   "materialized": false,
   "data_ready": false,

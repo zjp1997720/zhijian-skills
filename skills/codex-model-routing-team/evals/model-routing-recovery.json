@@ -2,9 +2,9 @@
   "skill_name": "codex-model-routing-team",
   "evals": [
     {
-      "id": "default-native-sol-medium",
-      "prompt": "并行完成三个普通复杂子任务，没有点名 Surface 或模型。",
-      "expected_output": "默认使用 parent_integrated 的 native_subagent/gpt-5.6-sol/medium/standard；复杂/高风险升 Sol High，关键审查升 XHigh；fork_turns=none；fallback 沿 registry 预声明。"
+      "id": "default-native-luna-xhigh",
+      "prompt": "并行处理三个方案明确、验收标准具体的普通子任务。",
+      "expected_output": "声明 task_contract specified 和具体验收方法；默认 native_subagent/gpt-6-luna/xhigh/standard；复杂执行 Luna Max，未决判断 Sol Medium/High，高风险 Sol High，关键审查 Sol XHigh；fork_turns=none；最多一个预声明 fallback。"
     },
     {
       "id": "native-luna-leaf",
@@ -34,7 +34,7 @@
     {
       "id": "sol-medium-default",
       "prompt": "创建 Sol Medium Worker，我认为 Medium 足够。",
-      "expected_output": "常规 App 或 Native 可使用 Sol Medium Standard；复杂/高风险按 registry 升 Sol High/XHigh，Low 仍拒绝。"
+      "expected_output": "用户明确指定 Sol Medium 可按 exact tuple 校验；自动明确执行仍默认 Luna XHigh，复杂执行 Luna Max，未决复杂判断和高风险 Sol High，关键审查 Sol XHigh；Sol Low 拒绝。"
     },
     {
       "id": "sol-fast-explicit-gate",
@@ -75,6 +75,31 @@
       "id": "expanded-capacity",
       "prompt": "12 个独立审核对象，host 有 6 个 collaboration slots。",
       "expected_output": "使用 expanded 12/16/6 与 reserved slots；波次先扣除协调者和活动 Worker。"
+    },
+    {
+      "id": "bounded-complex-luna-max",
+      "prompt": "接口、设计和验收均已定，独立实现涉及八个文件，工作量较大。",
+      "expected_output": "task_contract specified；complex 路由 Luna Max。文件数量与复杂标签不单独触发 Sol；按既定测试验收。"
+    },
+    {
+      "id": "unknown-root-cause-sol-high",
+      "prompt": "提示词很详细，但生产故障根因未知，需要独立诊断竞争假设。",
+      "expected_output": "unresolved + complex 路由 Sol High；提示词长度不消除未决判断。Worker 保持只读，生产变更仍由主 Agent 遵守授权处理。"
+    },
+    {
+      "id": "luna-contract-required",
+      "prompt": "使用 Luna，但我还没确定接口与正确结果，也没有具体验收方法。",
+      "expected_output": "不把未知状态标为 specified。主 Agent 先补齐合同，或把明确的诊断目标路由 Sol；新 v3 Luna 缺少 specified/acceptance 必须拒绝。"
+    },
+    {
+      "id": "depth-fallback-two-attempts",
+      "prompt": "Luna XHigh 不够就 Max，再不够就 Sol。",
+      "expected_output": "拒绝三段链。派遣前只选一个 fallback；XHigh 到 Max 后仍失败由主 Agent 接管，不得新增 unit 重置预算。"
+    },
+    {
+      "id": "no-routine-sol-redo",
+      "prompt": "Luna 已完成明确实现且目标测试通过，是否固定再叫 Sol 完整重写一遍保险？",
+      "expected_output": "主 Agent 检查关键证据和剩余风险；没有独立审查净收益时直接采纳，不常设 Sol 协调层或全量复做。"
     }
   ]
 }
