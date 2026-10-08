@@ -397,3 +397,16 @@ test('scroll arrow bounces relative to its own anchor', () => {
   const svg = generateCoverAnimation(mobileTheme, { template: 'scroll-painting', title: '标题' });
   assert.match(svg, /<g transform="translate\(180,[\d.]+\)"><text x="0" y="0"[^>]*><tspan leaf="">↓<\/tspan><animateTransform[^>]+values="0 0;0 6;0 0"/);
 });
+
+test('titles break after the comma even when the second half needs a smaller font', () => {
+  const title = '学校找 AI 培训方，先看他敢不敢把细节写出来';
+  for (const template of ['ink-wash', 'scroll-painting', 'spotlight', 'minimal-sketch']) {
+    const svg = generateCoverAnimation(mobileTheme, { template, title });
+    const titleNode = svg.match(new RegExp(`<text\\b[^>]*data-semantic-text="${title}"[^>]*>([\\s\\S]*?)<\\/text>`));
+    assert.ok(titleNode, `${template}: title should be a two-line text node`);
+    const lines = [...titleNode[1].matchAll(/<tspan leaf="" x="[-\d.]+" y="[-\d.]+">([^<]+)<\/tspan>/g)].map(match => match[1]);
+    assert.deepEqual(lines, ['学校找 AI 培训方，', '先看他敢不敢把细节写出来'], `${template}: must not split a word across lines`);
+    const size = Number(titleNode[0].match(/font-size="([\d.]+)"/)[1]);
+    assert.ok(size >= 22, `${template}: font stays at or above the 22px floor, got ${size}`);
+  }
+});
