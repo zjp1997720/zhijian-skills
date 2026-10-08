@@ -67,7 +67,8 @@ node scripts/convert.mjs /tmp/rewritten.md \
 | `--cover` | SVG 开场，自动替换开头 GIF | `false` |
 | `--brand-cta` | `auto` 首尾 GIF、`ending` 仅结尾、`none` 全部关闭 | `auto` |
 | `--cover-template` | 动画模板 | `ink-wash` |
-| `--cover-title` | 动画主标题 | frontmatter.title |
+| `--cover-title` | 动画主标题 | frontmatter.title，其次正文开头的一级标题 |
+| `--keep-h1` | 启用开场动画时仍保留正文开头的一级标题；默认移除以免与动画标题重复 | `false` |
 | `--cover-subtitle` | 动画副标题 | frontmatter.summary |
 | `--cover-tags` | 逗号分隔标签 | 无 |
 | `--top-label` | 顶部标签，同时作为开场动画品牌标签与默认署名来源；`none` 隐藏顶部标签区和动画标签；拉丁字母会被大写显示 | theme.top_label（zhijian 为 `智见AI`） |

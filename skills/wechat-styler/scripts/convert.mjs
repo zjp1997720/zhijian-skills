@@ -40,7 +40,9 @@ function parseArgs() {
   --strict-density           Stop if paragraph density fails
   --cover [false|0|no]        Enable SVG opening animation
   --cover-template <name>     Animation template (default: ink-wash)
-  --cover-title <text>        Opening title (default: frontmatter.title)
+  --cover-title <text>        Opening title (default: frontmatter.title, then leading H1)
+  --keep-h1                   With --cover, keep the leading H1 in the body
+                              (default: removed, the opening already shows the title)
   --cover-subtitle <text>     Opening subtitle (default: frontmatter.summary)
   --cover-tags <a,b,c>        Opening tags
   --top-label <text|none>     Top label + cover brand label (default: theme.top_label);
@@ -70,7 +72,8 @@ function parseArgs() {
     topLabel: null,
     coverAuthor: null,
     brandCta: 'auto',
-    strictDensity: false
+    strictDensity: false,
+    keepH1: false
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -104,6 +107,11 @@ function parseArgs() {
       } else {
         options.cover = true;
       }
+      continue;
+    }
+
+    if (key === 'keep-h1') {
+      options.keepH1 = true;
       continue;
     }
 
@@ -1009,8 +1017,24 @@ function configureRenderer(theme) {
   return factory(theme);
 }
 
+// 正文开头的一级标题(首个非空行是 `# 标题`)视为文章标题。
+// 启用开场动画时它与动画主标题重复:默认从正文移除,并作为动画标题的兜底来源。
+// 正文中段的 H1 不受影响。
+function splitLeadingH1(markdown) {
+  const match = markdown.match(/^(?:[ \t]*\r?\n)*[ \t]{0,3}#[ \t]+(.+?)(?:[ \t]+#+)?[ \t]*(?:\r?\n|$)/);
+  if (!match) return { title: null, markdown };
+  return { title: match[1].trim(), markdown: markdown.slice(match[0].length) };
+}
+
 // Generate HTML
 function generateHTML(markdown, theme, frontmatter, options = {}) {
+  let leadingH1 = null;
+  if (options.cover) {
+    const split = splitLeadingH1(markdown);
+    leadingH1 = split.title;
+    if (leadingH1 && !options.keepH1) markdown = split.markdown;
+  }
+
   marked.setOptions({
     renderer: configureRenderer(theme),
     breaks: true,
@@ -1065,7 +1089,7 @@ ${theme.top_label ? `<!-- 顶部标签 -->
     if (index === 0 && options.cover) {
       const coverOpts = {
         template: options.coverTemplate || 'ink-wash',
-        title: options.coverTitle || frontmatter.title || '',
+        title: options.coverTitle || frontmatter.title || leadingH1 || '',
         subtitle: options.coverSubtitle || frontmatter.summary || '',
         tags: options.coverTags || '',
       };
