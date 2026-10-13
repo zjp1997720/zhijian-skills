@@ -1150,7 +1150,7 @@ function generateHTML(markdown, theme, frontmatter, options = {}) {
 <body style="margin: 0; padding: 0;">
 
 <!-- 微信公众号复制容器：背景色使用 solid hex，并在外层、内容层、文本层重复声明，降低粘贴后丢失风险 -->
-<section data-wechat-root="article" style="background-color:${theme.background_color};padding:0;margin:0;">
+<section data-wechat-root="article" style="background-color:${theme.background_color};padding:0;margin:0;${Number(theme.root_radius) > 0 ? `border-radius:${Number(theme.root_radius)}px;overflow:hidden;` : ''}">
 
 ${theme.top_label ? `<!-- 顶部标签 -->
 <section style="max-width:${theme.max_width}px;margin:0 auto;padding:28px 16px 12px;background-color:${theme.background_color};">

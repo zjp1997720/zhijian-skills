@@ -36,6 +36,8 @@ trust_bg: "#EEF2F7"
 human_accent: "#B85235"
 primary_text: "#A04A2E"
 max_width: 640
+# 纸色卡片圆角：公众号正文两侧是白底，直角卡片边缘发硬（2026-10-13 大鹏手机实看反馈）
+root_radius: 12
 type_scale:
   h1: 28
   h2: 22

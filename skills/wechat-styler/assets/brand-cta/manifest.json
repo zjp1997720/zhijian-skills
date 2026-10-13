@@ -1,36 +1,38 @@
 {
-  "version": "2026-10-13-v7-flow-gif",
+  "version": "2026-10-13-v7.1-flow-gif",
   "default": "auto",
   "defaultStyle": "gif",
   "format": "gif",
   "assets": {
     "opening": {
-      "file": "zhijian-cta-opening-flow-f63ec0d7ddd0.gif",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-f63ec0d7ddd0.gif",
-      "sha256": "f63ec0d7ddd0b6d574296699363a2cddb943e9b554311776b00bd5acb6d858f8",
+      "file": "zhijian-cta-opening-flow-376b7c890008.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-376b7c890008.gif",
+      "sha256": "376b7c89000817b0d050bb1674578563ba35017846a1f68b029e93e7f0ffa490",
       "width": 720,
       "height": 272,
       "frames": 48,
       "fps": 12,
-      "bytes": 1076375,
+      "bytes": 800024,
       "loop": "forever",
       "alt": "关注大鹏，把 AI 用进真实工作",
       "format": "gif",
-      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013"
+      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013",
+      "layout": "paper margin 30px above / 18px below the character inside the 2x asset (1.18.1)"
     },
     "ending": {
-      "file": "zhijian-cta-ending-flow-da8009fbeaa2.gif",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-da8009fbeaa2.gif",
-      "sha256": "da8009fbeaa2afe79d0752a81458cb671f5a0945499a7c6b0c4a2bb6441fa393",
+      "file": "zhijian-cta-ending-flow-5375c80db38d.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-5375c80db38d.gif",
+      "sha256": "5375c80db38d67a5c1e11514f1c7bfab50311058aa913f90f9a9ca473c612c88",
       "width": 720,
       "height": 300,
       "frames": 72,
       "fps": 10,
-      "bytes": 1695438,
+      "bytes": 1286172,
       "loop": "forever",
       "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人",
       "format": "gif",
-      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013"
+      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013",
+      "layout": "paper margin 30px above / 18px below the character inside the 2x asset (1.18.1)"
     }
   },
   "fallback": {
@@ -60,6 +62,29 @@
     }
   },
   "legacy": [
+    {
+      "version": "2026-10-13-v7-flow-gif",
+      "format": "gif",
+      "note": "1.18.0 Flow GIFs with the character flush to the top/bottom edge; replaced in 1.18.1. Kept so reprocessing removes them.",
+      "assets": {
+        "opening": {
+          "file": "zhijian-cta-opening-flow-f63ec0d7ddd0.gif",
+          "sha256": "f63ec0d7ddd0b6d574296699363a2cddb943e9b554311776b00bd5acb6d858f8",
+          "width": 720,
+          "height": 272,
+          "alt": "关注大鹏，把 AI 用进真实工作",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-f63ec0d7ddd0.gif"
+        },
+        "ending": {
+          "file": "zhijian-cta-ending-flow-da8009fbeaa2.gif",
+          "sha256": "da8009fbeaa2afe79d0752a81458cb671f5a0945499a7c6b0c4a2bb6441fa393",
+          "width": 720,
+          "height": 300,
+          "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-da8009fbeaa2.gif"
+        }
+      }
+    },
     {
       "version": "2026-09-12-v4",
       "format": "gif",

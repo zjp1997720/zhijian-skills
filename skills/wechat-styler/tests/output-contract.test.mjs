@@ -21,6 +21,8 @@ test('renders the shared content root and metadata for downstream publishers', (
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const html = fs.readFileSync(output, 'utf8');
   assert.match(html, /data-wechat-root="article"/);
+  // zhijian rounds the paper card so it does not end in hard corners against WeChat's white page (1.18.1).
+  assert.match(html, /<section data-wechat-root="article" style="[^"]*border-radius:12px;overflow:hidden;"/);
   assert.match(html, /<meta name="description" content="摘要测试">/);
   fs.rmSync(workDir, { recursive: true, force: true });
 });
@@ -186,7 +188,7 @@ test('zhijian theme closes the article with one landing mark before topics and t
     assert.ok(html.indexOf('data-wechat-topics=') < html.indexOf('data-wechat-cta="ending"'));
     const ending = html.match(/<section data-wechat-cta="ending"[^>]*>/)[0];
     assert.doesNotMatch(ending, /background/i, 'ending CTA stays transparent on the paper body');
-    assert.match(html.slice(html.indexOf('data-wechat-cta="ending"')), /^data-wechat-cta="ending"[^>]*data-zhijian-cta="v7-flow-gif"[^>]*><img [^>]*data-wechat-cta-image="ending"[^>]*zhijian-cta-ending-flow-da8009fbeaa2\.gif/);
+    assert.match(html.slice(html.indexOf('data-wechat-cta="ending"')), /^data-wechat-cta="ending"[^>]*data-zhijian-cta="v7-flow-gif"[^>]*><img [^>]*data-wechat-cta-image="ending"[^>]*zhijian-cta-ending-flow-5375c80db38d\.gif/);
 
     const minimalOutput = path.join(workDir, 'minimal.html');
     const minimal = runConvert(workDir, [input, '--theme', 'minimal', '--no-open', '--output', minimalOutput]);
