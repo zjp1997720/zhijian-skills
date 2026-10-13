@@ -7,8 +7,10 @@
 
 移动端基线由 `tests/fixtures/zhijian-visual-baseline.md` 生成。更新主题时必须重新运行 `references/zhijian-theme-baseline.md` 中的命令，并人工检查标题字体、正文重量、引用对齐、文末落地线和横向溢出。
 
-## Brand CTA SVGs
+## Brand CTAs
 
-`brand-cta/manifest.json` records the two default article CTAs (`zhijian-cta-opening.svg`, `zhijian-cta-ending.svg`): SHA256, viewBox, display size, alt text and `format: "inline-svg"`. The converter reads these files and inlines them as one-line SVG with a transparent background, so nothing is uploaded or hosted. The SVGs are generated from the ZhiJian Xiaolan v003 vector source (flat vector character, text converted to paths, SMIL loops); regenerate there, copy here, and update the manifest SHA256 — the converter refuses a file whose SHA256 does not match.
+Since 1.18.0 the default CTAs are two Flow-generated GIFs keyed onto the paper colour `#F5F4ED`, hosted on COS (URL, size, frames, fps, bytes, SHA256 and source in `brand-cta/manifest.json`); nothing is shipped for them. The 1.17.0 SVGs below remain as the `--cta-style svg` fallback.
+
+`brand-cta/manifest.json` `fallback` records the two SVG CTAs (`zhijian-cta-opening.svg`, `zhijian-cta-ending.svg`): SHA256, viewBox, display size, alt text and `format: "inline-svg"`. The converter reads these files and inlines them as one-line SVG with a transparent background, so nothing is uploaded or hosted. The SVGs are generated from the ZhiJian Xiaolan v003 vector source (flat vector character, text converted to paths, SMIL loops); regenerate there, copy here, and update the manifest SHA256 — the converter refuses a file whose SHA256 does not match.
 
 The white-background GIFs used up to 1.16.0 are no longer shipped. Their file names, URLs and SHA256 stay in the manifest `legacy` field only so that reprocessing an old draft removes them instead of stacking a second CTA. Generated previews and private source images are not part of this payload.

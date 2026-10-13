@@ -2,7 +2,7 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.17.0
+version: 1.18.0
 description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
 summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
 tags:
@@ -45,7 +45,7 @@ disable-model-invocation: true
 
 ### 1. 默认转换
 
-默认保留正文、不增加正文组件；转换器自动加入品牌开头与结尾引导（透明内联 SVG）。开场互斥、关闭方式与素材维护见 `references/brand-cta.md`；每次转换读取该规则。按 `references/conversion-workflow.md` 选择主题与参数、运行转换并完成最小 QA。用户只给文件路径时默认使用 `zhijian`。
+默认保留正文、不增加正文组件；转换器自动加入品牌开头与结尾引导（默认 Flow 生成的纸色底 GIF，`--cta-style svg` 切回透明内联 SVG）。开场互斥、关闭方式与素材维护见 `references/brand-cta.md`；每次转换读取该规则。按 `references/conversion-workflow.md` 选择主题与参数、运行转换并完成最小 QA。用户只给文件路径时默认使用 `zhijian`。
 
 ### 2. 组件与动画
 

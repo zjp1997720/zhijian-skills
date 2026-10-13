@@ -1,25 +1,62 @@
 {
-  "version": "2026-10-13-v6-svg",
+  "version": "2026-10-13-v7-flow-gif",
   "default": "auto",
-  "format": "inline-svg",
+  "defaultStyle": "gif",
+  "format": "gif",
   "assets": {
     "opening": {
-      "file": "zhijian-cta-opening.svg",
-      "sha256": "613c966fe4fa108344058fc1fb0898461952ff623aa7cbd96769ed0903c606e4",
-      "viewBox": "0 0 360 136",
-      "width": 360,
-      "height": 136,
+      "file": "zhijian-cta-opening-flow-f63ec0d7ddd0.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-f63ec0d7ddd0.gif",
+      "sha256": "f63ec0d7ddd0b6d574296699363a2cddb943e9b554311776b00bd5acb6d858f8",
+      "width": 720,
+      "height": 272,
+      "frames": 48,
+      "fps": 12,
+      "bytes": 1076375,
+      "loop": "forever",
       "alt": "关注大鹏，把 AI 用进真实工作",
-      "format": "inline-svg"
+      "format": "gif",
+      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013"
     },
     "ending": {
-      "file": "zhijian-cta-ending.svg",
-      "sha256": "813eae51b644ea9d73bf7fd26e1d968325cadf18681606481678f8c7361a6586",
-      "viewBox": "0 0 360 150",
-      "width": 360,
-      "height": 150,
-      "alt": "有用，就留一份：点赞、收藏、转给需要的人",
-      "format": "inline-svg"
+      "file": "zhijian-cta-ending-flow-da8009fbeaa2.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-da8009fbeaa2.gif",
+      "sha256": "da8009fbeaa2afe79d0752a81458cb671f5a0945499a7c6b0c4a2bb6441fa393",
+      "width": 720,
+      "height": 300,
+      "frames": 72,
+      "fps": 10,
+      "bytes": 1695438,
+      "loop": "forever",
+      "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人",
+      "format": "gif",
+      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013"
+    }
+  },
+  "fallback": {
+    "version": "2026-10-13-v6-svg",
+    "format": "inline-svg",
+    "role": "fallback",
+    "note": "1.17.0 transparent inline SVG; selected with --cta-style svg.",
+    "assets": {
+      "opening": {
+        "file": "zhijian-cta-opening.svg",
+        "sha256": "613c966fe4fa108344058fc1fb0898461952ff623aa7cbd96769ed0903c606e4",
+        "viewBox": "0 0 360 136",
+        "width": 360,
+        "height": 136,
+        "alt": "关注大鹏，把 AI 用进真实工作",
+        "format": "inline-svg"
+      },
+      "ending": {
+        "file": "zhijian-cta-ending.svg",
+        "sha256": "813eae51b644ea9d73bf7fd26e1d968325cadf18681606481678f8c7361a6586",
+        "viewBox": "0 0 360 150",
+        "width": 360,
+        "height": 150,
+        "alt": "有用，就留一份：点赞、收藏、转给需要的人",
+        "format": "inline-svg"
+      }
     }
   },
   "legacy": [

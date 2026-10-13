@@ -50,6 +50,8 @@ function parseArgs() {
   --cover-author <text|none>  Cover byline, used verbatim (scroll-painting);
                               default "<top label> 出品"; "none" hides it
   --brand-cta <mode>          auto | ending | none (default: auto)
+  --cta-style <style>         gif | svg (default: gif); gif = Flow paper-colour GIF,
+                              svg = transparent inline SVG fallback
   --no-open                   Do not open the result in a browser (also skipped
                               under node --test, CI, or WECHAT_STYLER_NO_OPEN=1)
   --topics <a,b,c|none>       WeChat topic tags at the end of the body, rendered
@@ -77,6 +79,7 @@ function parseArgs() {
     topLabel: null,
     coverAuthor: null,
     brandCta: 'auto',
+    ctaStyle: 'gif',
     topics: null,
     strictDensity: false,
     keepH1: false,
@@ -138,6 +141,10 @@ function parseArgs() {
       case 'brand-cta':
         if (!['auto','ending','none'].includes(value)) throw new Error('--brand-cta requires auto, ending, or none');
         options.brandCta = value;
+        break;
+      case 'cta-style':
+        if (!['gif','svg'].includes(value)) throw new Error('--cta-style requires gif or svg');
+        options.ctaStyle = value;
         break;
       case 'theme':
         options.theme = value;
@@ -1197,7 +1204,7 @@ ${section}
 </body>
 </html>`;
 
-  return applyBrandCta(html, { mode: options.brandCta || 'auto', cover: options.cover, maxWidth: theme.max_width });
+  return applyBrandCta(html, { mode: options.brandCta || 'auto', style: options.ctaStyle || 'gif', cover: options.cover, maxWidth: theme.max_width });
 }
 
 // Convert single file
