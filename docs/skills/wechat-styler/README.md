@@ -75,7 +75,7 @@ $wechat-styler Then run: node scripts/validate.mjs path/to/output.html
 
 ## The Brand Theme Question
 
-The default theme `zhijian` is the author's own brand theme (warm parchment + terracotta accent + ink-blue structure, derived from a brand design system). It's included as a **worked example** of how to encode a brand system into a skill — not as a product recommendation.
+The default theme `zhijian` is the author's own brand theme (warm parchment + terracotta accent + ink-blue structure, derived from a brand design system; v3 uses an LXGW WenKai display stack for headings, a screen sans stack for body text, and a short ink line with a clay dot to close the article). It's included as a **worked example** of how to encode a brand system into a skill — not as a product recommendation.
 
 To make it yours: copy `themes/zhijian.yaml`, change the colors, fonts, and `top_label`, give it your name. That's the whole branding step.
 

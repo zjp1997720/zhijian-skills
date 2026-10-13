@@ -141,8 +141,8 @@ calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"
 | 强调色(标签/线条/墨点) | `theme.accent_color` | `#B85235` |
 | 结构色(标签2) | `theme.accent_secondary` | `#1B365D` |
 | 副标题 | `theme.tertiary_color` | `#6B6A64` |
-| 标题字体 | `theme.heading_font` | 仓耳今楷 |
-| 正文字体 | `theme.font_family_cn` | 思源宋体 |
+| 标题字体 | `theme.heading_font` | 霞鹜文楷 |
+| 正文字体 | `theme.font_family_cn` | 思源黑体 |
 | UI字体 | `theme.ui_font` | 思源黑体 |
 
 ## 尺寸策略

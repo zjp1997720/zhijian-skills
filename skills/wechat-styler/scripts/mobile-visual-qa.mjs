@@ -121,11 +121,17 @@ async function inspect(page, options) {
     if (expectZhijian && h2s.length > 0 && warmBarH2s.length !== h2s.length) {
       failures.push(`Zhijian warm-bar H2 count ${warmBarH2s.length}/${h2s.length}`);
     }
-    if (expectZhijian && h2Style && !h2Style.fontFamily.includes('TsangerJinKai02')) {
+    if (expectZhijian && h2Style && !h2Style.fontFamily.includes('LXGW WenKai')) {
       failures.push('Zhijian H2 does not declare the editorial heading font');
     }
-    if (expectZhijian && h3Style && (h3Style.fontSize !== '18px' || h3Style.fontWeight !== '600')) {
-      failures.push(`Zhijian H3 expected 18px/600, got ${h3Style.fontSize}/${h3Style.fontWeight}`);
+    if (expectZhijian && h3Style && (h3Style.fontSize !== '18px' || h3Style.fontWeight !== '500')) {
+      failures.push(`Zhijian H3 expected 18px/500, got ${h3Style.fontSize}/${h3Style.fontWeight}`);
+    }
+    if (expectZhijian && bodyStyle && !bodyStyle.fontFamily.includes('Source Han Sans SC')) {
+      failures.push('Zhijian body does not declare the screen sans stack');
+    }
+    if (expectZhijian && root.querySelectorAll('[data-wechat-block="end-mark"] svg circle').length !== 1) {
+      failures.push('Zhijian ending landing mark is missing');
     }
     if (expectZhijian && bodyStyle && (
       bodyStyle.fontSize !== '15px'

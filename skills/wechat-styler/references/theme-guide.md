@@ -20,16 +20,17 @@
 
 ## zhijian（智见AI 品牌主题）— 默认
 
-基于 DESIGN.md 品牌系统，暖纸感 × 顾问可信度。
+基于智见AI 品牌系统 v3：纸 · 墨 · 赭 · 字 + 落地线。
 
-- 纸感背景 `#F5F4ED`，深暖陶行动色 `#B85235`，墨蓝结构色 `#1B365D`
-- 四层字体分工：标题使用仓耳今楷，正文使用思源宋体 VF，元信息/UI 使用思源黑体，代码使用 SF Mono
-- H2 左侧暖陶竖线，H3 墨蓝色，引用块使用信任蓝卡片
-- 当前样式锁：`editorial-weighted-2026-07`，完整版本对照与移动端基线见 `zhijian-theme-baseline.md`
+- 纸色背景 `#F5F4ED`，赭石行动色 `#B85235`，墨蓝结构色 `#1B365D`；全部色值限定在 v3 调色板
+- 四个字体角色：标题用判断字霞鹜文楷（统一 500，无 Bold），正文、图注与 UI 用屏幕字思源黑体栈（Android 没有宋体），代码用 JetBrains Mono
+- H2 左侧赭石竖线，H3 墨蓝色，引用块使用墨蓝淡底卡片；文末一条墨蓝短落地线 + 赭石圆点（`end_mark: landing`）
+- 公众号不嵌入字体，读者手机按栈降级，降级说明见 `zhijian-theme-baseline.md`
+- 当前样式锁：`v3-paper-ink-2026-10`，完整版本对照与移动端基线见 `zhijian-theme-baseline.md`
 
 ```yaml
-font_family_cn: 'Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC','Songti SC',STSong,SimSun,Georgia,serif
-font_family_en: 'Source Han Serif SC VF','Source Han Serif SC',Georgia,serif
+font_family_cn: 'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif
+font_family_en: 'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif
 font_size: 15
 body_weight: 450
 line_height: 1.68
@@ -38,11 +39,15 @@ accent_secondary: '#1B365D'
 background_color: '#F5F4ED'
 surface_color: '#FAF9F5'
 text_color: '#141413'
-heading_font: 'TsangerJinKai02','Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC','Songti SC',STSong,SimSun,Georgia,serif
-ui_font: 'Source Han Sans CN','Source Han Sans SC','Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif
-code_font: 'SF Mono','JetBrains Mono',Menlo,Consolas,'Source Han Serif SC VF','Source Han Serif SC',monospace
-code_bg: '#30302E'
+heading_font: 'LXGW WenKai','LXGW WenKai Screen','Source Han Serif SC Heavy','Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC',serif
+heading_weight: 500
+ui_font: 'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif
+code_font: 'JetBrains Mono',Consolas,'Source Han Sans SC',monospace
+code_bg: '#141413'
 code_color: '#F5F4ED'
+quote_text: '#504E49'
+human_accent: '#B85235'
+end_mark: landing
 ```
 
 **适用场景：** 所有智见AI品牌内容 — 公众号文章、培训讲义、课程内容、方法论分享、AI 落地案例

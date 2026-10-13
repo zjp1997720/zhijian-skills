@@ -514,6 +514,17 @@ function softRule(theme, {
   return `<section style="margin:${margin};background-color:${theme.background_color};"><section style="width:${width};${maxWidthStyle}border-top:1px solid ${color};height:0;margin:${ruleMargin};background-color:${theme.background_color};"><span><br /></span></section></section>\n`;
 }
 
+// 文末结尾标记：短落地线（墨蓝 2px × 64px，终点切线水平）+ 赭石 10px 圆点，居左。
+// 线宽:点径 = 1:5，圆心在线轴上、距线终点 3.5 × 线宽。只由主题 `end_mark: landing` 开启。
+function renderEndMark(theme) {
+  if (theme.end_mark !== 'landing') return '';
+  const ink = theme.trust_blue || theme.accent_secondary || '#1B365D';
+  const clay = theme.accent_color || '#B85235';
+  return `<!-- 文末结尾标记 -->
+<section data-wechat-block="end-mark" style="max-width:${theme.max_width}px;margin:0 auto;padding:0 16px 28px;line-height:0;text-align:left;background-color:${theme.background_color};"><svg xmlns="http://www.w3.org/2000/svg" width="76" height="12" viewBox="0 0 76 12" style="display:block;width:76px;height:12px;margin:0;overflow:visible;" aria-hidden="true"><path d="M1 9 C 20 9, 34 6, 64 6" fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round"></path><circle cx="71" cy="6" r="5" fill="${clay}"></circle></svg></section>
+`;
+}
+
 function createBaseRenderer(theme) {
   const renderer = new marked.Renderer();
   const scale = theme.type_scale;
@@ -942,17 +953,19 @@ function createZhijianWarmPaperRenderer(theme) {
   const bodyWeight = theme.body_weight || 400;
   const trustBlue = theme.trust_blue || theme.accent_secondary || '#1B365D';
   const primaryText = theme.primary_text || '#A04A2E';
+  // 判断字只有 300/400/500 三档，标题统一 500，避免浏览器伪粗。
+  const headingWeight = theme.heading_weight || 500;
 
   renderer.heading = (text, level) => {
     const headingFont = `font-family:${theme.heading_font};word-break:break-word;background-color:${theme.background_color};`;
     if (level === 1) {
-      return `<h1 style="${headingFont}font-size:${scale.h1}px;font-weight:500;color:${theme.text_color};line-height:${rhythm.heading_line_height};margin:0 0 18px;padding:0;">${bgSpan(theme, text)}</h1>\n`;
+      return `<h1 style="${headingFont}font-size:${scale.h1}px;font-weight:${headingWeight};color:${theme.text_color};line-height:${rhythm.heading_line_height};margin:0 0 18px;padding:0;">${bgSpan(theme, text)}</h1>\n`;
     }
     if (level === 2) {
-      return `<h2 style="${headingFont}font-size:${scale.h2}px;font-weight:500;color:${theme.text_color};line-height:1.28;margin:30px 0 14px;padding:0 0 0 12px;border-left:4px solid ${theme.accent_color};border-radius:2px;">${bgSpan(theme, text)}</h2>\n`;
+      return `<h2 style="${headingFont}font-size:${scale.h2}px;font-weight:${headingWeight};color:${theme.text_color};line-height:1.28;margin:30px 0 14px;padding:0 0 0 12px;border-left:4px solid ${theme.accent_color};border-radius:2px;">${bgSpan(theme, text)}</h2>\n`;
     }
     if (level === 3) {
-      return `<h3 style="${headingFont}font-size:${scale.h3}px;font-weight:600;color:${trustBlue};line-height:1.32;margin:24px 0 10px;padding:0;">${bgSpan(theme, text)}</h3>\n`;
+      return `<h3 style="${headingFont}font-size:${scale.h3}px;font-weight:${headingWeight};color:${trustBlue};line-height:1.32;margin:24px 0 10px;padding:0;">${bgSpan(theme, text)}</h3>\n`;
     }
     return `<h${level} style="${headingFont}font-size:${scale.body}px;font-weight:500;color:${theme.secondary_color};line-height:1.35;margin:18px 0 8px;padding:0;">${bgSpan(theme, text)}</h${level}>\n`;
   };
@@ -966,7 +979,7 @@ function createZhijianWarmPaperRenderer(theme) {
     const quoteText = theme.quote_text || theme.secondary_color;
     const quoteMark = theme.quote_mark || trustBlue;
     const quoteContent = toneBlockContent(quote, theme, quoteBg, quoteText);
-    const quoteMarkHtml = `<span style="display:inline-block;font-family:${theme.heading_font};font-size:21px;font-weight:600;line-height:1;color:${quoteMark};vertical-align:-2px;margin-right:7px;background-color:${quoteBg};">“</span>`;
+    const quoteMarkHtml = `<span style="display:inline-block;font-family:${theme.heading_font};font-size:21px;font-weight:${headingWeight};line-height:1;color:${quoteMark};vertical-align:-2px;margin-right:7px;background-color:${quoteBg};">“</span>`;
     const quotedContent = quoteContent.replace(/(<p\b[^>]*>)/i, `$1${quoteMarkHtml}`);
     return `<section data-wechat-block="quote" style="background-color:${quoteBg};padding:13px 16px 14px;margin:0 0 ${rhythm.paragraph_margin}px;border-radius:4px;">\n${quotedContent}</section>\n`;
   };
@@ -1169,6 +1182,7 @@ ${section}
     // Section rhythm is handled by padding and theme-specific headings, not automatic full-width rules.
   });
 
+  html += renderEndMark(theme);
   html += renderTopicTags(options.resolvedTopics || [], theme);
 
   html += `</section>

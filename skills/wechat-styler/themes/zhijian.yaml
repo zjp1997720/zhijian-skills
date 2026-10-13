@@ -1,9 +1,9 @@
 name: zhijian
-description: 智见AI 品牌主题 - 暖纸感 × 顾问可信度，深暖陶行动 + 墨蓝结构
-theme_revision: editorial-weighted-2026-07
+description: 智见AI 品牌主题 v3 - 纸 · 墨 · 赭 · 字 + 落地线，判断字标题 + 屏幕字正文
+theme_revision: v3-paper-ink-2026-10
 renderer_preset: zhijian-warm-paper
-font_family_cn: "'Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC','Songti SC',STSong,SimSun,Georgia,serif"
-font_family_en: "'Source Han Serif SC VF','Source Han Serif SC',Georgia,serif"
+font_family_cn: "'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif"
+font_family_en: "'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif"
 font_size: 15
 body_weight: 450
 line_height: 1.68
@@ -14,14 +14,15 @@ surface_color: "#FAF9F5"
 text_color: "#141413"
 secondary_color: "#504E49"
 tertiary_color: "#6B6A64"
-heading_font: "'TsangerJinKai02','Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC','Songti SC',STSong,SimSun,Georgia,serif"
-ui_font: "'Source Han Sans CN','Source Han Sans SC','Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif"
-code_font: "Menlo,Consolas,'Courier New','Source Han Serif SC VF','Source Han Serif SC',monospace"
-code_bg: "#30302E"
+heading_font: "'LXGW WenKai','LXGW WenKai Screen','Source Han Serif SC Heavy','Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC',serif"
+heading_weight: 500
+ui_font: "'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif"
+code_font: "'JetBrains Mono',Consolas,'Source Han Sans SC',monospace"
+code_bg: "#141413"
 code_color: "#F5F4ED"
 quote_border: "#1B365D"
 quote_bg: "#EEF2F7"
-quote_text: "#35465A"
+quote_text: "#504E49"
 quote_mark: "#1B365D"
 divider_color: "#E5E3D8"
 border_color: "#E5E3D8"
@@ -29,7 +30,7 @@ tag_bg: "#FAF9F5"
 tag_color: "#B85235"
 trust_blue: "#1B365D"
 trust_bg: "#EEF2F7"
-human_accent: "#C96442"
+human_accent: "#B85235"
 primary_text: "#A04A2E"
 max_width: 640
 type_scale:
@@ -53,3 +54,4 @@ block_style:
   code_style: dark-terminal
   image_style: soft-frame
 top_label: 智见AI
+end_mark: landing

@@ -36,7 +36,7 @@ test('real converter default, components, SVG and opt-out routes',()=>{
    fs.writeFileSync(path.join(dir,'article.md'),'---\ntitle: 验收文章\n---\n\n## 正文\n\n正文保留。\n');
    const r=spawnSync(process.execPath,[path.join(root,'scripts/convert.mjs'),path.join(dir,'*.md'),...args],{encoding:'utf8'});
    assert.equal(r.status,0,r.stderr);const h=fs.readFileSync(path.join(dir,'article_wechat.html'),'utf8');
-   assert.equal(count(h,'opening'),opening);assert.equal(count(h,'ending'),ending);assert.equal(h.includes('<svg'),svg);assert.match(h,/正文保留/);
+   assert.equal(count(h,'opening'),opening);assert.equal(count(h,'ending'),ending);assert.equal(h.replace(/<section data-wechat-block="end-mark"[\s\S]*?<\/section>/,'').includes('<svg'),svg);assert.match(h,/正文保留/);
   }finally{fs.rmSync(dir,{recursive:true,force:true});}
  }
 });
