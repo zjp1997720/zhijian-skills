@@ -1501,7 +1501,7 @@ export function generateCoverAnimation(theme, options = {}) {
     tertiary: theme.tertiary_color || theme.secondary_color || '#6B6A64',
     light: '#D8D5C8',
     hint: '#9CA3AF',
-    headingFont: theme.heading_font || "'TsangerJinKai02','Source Han Serif SC','Songti SC',Georgia,serif",
+    headingFont: theme.heading_font || "'LXGW WenKai','LXGW WenKai Screen','Source Han Serif SC','Noto Serif CJK SC',serif",
     serifFont: theme.font_family_cn || "'Source Han Serif SC','Songti SC',serif",
     uiFont: theme.ui_font || "'Source Han Sans SC','PingFang SC',sans-serif",
     // Keep broad Latin fallbacks, but never treat font choice as a substitute

@@ -28,7 +28,7 @@ SVG SMIL 动画(`<animate>` / `<animateTransform>`)在微信公众号里**只有
 
 宽度固定 360，高度按实际行数逐元素累加（上表为带副标题、无标签时的参考值），不再预留固定空白带。
 
-品牌标签（ink-wash、spotlight）取 `theme.top_label`，画卷右下署名默认为「<top_label> 出品」。非智见AI账号用 `--top-label "<文本>"`（`none` 隐藏）和 `--cover-author "<署名>"`（原样输出、不加「出品」，`none` 隐藏）设置，不再事后改 HTML；首尾 GIF 仍是智见AI素材，必要时加 `--brand-cta none`。
+品牌标签（ink-wash、spotlight）取 `theme.top_label`，画卷右下署名默认为「<top_label> 出品」。非智见AI账号用 `--top-label "<文本>"`（`none` 隐藏）和 `--cover-author "<署名>"`（原样输出、不加「出品」，`none` 隐藏）设置，不再事后改 HTML；首尾引导仍是智见AI素材，必要时加 `--brand-cta none`。
 
 ### 墨韵开篇 (ink-wash)
 
@@ -141,8 +141,8 @@ calcMode="spline" keyTimes="0;1" keySplines="0.22 1 0.36 1"
 | 强调色(标签/线条/墨点) | `theme.accent_color` | `#B85235` |
 | 结构色(标签2) | `theme.accent_secondary` | `#1B365D` |
 | 副标题 | `theme.tertiary_color` | `#6B6A64` |
-| 标题字体 | `theme.heading_font` | 仓耳今楷 |
-| 正文字体 | `theme.font_family_cn` | 思源宋体 |
+| 标题字体 | `theme.heading_font` | 霞鹜文楷 |
+| 正文字体 | `theme.font_family_cn` | 思源黑体 |
 | UI字体 | `theme.ui_font` | 思源黑体 |
 
 ## 尺寸策略

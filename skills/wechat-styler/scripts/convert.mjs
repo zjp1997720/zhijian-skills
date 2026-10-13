@@ -50,6 +50,8 @@ function parseArgs() {
   --cover-author <text|none>  Cover byline, used verbatim (scroll-painting);
                               default "<top label> 出品"; "none" hides it
   --brand-cta <mode>          auto | ending | none (default: auto)
+  --cta-style <style>         gif | svg (default: gif); gif = Flow paper-colour GIF,
+                              svg = transparent inline SVG fallback
   --no-open                   Do not open the result in a browser (also skipped
                               under node --test, CI, or WECHAT_STYLER_NO_OPEN=1)
   --topics <a,b,c|none>       WeChat topic tags at the end of the body, rendered
@@ -77,6 +79,7 @@ function parseArgs() {
     topLabel: null,
     coverAuthor: null,
     brandCta: 'auto',
+    ctaStyle: 'gif',
     topics: null,
     strictDensity: false,
     keepH1: false,
@@ -138,6 +141,10 @@ function parseArgs() {
       case 'brand-cta':
         if (!['auto','ending','none'].includes(value)) throw new Error('--brand-cta requires auto, ending, or none');
         options.brandCta = value;
+        break;
+      case 'cta-style':
+        if (!['gif','svg'].includes(value)) throw new Error('--cta-style requires gif or svg');
+        options.ctaStyle = value;
         break;
       case 'theme':
         options.theme = value;
@@ -313,12 +320,14 @@ const presetDefaults = {
   'zhijian-warm-paper': {
     type_scale: { h1: 28, h2: 22, h3: 18, body: 15, caption: 13, code: 14 },
     rhythm: {
-      body_line_height: 1.68,
+      body_line_height: 1.9,
+      body_letter_spacing: '0.034em',
       heading_line_height: 1.22,
-      paragraph_margin: 19,
+      h2_margin_top: 0,
+      paragraph_margin: 16,
       section_padding_first: 20,
-      section_padding: 32,
-      list_item_margin: 10
+      section_padding: 20,
+      list_item_margin: 8
     },
     block_style: {
       heading_style: 'warm-bar',
@@ -476,6 +485,9 @@ function replaceBackground(html, theme, bg) {
 
 function toneBlockContent(html, theme, bg, color = theme.secondary_color) {
   let toned = replaceBackground(html, theme, bg).replaceAll(`color:${theme.text_color};`, `color:${color};`);
+  if (theme.body_text_color && theme.body_text_color !== theme.text_color) {
+    toned = toned.replaceAll(`color:${theme.body_text_color};`, `color:${color};`);
+  }
   
   // 移除列表作为最后一个元素时最外层的 margin-bottom 声明
   toned = toned.replace(/(<(?:ul|ol)[^>]+?margin:\s*0\s+0\s+\d+px\s*(?:;)?)(?=[^>]*>[\s\S]*<\/(?:ul|ol)>\s*$)/i, (match) => {
@@ -514,6 +526,17 @@ function softRule(theme, {
   return `<section style="margin:${margin};background-color:${theme.background_color};"><section style="width:${width};${maxWidthStyle}border-top:1px solid ${color};height:0;margin:${ruleMargin};background-color:${theme.background_color};"><span><br /></span></section></section>\n`;
 }
 
+// 文末结尾标记：短落地线（墨蓝 2px × 64px，终点切线水平）+ 赭石 10px 圆点，居左。
+// 线宽:点径 = 1:5，圆心在线轴上、距线终点 3.5 × 线宽。只由主题 `end_mark: landing` 开启。
+function renderEndMark(theme) {
+  if (theme.end_mark !== 'landing') return '';
+  const ink = theme.trust_blue || theme.accent_secondary || '#1B365D';
+  const clay = theme.accent_color || '#B85235';
+  return `<!-- 文末结尾标记 -->
+<section data-wechat-block="end-mark" style="max-width:${theme.max_width}px;margin:0 auto;padding:0 16px 28px;line-height:0;text-align:left;background-color:${theme.background_color};"><svg xmlns="http://www.w3.org/2000/svg" width="76" height="12" viewBox="0 0 76 12" style="display:block;width:76px;height:12px;margin:0;overflow:visible;" aria-hidden="true"><path d="M1 9 C 20 9, 34 6, 64 6" fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round"></path><circle cx="71" cy="6" r="5" fill="${clay}"></circle></svg></section>
+`;
+}
+
 function createBaseRenderer(theme) {
   const renderer = new marked.Renderer();
   const scale = theme.type_scale;
@@ -526,7 +549,7 @@ function createBaseRenderer(theme) {
     }
     const indent = rhythm.paragraph_indent || 0;
     const indentStyle = indent > 0 ? `text-indent:${indent}em;` : '';
-    return `<p style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:0.008em;text-align:justify;margin:0 0 ${rhythm.paragraph_margin}px;padding:0;${indentStyle}word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, text)}</p>\n`;
+    return `<p style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.body_text_color || theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:${rhythm.body_letter_spacing || '0.008em'};text-align:justify;margin:0 0 ${rhythm.paragraph_margin}px;padding:0;${indentStyle}word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, text)}</p>\n`;
   };
 
   renderer.strong = (text) => {
@@ -655,7 +678,7 @@ function createMagazineEditorialRenderer(theme) {
         return `<h1 style="font-family:${theme.heading_font};font-weight:500;color:${theme.text_color};word-break:break-word;background-color:${theme.surface_color};font-size:${scale.h1}px;line-height:${rhythm.heading_line_height};margin:0 0 18px;padding:12px 14px;">${bgSpan(theme, text, theme.surface_color)}</h1>\n`;
       }
       if (level === 2) {
-        return `<h2 style="font-family:${theme.heading_font};font-weight:500;color:${theme.text_color};word-break:break-word;background-color:${theme.surface_color};font-size:${scale.h2}px;line-height:${rhythm.heading_line_height};margin:32px 0 14px;padding:9px 12px;border-left:3px solid ${theme.accent_color};">${bgSpan(theme, text, theme.surface_color)}</h2>\n`;
+        return `<h2 style="font-family:${theme.heading_font};font-weight:500;color:${theme.text_color};word-break:break-word;background-color:${theme.surface_color};font-size:${scale.h2}px;line-height:${rhythm.heading_line_height};margin:32px 0 14px;padding:9px 8px;border-left:3px solid ${theme.accent_color};">${bgSpan(theme, text, theme.surface_color)}</h2>\n`;
       }
       if (level === 3) {
         return `<h3 style="${headingBase}font-size:${scale.h3}px;line-height:1.4;margin:24px 0 10px;padding:0 0 6px;border-bottom:1px dotted ${theme.divider_color};">${bgSpan(theme, text)}</h3>\n`;
@@ -942,17 +965,20 @@ function createZhijianWarmPaperRenderer(theme) {
   const bodyWeight = theme.body_weight || 400;
   const trustBlue = theme.trust_blue || theme.accent_secondary || '#1B365D';
   const primaryText = theme.primary_text || '#A04A2E';
+  // 判断字只有 300/400/500 三档，标题统一 500，避免浏览器伪粗。
+  const headingWeight = theme.heading_weight || 500;
 
   renderer.heading = (text, level) => {
-    const headingFont = `font-family:${theme.heading_font};word-break:break-word;background-color:${theme.background_color};`;
+    // 显式字距 0：公众号正文容器默认继承约 0.034em 字距，标题不声明会被撑宽而多折一行。
+    const headingFont = `font-family:${theme.heading_font};letter-spacing:0;word-break:break-word;background-color:${theme.background_color};`;
     if (level === 1) {
-      return `<h1 style="${headingFont}font-size:${scale.h1}px;font-weight:500;color:${theme.text_color};line-height:${rhythm.heading_line_height};margin:0 0 18px;padding:0;">${bgSpan(theme, text)}</h1>\n`;
+      return `<h1 style="${headingFont}font-size:${scale.h1}px;font-weight:${headingWeight};color:${theme.text_color};line-height:${rhythm.heading_line_height};margin:0 0 18px;padding:0;">${bgSpan(theme, text)}</h1>\n`;
     }
     if (level === 2) {
-      return `<h2 style="${headingFont}font-size:${scale.h2}px;font-weight:500;color:${theme.text_color};line-height:1.28;margin:30px 0 14px;padding:0 0 0 12px;border-left:4px solid ${theme.accent_color};border-radius:2px;">${bgSpan(theme, text)}</h2>\n`;
+      return `<h2 style="${headingFont}font-size:${scale.h2}px;font-weight:${headingWeight};color:${theme.text_color};line-height:1.28;margin:${rhythm.h2_margin_top ?? 30}px 0 14px;padding:0 0 0 12px;border-left:4px solid ${theme.accent_color};border-radius:2px;">${bgSpan(theme, text)}</h2>\n`;
     }
     if (level === 3) {
-      return `<h3 style="${headingFont}font-size:${scale.h3}px;font-weight:600;color:${trustBlue};line-height:1.32;margin:24px 0 10px;padding:0;">${bgSpan(theme, text)}</h3>\n`;
+      return `<h3 style="${headingFont}font-size:${scale.h3}px;font-weight:${headingWeight};color:${trustBlue};line-height:1.32;margin:24px 0 10px;padding:0;">${bgSpan(theme, text)}</h3>\n`;
     }
     return `<h${level} style="${headingFont}font-size:${scale.body}px;font-weight:500;color:${theme.secondary_color};line-height:1.35;margin:18px 0 8px;padding:0;">${bgSpan(theme, text)}</h${level}>\n`;
   };
@@ -966,7 +992,7 @@ function createZhijianWarmPaperRenderer(theme) {
     const quoteText = theme.quote_text || theme.secondary_color;
     const quoteMark = theme.quote_mark || trustBlue;
     const quoteContent = toneBlockContent(quote, theme, quoteBg, quoteText);
-    const quoteMarkHtml = `<span style="display:inline-block;font-family:${theme.heading_font};font-size:21px;font-weight:600;line-height:1;color:${quoteMark};vertical-align:-2px;margin-right:7px;background-color:${quoteBg};">“</span>`;
+    const quoteMarkHtml = `<span style="display:inline-block;font-family:${theme.heading_font};font-size:21px;font-weight:${headingWeight};line-height:1;color:${quoteMark};vertical-align:-2px;margin-right:7px;background-color:${quoteBg};">“</span>`;
     const quotedContent = quoteContent.replace(/(<p\b[^>]*>)/i, `$1${quoteMarkHtml}`);
     return `<section data-wechat-block="quote" style="background-color:${quoteBg};padding:13px 16px 14px;margin:0 0 ${rhythm.paragraph_margin}px;border-radius:4px;">\n${quotedContent}</section>\n`;
   };
@@ -989,11 +1015,11 @@ function createZhijianWarmPaperRenderer(theme) {
   renderer.list = (body, ordered) => {
     const tag = ordered ? 'ol' : 'ul';
     const listStyle = ordered ? 'list-style-type:decimal;' : 'list-style-type:disc;';
-    return `<${tag} style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.text_color};line-height:${rhythm.body_line_height};margin:0 0 ${rhythm.paragraph_margin}px;padding-left:24px;${listStyle}background-color:${theme.background_color};">\n${body}</${tag}>\n`;
+    return `<${tag} style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.body_text_color || theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:${rhythm.body_letter_spacing || '0.008em'};margin:0 0 ${rhythm.paragraph_margin}px;padding-left:24px;${listStyle}background-color:${theme.background_color};">\n${body}</${tag}>\n`;
   };
 
   renderer.listitem = (text) => {
-    return `<li style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.text_color};line-height:${rhythm.body_line_height};text-align:justify;margin:0 0 ${rhythm.list_item_margin}px;word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, processTaskListItem(text, theme))}</li>\n`;
+    return `<li style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.body_text_color || theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:${rhythm.body_letter_spacing || '0.008em'};text-align:justify;margin:0 0 ${rhythm.list_item_margin}px;word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, processTaskListItem(text, theme))}</li>\n`;
   };
 
   renderer.image = (href, title, text) => {
@@ -1169,6 +1195,7 @@ ${section}
     // Section rhythm is handled by padding and theme-specific headings, not automatic full-width rules.
   });
 
+  html += renderEndMark(theme);
   html += renderTopicTags(options.resolvedTopics || [], theme);
 
   html += `</section>
@@ -1177,7 +1204,7 @@ ${section}
 </body>
 </html>`;
 
-  return applyBrandCta(html, { mode: options.brandCta || 'auto', cover: options.cover, maxWidth: theme.max_width });
+  return applyBrandCta(html, { mode: options.brandCta || 'auto', style: options.ctaStyle || 'gif', cover: options.cover, maxWidth: theme.max_width });
 }
 
 // Convert single file

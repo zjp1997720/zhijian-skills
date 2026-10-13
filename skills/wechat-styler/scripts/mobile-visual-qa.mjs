@@ -121,18 +121,39 @@ async function inspect(page, options) {
     if (expectZhijian && h2s.length > 0 && warmBarH2s.length !== h2s.length) {
       failures.push(`Zhijian warm-bar H2 count ${warmBarH2s.length}/${h2s.length}`);
     }
-    if (expectZhijian && h2Style && !h2Style.fontFamily.includes('TsangerJinKai02')) {
+    if (expectZhijian && h2Style && !h2Style.fontFamily.includes('LXGW WenKai')) {
       failures.push('Zhijian H2 does not declare the editorial heading font');
     }
-    if (expectZhijian && h3Style && (h3Style.fontSize !== '18px' || h3Style.fontWeight !== '600')) {
-      failures.push(`Zhijian H3 expected 18px/600, got ${h3Style.fontSize}/${h3Style.fontWeight}`);
+    if (expectZhijian && h3Style && (h3Style.fontSize !== '18px' || h3Style.fontWeight !== '500')) {
+      failures.push(`Zhijian H3 expected 18px/500, got ${h3Style.fontSize}/${h3Style.fontWeight}`);
+    }
+    if (expectZhijian && bodyStyle && !bodyStyle.fontFamily.includes('Source Han Sans SC')) {
+      failures.push('Zhijian body does not declare the screen sans stack');
+    }
+    if (expectZhijian) {
+      root.querySelectorAll('[data-wechat-cta]').forEach((cta) => {
+        const kind = cta.getAttribute('data-wechat-cta');
+        const bg = getComputedStyle(cta).backgroundColor;
+        if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') failures.push(`Zhijian ${kind} CTA has a background (${bg}); it must stay transparent`);
+        const gifImg = cta.querySelector('img[data-wechat-cta-image]');
+        if (gifImg) {
+          // v7 default: the Flow GIF carries the paper colour and the text, so the wrapper adds neither.
+          if (cta.getAttribute('data-zhijian-cta') !== 'v7-flow-gif') failures.push(`Zhijian ${kind} CTA image is not marked v7-flow-gif`);
+          if (!/\.gif(?:[?#]|$)/i.test(gifImg.getAttribute('src') || '')) failures.push(`Zhijian ${kind} CTA image is not a GIF`);
+        } else if (!cta.querySelector('svg[data-zhijian-cta] path')) {
+          failures.push(`Zhijian ${kind} CTA is neither the v7 Flow GIF nor the inline vector SVG`);
+        }
+      });
+    }
+    if (expectZhijian && root.querySelectorAll('[data-wechat-block="end-mark"] svg circle').length !== 1) {
+      failures.push('Zhijian ending landing mark is missing');
     }
     if (expectZhijian && bodyStyle && (
       bodyStyle.fontSize !== '15px'
-      || bodyStyle.fontWeight !== '450'
-      || Math.abs(Number.parseFloat(bodyStyle.lineHeight) - 25.2) > 0.2
+      || bodyStyle.fontWeight !== '400'
+      || Math.abs(Number.parseFloat(bodyStyle.lineHeight) - 28.5) > 0.2
     )) {
-      failures.push(`Zhijian body expected 15px/450/1.68, got ${bodyStyle.fontSize}/${bodyStyle.fontWeight}/${bodyStyle.lineHeight}`);
+      failures.push(`Zhijian body expected 15px/400/1.9, got ${bodyStyle.fontSize}/${bodyStyle.fontWeight}/${bodyStyle.lineHeight}`);
     }
     return {
       viewport: { width: window.innerWidth, height: window.innerHeight },

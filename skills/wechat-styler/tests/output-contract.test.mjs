@@ -128,10 +128,17 @@ test('zhijian theme keeps action and trust semantics visually distinct', () => {
 
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const html = fs.readFileSync(output, 'utf8');
-  assert.match(html, /font-size:15px;font-weight:450[^>]+line-height:1\.68/);
-  assert.match(html, /<h2[^>]+font-family:'TsangerJinKai02'[^>]+font-size:22px;font-weight:500[^>]+border-left:4px solid #B85235/);
-  assert.match(html, /<h3[^>]+font-family:'TsangerJinKai02'[^>]+font-size:18px;font-weight:600[^>]+color:#1B365D/);
-  assert.match(html, /<ul[^>]+font-size:15px;font-weight:450/);
+  assert.match(html, /<p style="[^"]*font-size:15px;font-weight:400;color:#504E49;line-height:1\.9;letter-spacing:0\.034em;text-align:justify;margin:0 0 16px;/);
+  assert.match(html, /<h2[^>]+font-family:'LXGW WenKai','LXGW WenKai Screen'[^>]+font-size:22px;font-weight:500[^>]+border-left:4px solid #B85235/);
+  assert.match(html, /<h3[^>]+font-family:'LXGW WenKai','LXGW WenKai Screen'[^>]+font-size:18px;font-weight:500[^>]+color:#1B365D/);
+  assert.match(html, /<p style="font-family:'Source Han Sans SC','Noto Sans SC','PingFang SC'[^"]*font-size:15px;font-weight:400/);
+  assert.match(html, /font-size:21px;font-weight:500;line-height:1;color:#1B365D[^>]*>“<\/span>/);
+  assert.doesNotMatch(html, /font-weight:(600|700|900)[^"]*"[^>]*>[^<]*<\/h[1-3]>/);
+  assert.match(html, /<ul[^>]+font-size:15px;font-weight:400;color:#504E49;line-height:1\.9;letter-spacing:0\.034em/);
+  assert.match(html, /<li[^>]+color:#504E49;line-height:1\.9;letter-spacing:0\.034em;text-align:justify;margin:0 0 8px;/);
+  assert.match(html, /<h2[^>]+letter-spacing:0;[^>]+margin:0px 0 14px;/);
+  assert.match(html, /<section style="max-width:640px;margin:0 auto;padding:20px 16px;/);
+  assert.doesNotMatch(html, /<p style="[^"]*font-size:15px[^"]*color:#141413;line-height:1\.9/);
   assert.match(html, /<strong style="color:#A04A2E;font-weight:600/);
   assert.match(html, /<a href="https:\/\/example\.com"[^>]+color:#1B365D/);
   assert.match(html, /<section data-wechat-block="quote" style="background-color:#EEF2F7;padding:13px 16px 14px[^>]+border-radius:4px;">/);
@@ -139,9 +146,53 @@ test('zhijian theme keeps action and trust semantics visually distinct', () => {
   assert.doesNotMatch(html, /display:block[^>]+>“<\/span>/);
   assert.doesNotMatch(html, /background-color:#EEF2F7;border-left:/);
   assert.match(html, /<section style="text-align:center;margin:0;background-color:#F5F4ED;">\s*<img[^>]+alt="图注测试"/);
-  assert.match(html, /<p style="font-family:'Source Han Sans CN'[^\"]*font-size:13px[^\"]*line-height:1\.4;text-align:center;margin:0 12px 22px/);
+  assert.match(html, /<p style="font-family:'Source Han Sans SC'[^\"]*font-size:13px[^\"]*line-height:1\.4;text-align:center;margin:0 12px 19px/);
   assert.doesNotMatch(html, /text-align:center;margin:0 0 8px;background-color:#F5F4ED/);
   fs.rmSync(workDir, { recursive: true, force: true });
+});
+
+test('zhijian theme stays inside the v3 palette and display font stack', () => {
+  const yaml = fs.readFileSync(path.join(skillRoot, 'themes/zhijian.yaml'), 'utf8');
+  const palette = new Set(['#F5F4ED', '#FAF9F5', '#1B365D', '#B85235', '#141413', '#E5E3D8', '#504E49', '#6B6A64', '#A04A2E', '#EEF2F7']);
+  const colors = [...yaml.matchAll(/#[0-9A-Fa-f]{6}\b/g)].map((match) => match[0].toUpperCase());
+  assert.ok(colors.length > 0);
+  for (const color of colors) assert.ok(palette.has(color), `${color} is not a v3 palette color`);
+  assert.doesNotMatch(yaml, /Tsanger|Songti|Georgia|STSong|SimSun/);
+  assert.match(yaml, /^heading_font: "'LXGW WenKai',/m);
+  assert.match(yaml, /^font_family_cn: "'Source Han Sans SC',/m);
+  assert.match(yaml, /^code_font: "'JetBrains Mono',/m);
+});
+
+test('zhijian theme closes the article with one landing mark before topics and the ending CTA', () => {
+  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), 'wechat-zhijian-end-mark-'));
+  try {
+    const input = path.join(workDir, 'article.md');
+    fs.writeFileSync(input, '## 章节\n\n最后一段正文。\n');
+    const output = path.join(workDir, 'zhijian.html');
+    const result = runConvert(workDir, [input, '--theme', 'zhijian', '--topics', 'AI培训,企业AI', '--no-open', '--output', output]);
+    assert.equal(result.status, 0, result.stderr || result.stdout);
+    const html = fs.readFileSync(output, 'utf8');
+    const marks = html.match(/<section data-wechat-block="end-mark"[\s\S]*?<\/section>/g) || [];
+    assert.equal(marks.length, 1);
+    const mark = marks[0];
+    assert.match(mark, /text-align:left/);
+    assert.match(mark, /<path d="M1 9 C 20 9, 34 6, 64 6" fill="none" stroke="#1B365D" stroke-width="2"/);
+    assert.match(mark, /<circle cx="71" cy="6" r="5" fill="#B85235">/);
+    assert.doesNotMatch(mark, /<animate/);
+    const markAt = html.indexOf('data-wechat-block="end-mark"');
+    assert.ok(markAt > html.indexOf('最后一段正文'));
+    assert.ok(markAt < html.indexOf('data-wechat-topics='));
+    assert.ok(markAt < html.indexOf('data-wechat-cta="ending"'));
+    assert.ok(html.indexOf('data-wechat-topics=') < html.indexOf('data-wechat-cta="ending"'));
+    const ending = html.match(/<section data-wechat-cta="ending"[^>]*>/)[0];
+    assert.doesNotMatch(ending, /background/i, 'ending CTA stays transparent on the paper body');
+    assert.match(html.slice(html.indexOf('data-wechat-cta="ending"')), /^data-wechat-cta="ending"[^>]*data-zhijian-cta="v7-flow-gif"[^>]*><img [^>]*data-wechat-cta-image="ending"[^>]*zhijian-cta-ending-flow-da8009fbeaa2\.gif/);
+
+    const minimalOutput = path.join(workDir, 'minimal.html');
+    const minimal = runConvert(workDir, [input, '--theme', 'minimal', '--no-open', '--output', minimalOutput]);
+    assert.equal(minimal.status, 0, minimal.stderr || minimal.stdout);
+    assert.doesNotMatch(fs.readFileSync(minimalOutput, 'utf8'), /data-wechat-block="end-mark"/);
+  } finally { fs.rmSync(workDir, { recursive: true, force: true }); }
 });
 
 for (const script of ['convert', 'content-density-audit', 'mobile-visual-qa']) {

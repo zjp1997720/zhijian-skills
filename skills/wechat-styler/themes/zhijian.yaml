@@ -1,27 +1,31 @@
 name: zhijian
-description: 智见AI 品牌主题 - 暖纸感 × 顾问可信度，深暖陶行动 + 墨蓝结构
-theme_revision: editorial-weighted-2026-07
+description: 智见AI 品牌主题 v3 - 纸 · 墨 · 赭 · 字 + 落地线，判断字标题 + 屏幕字正文
+theme_revision: v3-breathing-2026-10
 renderer_preset: zhijian-warm-paper
-font_family_cn: "'Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC','Songti SC',STSong,SimSun,Georgia,serif"
-font_family_en: "'Source Han Serif SC VF','Source Han Serif SC',Georgia,serif"
+font_family_cn: "'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif"
+font_family_en: "'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif"
 font_size: 15
-body_weight: 450
-line_height: 1.68
+body_weight: 400
+line_height: 1.9
 accent_color: "#B85235"
 accent_secondary: "#1B365D"
 background_color: "#F5F4ED"
 surface_color: "#FAF9F5"
 text_color: "#141413"
+# 正文与列表用次级文字色：对纸底对比度 7.5:1（仍高于 AAA 7:1），比 #141413 的 16.7:1 少一半墨重；
+# 标题、加粗保持 #141413 / 赭石，层级反而更清楚。
+body_text_color: "#504E49"
 secondary_color: "#504E49"
 tertiary_color: "#6B6A64"
-heading_font: "'TsangerJinKai02','Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC','Songti SC',STSong,SimSun,Georgia,serif"
-ui_font: "'Source Han Sans CN','Source Han Sans SC','Noto Sans CJK SC','PingFang SC','Microsoft YaHei',sans-serif"
-code_font: "Menlo,Consolas,'Courier New','Source Han Serif SC VF','Source Han Serif SC',monospace"
-code_bg: "#30302E"
+heading_font: "'LXGW WenKai','LXGW WenKai Screen','Source Han Serif SC Heavy','Source Han Serif SC VF','Source Han Serif SC','Noto Serif CJK SC',serif"
+heading_weight: 500
+ui_font: "'Source Han Sans SC','Noto Sans SC','PingFang SC','Microsoft YaHei','Noto Sans CJK SC',sans-serif"
+code_font: "'JetBrains Mono',Consolas,'Source Han Sans SC',monospace"
+code_bg: "#141413"
 code_color: "#F5F4ED"
 quote_border: "#1B365D"
 quote_bg: "#EEF2F7"
-quote_text: "#35465A"
+quote_text: "#504E49"
 quote_mark: "#1B365D"
 divider_color: "#E5E3D8"
 border_color: "#E5E3D8"
@@ -29,7 +33,7 @@ tag_bg: "#FAF9F5"
 tag_color: "#B85235"
 trust_blue: "#1B365D"
 trust_bg: "#EEF2F7"
-human_accent: "#C96442"
+human_accent: "#B85235"
 primary_text: "#A04A2E"
 max_width: 640
 type_scale:
@@ -40,12 +44,16 @@ type_scale:
   caption: 13
   code: 14
 rhythm:
-  body_line_height: 1.68
+  # 呼吸感节奏（v3-breathing）：15px 字配 28.5px 行框，行间留白 13.5px（0.9em）；
+  # 段距 16px，使段间可见空白约等于一个行框；章节间 56px（约两个行框）。
+  body_line_height: 1.9
+  body_letter_spacing: 0.034em
   heading_line_height: 1.22
-  paragraph_margin: 19
+  h2_margin_top: 0
+  paragraph_margin: 16
   section_padding_first: 20
-  section_padding: 32
-  list_item_margin: 10
+  section_padding: 20
+  list_item_margin: 8
 block_style:
   heading_style: warm-bar
   quote_style: trust-quote
@@ -53,3 +61,4 @@ block_style:
   code_style: dark-terminal
   image_style: soft-frame
 top_label: 智见AI
+end_mark: landing

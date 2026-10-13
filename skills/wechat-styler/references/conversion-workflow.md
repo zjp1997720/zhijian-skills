@@ -7,7 +7,7 @@
 - 输入为一个 Markdown 文件或匹配多个文件的 glob。
 - 未指定主题时使用 `zhijian`。
 - 默认输出为输入文件同目录下的 `<name>_wechat.html`。
-- 默认模式不改写 Markdown，不添加正文组件；自动加入品牌首尾 GIF。必读 `brand-cta.md` 的开场互斥和去重规则。
+- 默认模式不改写 Markdown，不添加正文组件；自动加入品牌首尾引导（默认 Flow 纸色底 GIF，`--cta-style svg` 为透明内联 SVG 备选）。必读 `brand-cta.md` 的开场互斥和去重规则。
 - `--components` 的 Markdown 改写由 Agent 完成，`convert.mjs` 只负责渲染。
 
 ## 常用命令
@@ -31,7 +31,7 @@ node scripts/convert.mjs /tmp/rewritten.md \
   --cover-title "..." --cover-subtitle "..." --cover-tags "..."
 ```
 
-`--components` 只启用正文组件；`--cover` 显式启用主题 SVG 开场并自动替换开头 GIF。默认转换无需传这两个参数。
+`--components` 只启用正文组件；`--cover` 显式启用主题 SVG 开场并自动省略开头引导。默认转换无需传这两个参数。
 
 ## 主题选择
 
@@ -48,7 +48,7 @@ node scripts/convert.mjs /tmp/rewritten.md \
 
 主题详情、YAML 参数和扩展规则见 `theme-guide.md`。当前明确主题沿用，不因文章类型自动覆盖。
 
-`zhijian` 视觉基线为 `editorial-weighted-2026-07`：H2/H3 使用仓耳今楷优先栈，正文使用思源宋体 VF 15px / 450 / 1.68，图注和元信息使用思源黑体 13px。大鹏已确认手机端默认正文 15px；字号不能代替段落整理。年长读者、叙事文章或术语密集正文可按明确要求使用 16–17px。
+`zhijian` 视觉基线为 `v3-breathing-2026-10`：H1/H2/H3 使用霞鹜文楷判断字栈、统一 500，正文使用思源黑体屏幕字栈 15px / 400 / 1.9、字距 0.034em、次级文字色 `#504E49`，图注和元信息用同一黑体栈 13px，文末自动加一条短落地线。公众号不嵌入字体，读者手机按栈降级。大鹏已确认手机端默认正文 15px；字号不能代替段落整理。年长读者、叙事文章或术语密集正文可按明确要求使用 16–17px。
 
 ## 转换参数
 
@@ -64,8 +64,9 @@ node scripts/convert.mjs /tmp/rewritten.md \
 | `--components` | 组件模式 | `false` |
 | `--component-density` | Agent 改写层密度；不传给 `convert.mjs` | `standard` |
 | `--strict-density` | 密度失败时停止 | `false`；正式候选必传 |
-| `--cover` | SVG 开场，自动替换开头 GIF | `false` |
-| `--brand-cta` | `auto` 首尾 GIF、`ending` 仅结尾、`none` 全部关闭 | `auto` |
+| `--cover` | SVG 开场，自动省略开头引导 | `false` |
+| `--brand-cta` | `auto` 首尾引导、`ending` 仅结尾、`none` 全部关闭 | `auto` |
+| `--cta-style` | `gif` Flow 纸色底 GIF、`svg` 透明内联 SVG 备选 | `gif` |
 | `--cover-template` | 动画模板 | `ink-wash` |
 | `--cover-title` | 动画主标题 | frontmatter.title，其次正文开头的一级标题 |
 | `--keep-h1` | 启用开场动画时仍保留正文开头的一级标题；默认移除以免与动画标题重复 | `false` |

@@ -1,23 +1,87 @@
 {
-  "version": "2026-09-12-v4",
+  "version": "2026-10-13-v7-flow-gif",
   "default": "auto",
-  "duration_ms": 2400,
+  "defaultStyle": "gif",
+  "format": "gif",
   "assets": {
     "opening": {
-      "file": "zhijian-cta-opening-094cbecddef5.gif",
-      "sha256": "094cbecddef59a59618ffc7f976c8e21b5f3833251000d18e864e3f0a6fee9a3",
-      "width": 2000,
-      "height": 400,
+      "file": "zhijian-cta-opening-flow-f63ec0d7ddd0.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-f63ec0d7ddd0.gif",
+      "sha256": "f63ec0d7ddd0b6d574296699363a2cddb943e9b554311776b00bd5acb6d858f8",
+      "width": 720,
+      "height": 272,
+      "frames": 48,
+      "fps": 12,
+      "bytes": 1076375,
+      "loop": "forever",
       "alt": "关注大鹏，把 AI 用进真实工作",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-094cbecddef5.gif"
+      "format": "gif",
+      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013"
     },
     "ending": {
-      "file": "zhijian-cta-ending-12ac690644ff.gif",
-      "sha256": "12ac690644ffb4350a1e1c608eaa2e44b9c6a5b5958e1555fb2cc1036a63c578",
-      "width": 2000,
-      "height": 500,
-      "alt": "有用，就留一份：点赞、收藏、转给需要的人",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-12ac690644ff.gif"
+      "file": "zhijian-cta-ending-flow-da8009fbeaa2.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-da8009fbeaa2.gif",
+      "sha256": "da8009fbeaa2afe79d0752a81458cb671f5a0945499a7c6b0c4a2bb6441fa393",
+      "width": 720,
+      "height": 300,
+      "frames": 72,
+      "fps": 10,
+      "bytes": 1695438,
+      "loop": "forever",
+      "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人",
+      "format": "gif",
+      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013"
     }
-  }
+  },
+  "fallback": {
+    "version": "2026-10-13-v6-svg",
+    "format": "inline-svg",
+    "role": "fallback",
+    "note": "1.17.0 transparent inline SVG; selected with --cta-style svg.",
+    "assets": {
+      "opening": {
+        "file": "zhijian-cta-opening.svg",
+        "sha256": "613c966fe4fa108344058fc1fb0898461952ff623aa7cbd96769ed0903c606e4",
+        "viewBox": "0 0 360 136",
+        "width": 360,
+        "height": 136,
+        "alt": "关注大鹏，把 AI 用进真实工作",
+        "format": "inline-svg"
+      },
+      "ending": {
+        "file": "zhijian-cta-ending.svg",
+        "sha256": "813eae51b644ea9d73bf7fd26e1d968325cadf18681606481678f8c7361a6586",
+        "viewBox": "0 0 360 150",
+        "width": 360,
+        "height": 150,
+        "alt": "有用，就留一份：点赞、收藏、转给需要的人",
+        "format": "inline-svg"
+      }
+    }
+  },
+  "legacy": [
+    {
+      "version": "2026-09-12-v4",
+      "format": "gif",
+      "note": "White-background GIFs used up to 1.16.0. Files are no longer shipped; kept only so reprocessing old drafts removes them instead of stacking a second CTA.",
+      "assets": {
+        "opening": {
+          "file": "zhijian-cta-opening-094cbecddef5.gif",
+          "sha256": "094cbecddef59a59618ffc7f976c8e21b5f3833251000d18e864e3f0a6fee9a3",
+          "width": 2000,
+          "height": 400,
+          "alt": "关注大鹏，把 AI 用进真实工作",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-094cbecddef5.gif"
+        },
+        "ending": {
+          "file": "zhijian-cta-ending-12ac690644ff.gif",
+          "sha256": "12ac690644ffb4350a1e1c608eaa2e44b9c6a5b5958e1555fb2cc1036a63c578",
+          "width": 2000,
+          "height": 500,
+          "alt": "有用，就留一份：点赞、收藏、转给需要的人",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-12ac690644ff.gif"
+        }
+      }
+    }
+  ]
 }
