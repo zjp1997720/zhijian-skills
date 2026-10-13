@@ -183,6 +183,10 @@ test('zhijian theme closes the article with one landing mark before topics and t
     assert.ok(markAt > html.indexOf('最后一段正文'));
     assert.ok(markAt < html.indexOf('data-wechat-topics='));
     assert.ok(markAt < html.indexOf('data-wechat-cta="ending"'));
+    assert.ok(html.indexOf('data-wechat-topics=') < html.indexOf('data-wechat-cta="ending"'));
+    const ending = html.match(/<section data-wechat-cta="ending"[^>]*>/)[0];
+    assert.doesNotMatch(ending, /background/i, 'ending CTA stays transparent on the paper body');
+    assert.match(html.slice(html.indexOf('data-wechat-cta="ending"')), /^data-wechat-cta="ending"[^>]*><svg [^>]*data-zhijian-cta="ending"/);
 
     const minimalOutput = path.join(workDir, 'minimal.html');
     const minimal = runConvert(workDir, [input, '--theme', 'minimal', '--no-open', '--output', minimalOutput]);

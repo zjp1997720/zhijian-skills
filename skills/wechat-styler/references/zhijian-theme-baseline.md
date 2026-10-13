@@ -49,7 +49,8 @@
 - 代码：`'JetBrains Mono',Consolas,'Source Han Sans SC',monospace`；代码块近黑 `#141413` 底、纸色字。
 - 普通加粗：赭石文字色 `#A04A2E`；链接：墨蓝 `#1B365D`。
 - 引用：墨蓝淡底 `#EEF2F7`，文字 `#504E49`，无左线，开引号与首行同段对齐。
-- 文末结尾标记（`end_mark: landing`）：正文最后一段之后、话题标签与结尾引导图之前，居左放一条墨蓝 2px、宽 64px、终点切线水平的短落地线，线终点后 7px（3.5 × 线宽）为直径 10px 的赭石圆点，圆心在线轴上（线宽:点径 = 1:5）。以内联静态 SVG 输出，带 `data-wechat-block="end-mark"`，无动画。全文只此一个赭石圆点装饰。
+- 文末结尾标记（`end_mark: landing`）：正文最后一段之后、话题标签与结尾引导之前，居左放一条墨蓝 2px、宽 64px、终点切线水平的短落地线，线终点后 7px（3.5 × 线宽）为直径 10px 的赭石圆点，圆心在线轴上（线宽:点径 = 1:5）。以内联静态 SVG 输出，带 `data-wechat-block="end-mark"`，无动画。全文只此一个赭石圆点装饰。
+- 首尾引导（`--brand-cta auto`）：开头引导在正文之前，结尾引导在落地线与话题标签之后。两段均为透明背景的内联 SVG（`data-wechat-cta` 外层 section 不写 `background-color`），直接吃正文纸色 `#F5F4ED`，不再出现白底色块。规则与素材见 `brand-cta.md`。
 - 主题所有色值限定在 v3 调色板：`#F5F4ED` `#FAF9F5` `#1B365D` `#B85235` `#141413` `#E5E3D8` `#504E49` `#6B6A64` `#A04A2E` `#EEF2F7`，由 `tests/output-contract.test.mjs` 锁定。
 
 ## 字体降级（公众号不嵌字体）
@@ -77,4 +78,4 @@ npm run qa:mobile -- /tmp/zhijian-visual-baseline.html \
   --screenshot assets/zhijian-theme-mobile-baseline.png
 ```
 
-`--expect-zhijian` 会检查 H2 声明霞鹜文楷栈、H3 为 18px / 500、正文声明屏幕字栈且为 15px / 400 / 1.9，以及文末落地线存在。任何主题调整必须同时更新样式锁、自动回归和移动端基线图；字体变更还要在真实 iOS 与 Android 手机上核对回退字体。
+`--expect-zhijian` 会检查 H2 声明霞鹜文楷栈、H3 为 18px / 500、正文声明屏幕字栈且为 15px / 400 / 1.9，文末落地线存在，以及首尾引导为透明背景的内联矢量 SVG。任何主题调整必须同时更新样式锁、自动回归和移动端基线图；字体变更还要在真实 iOS 与 Android 手机上核对回退字体。

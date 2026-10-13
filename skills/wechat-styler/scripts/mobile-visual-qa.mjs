@@ -130,6 +130,14 @@ async function inspect(page, options) {
     if (expectZhijian && bodyStyle && !bodyStyle.fontFamily.includes('Source Han Sans SC')) {
       failures.push('Zhijian body does not declare the screen sans stack');
     }
+    if (expectZhijian) {
+      root.querySelectorAll('[data-wechat-cta]').forEach((cta) => {
+        const kind = cta.getAttribute('data-wechat-cta');
+        const bg = getComputedStyle(cta).backgroundColor;
+        if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') failures.push(`Zhijian ${kind} CTA has a background (${bg}); it must stay transparent`);
+        if (!cta.querySelector('svg[data-zhijian-cta] path')) failures.push(`Zhijian ${kind} CTA is not the inline vector SVG`);
+      });
+    }
     if (expectZhijian && root.querySelectorAll('[data-wechat-block="end-mark"] svg circle').length !== 1) {
       failures.push('Zhijian ending landing mark is missing');
     }

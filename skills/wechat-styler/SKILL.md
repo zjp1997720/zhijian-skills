@@ -2,7 +2,7 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.16.0
+version: 1.17.0
 description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
 summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
 tags:
@@ -17,7 +17,7 @@ disable-model-invocation: true
 
 # WeChat Styler
 
-把已定稿或已授权排版的 Markdown 转成可评审公众号 HTML。默认保留正文并自动加入智见品牌首尾 GIF；组件改写、主题开场动画和微信编辑器注入按需加载。
+把已定稿或已授权排版的 Markdown 转成可评审公众号 HTML。默认保留正文并自动加入智见品牌首尾引导（透明内联 SVG）；组件改写、主题开场动画和微信编辑器注入按需加载。
 
 ![WeChat Styler 左右并列效果预览](https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/img/wechat-styler-before-after-recent.png)
 
@@ -45,7 +45,7 @@ disable-model-invocation: true
 
 ### 1. 默认转换
 
-默认保留正文、不增加正文组件；转换器自动加入品牌开头与结尾 GIF。开场互斥、关闭方式与素材维护见 `references/brand-cta.md`；每次转换读取该规则。按 `references/conversion-workflow.md` 选择主题与参数、运行转换并完成最小 QA。用户只给文件路径时默认使用 `zhijian`。
+默认保留正文、不增加正文组件；转换器自动加入品牌开头与结尾引导（透明内联 SVG）。开场互斥、关闭方式与素材维护见 `references/brand-cta.md`；每次转换读取该规则。按 `references/conversion-workflow.md` 选择主题与参数、运行转换并完成最小 QA。用户只给文件路径时默认使用 `zhijian`。
 
 ### 2. 组件与动画
 
@@ -83,9 +83,9 @@ disable-model-invocation: true
 - 默认输入 `article.md`，输出同目录 `article_wechat.html`；也可显式指定输出路径。
 - 输出为完整内联样式 HTML，可复制或在获授权后注入公众号编辑器。
 - 占位图、参数、主题、输出路径和命令见 `references/conversion-workflow.md`。
-- 品牌 GIF 位于文章首尾，正文中间使用静态组件。明确启用 SVG 开场动画时只保留结尾 GIF。
+- 品牌引导位于文章首尾，正文中间使用静态组件。明确启用 SVG 开场动画时只保留结尾引导。
 - 开场动画承担文章标题：启用 `--cover` 时自动移除正文开头的一级标题（首个非空行的 `# 标题`），动画标题依次取 `--cover-title`、frontmatter.title、该一级标题；正文中段的一级标题不受影响，确需保留时传 `--keep-h1`。
-- 话题标签渲染在正文末尾（结尾 GIF 之前），结构复刻公众号编辑器原生 `a.wx_topic_link`，斜体 14px；注入后编辑器识别为话题，保存即生效。
+- 话题标签渲染在正文末尾（结尾引导之前），结构复刻公众号编辑器原生 `a.wx_topic_link`，斜体 14px；注入后编辑器识别为话题，保存即生效。
 
 ## References
 

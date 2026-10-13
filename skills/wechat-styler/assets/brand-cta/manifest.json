@@ -1,23 +1,50 @@
 {
-  "version": "2026-09-12-v4",
+  "version": "2026-10-13-v6-svg",
   "default": "auto",
-  "duration_ms": 2400,
+  "format": "inline-svg",
   "assets": {
     "opening": {
-      "file": "zhijian-cta-opening-094cbecddef5.gif",
-      "sha256": "094cbecddef59a59618ffc7f976c8e21b5f3833251000d18e864e3f0a6fee9a3",
-      "width": 2000,
-      "height": 400,
+      "file": "zhijian-cta-opening.svg",
+      "sha256": "613c966fe4fa108344058fc1fb0898461952ff623aa7cbd96769ed0903c606e4",
+      "viewBox": "0 0 360 136",
+      "width": 360,
+      "height": 136,
       "alt": "关注大鹏，把 AI 用进真实工作",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-094cbecddef5.gif"
+      "format": "inline-svg"
     },
     "ending": {
-      "file": "zhijian-cta-ending-12ac690644ff.gif",
-      "sha256": "12ac690644ffb4350a1e1c608eaa2e44b9c6a5b5958e1555fb2cc1036a63c578",
-      "width": 2000,
-      "height": 500,
+      "file": "zhijian-cta-ending.svg",
+      "sha256": "813eae51b644ea9d73bf7fd26e1d968325cadf18681606481678f8c7361a6586",
+      "viewBox": "0 0 360 150",
+      "width": 360,
+      "height": 150,
       "alt": "有用，就留一份：点赞、收藏、转给需要的人",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-12ac690644ff.gif"
+      "format": "inline-svg"
     }
-  }
+  },
+  "legacy": [
+    {
+      "version": "2026-09-12-v4",
+      "format": "gif",
+      "note": "White-background GIFs used up to 1.16.0. Files are no longer shipped; kept only so reprocessing old drafts removes them instead of stacking a second CTA.",
+      "assets": {
+        "opening": {
+          "file": "zhijian-cta-opening-094cbecddef5.gif",
+          "sha256": "094cbecddef59a59618ffc7f976c8e21b5f3833251000d18e864e3f0a6fee9a3",
+          "width": 2000,
+          "height": 400,
+          "alt": "关注大鹏，把 AI 用进真实工作",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-094cbecddef5.gif"
+        },
+        "ending": {
+          "file": "zhijian-cta-ending-12ac690644ff.gif",
+          "sha256": "12ac690644ffb4350a1e1c608eaa2e44b9c6a5b5958e1555fb2cc1036a63c578",
+          "width": 2000,
+          "height": 500,
+          "alt": "有用，就留一份：点赞、收藏、转给需要的人",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-12ac690644ff.gif"
+        }
+      }
+    }
+  ]
 }

@@ -28,7 +28,7 @@ SVG SMIL 动画(`<animate>` / `<animateTransform>`)在微信公众号里**只有
 
 宽度固定 360，高度按实际行数逐元素累加（上表为带副标题、无标签时的参考值），不再预留固定空白带。
 
-品牌标签（ink-wash、spotlight）取 `theme.top_label`，画卷右下署名默认为「<top_label> 出品」。非智见AI账号用 `--top-label "<文本>"`（`none` 隐藏）和 `--cover-author "<署名>"`（原样输出、不加「出品」，`none` 隐藏）设置，不再事后改 HTML；首尾 GIF 仍是智见AI素材，必要时加 `--brand-cta none`。
+品牌标签（ink-wash、spotlight）取 `theme.top_label`，画卷右下署名默认为「<top_label> 出品」。非智见AI账号用 `--top-label "<文本>"`（`none` 隐藏）和 `--cover-author "<署名>"`（原样输出、不加「出品」，`none` 隐藏）设置，不再事后改 HTML；首尾引导仍是智见AI素材，必要时加 `--brand-cta none`。
 
 ### 墨韵开篇 (ink-wash)
 
