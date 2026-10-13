@@ -72,8 +72,9 @@ export function applyBrandCta(html, { mode = 'auto', style = 'gif', cover = fals
   // An explicit/generated SVG opener takes precedence over the stock greeting.
   const hasSvgOpener = cover || userSvgOpener.test(result);
   // No background-color in either style: the GIF pixels already are the paper colour, the SVG is transparent.
+  // Paper padding keeps the character off the root's top/bottom edge (1.18.1: it read as 'head-butting' on phones).
   const gif = style === 'gif';
-  const block = kind => `<section data-wechat-cta="${kind}" data-zhijian-cta="${gif ? 'v7-flow-gif' : 'v6'}" style="max-width:${Number(maxWidth)}px;margin:${kind === 'opening' ? '0 auto 18px' : '24px auto 0'};padding:0;line-height:0;">${gif ? brandCtaImg(kind) : brandCtaSvg(kind)}</section>`;
+  const block = kind => `<section data-wechat-cta="${kind}" data-zhijian-cta="${gif ? 'v7-flow-gif' : 'v6'}" style="max-width:${Number(maxWidth)}px;margin:${kind === 'opening' ? '0 auto 18px' : '24px auto 0'};padding:${kind === 'opening' ? '24px 0 0' : '0 0 28px'};line-height:0;">${gif ? brandCtaImg(kind) : brandCtaSvg(kind)}</section>`;
   const opening = mode === 'auto' && !hasSvgOpener ? block('opening') : '';
   if (!/data-wechat-root="article"/.test(result)) throw new Error('CTA insertion requires the article root');
   result = result.replace(/(<section\b[^>]*data-wechat-root="article"[^>]*>)/i, `$1\n${opening}`);

@@ -17,12 +17,12 @@ const stripCta=s=>s.replace(/<section\b[^>]*data-wechat-cta="(?:opening|ending)"
 
 const GIF_BASE='https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/';
 const GIF={
- opening:{file:'zhijian-cta-opening-flow-f63ec0d7ddd0.gif',w:720,h:272,frames:48,fps:12,bytes:1076375,sha:'f63ec0d7ddd0b6d574296699363a2cddb943e9b554311776b00bd5acb6d858f8'},
- ending:{file:'zhijian-cta-ending-flow-da8009fbeaa2.gif',w:720,h:300,frames:72,fps:10,bytes:1695438,sha:'da8009fbeaa2afe79d0752a81458cb671f5a0945499a7c6b0c4a2bb6441fa393'}
+ opening:{file:'zhijian-cta-opening-flow-376b7c890008.gif',w:720,h:272,frames:48,fps:12,bytes:800024,sha:'376b7c89000817b0d050bb1674578563ba35017846a1f68b029e93e7f0ffa490'},
+ ending:{file:'zhijian-cta-ending-flow-5375c80db38d.gif',w:720,h:300,frames:72,fps:10,bytes:1286172,sha:'5375c80db38d67a5c1e11514f1c7bfab50311058aa913f90f9a9ca473c612c88'}
 };
 
 test('manifest: v7 Flow GIF default, SVG fallback, old GIFs legacy',()=>{
- assert.equal(brandCtaManifest.version,'2026-10-13-v7-flow-gif');
+ assert.equal(brandCtaManifest.version,'2026-10-13-v7.1-flow-gif');
  assert.deepEqual(fs.readdirSync(assetDir).filter(f=>f.endsWith('.gif')),[],'GIF payload is hosted, not shipped');
  for(const kind of ['opening','ending']){
   const a=brandCtaAssets[kind],g=GIF[kind];
@@ -63,6 +63,8 @@ test('default emits v7 Flow GIF img, transparent wrapper, unique on reapplicatio
  assert.ok(b.indexOf('data-wechat-cta="ending"')>b.indexOf('保留正文'));
  const sections=ctaSections(b);assert.equal(sections.length,2);
  for(const s of sections){assert.match(s,/data-zhijian-cta="v7-flow-gif"/);assert.doesNotMatch(s,/background/i);}
+ // Paper padding keeps the character off the article card's top and bottom edges (1.18.1).
+ assert.match(sections[0],/padding:24px 0 0;/);assert.match(sections[1],/padding:0 0 28px;/);
  for(const kind of ['opening','ending']){
   const g=GIF[kind];
   const img=b.match(new RegExp(`<img [^>]*data-wechat-cta-image="${kind}"[^>]*>`))[0];

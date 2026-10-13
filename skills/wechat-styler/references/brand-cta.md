@@ -4,7 +4,7 @@
 
 ## 样式选择：`--cta-style gif|svg`
 
-- `gif`（默认，1.18.0 起）：Google Flow 生成的 3D 小蓝视频，绿幕抠像后直接键入文章纸色 `#F5F4ED`，标题和副标题已在像素里。外层 section 与 `<img>` 都不写 `background-color`、边框或说明文字，只做 `width:100%;max-width:360px;margin:0 auto;height:auto;display:block`。GIF 托管在 COS（URL 与 SHA256 在 manifest），不随 Skill 分发。
+- `gif`（默认，1.18.0 起）：Google Flow 生成的 3D 小蓝视频，绿幕抠像后直接键入文章纸色 `#F5F4ED`，标题和副标题已在像素里。外层 section 与 `<img>` 都不写 `background-color`、边框或说明文字，只做 `width:100%;max-width:360px;margin:0 auto;height:auto;display:block`。1.18.1 起 GIF 内小蓝上方留 30px、下方留 18px 纸色（2x 素材），文首 section 加 `padding-top:24px`、文末加 `padding-bottom:28px`，避免贴住纸色卡片上下沿；`zhijian` 主题的纸色外层另加 `root_radius: 12` 圆角。GIF 托管在 COS（URL 与 SHA256 在 manifest），不随 Skill 分发。
 - `svg`（备选）：1.17.0 的透明内联 SVG，矢量小蓝 + 路径文字 + SMIL 循环，无需图床。
 - 重复处理时换样式会替换，不会叠放；`--brand-cta none|ending` 与样式正交。
 
@@ -29,13 +29,13 @@
 默认（`gif`）每段输出为一行：
 
 ```html
-<section data-wechat-cta="opening" data-zhijian-cta="v7-flow-gif" style="max-width:<主题宽度>px;margin:0 auto 18px;padding:0;line-height:0;"><img data-wechat-cta-image="opening" src="https://…/zhijian-cta-opening-flow-f63ec0d7ddd0.gif" alt="…" width="720" height="272" style="display:block;width:100%;max-width:360px;height:auto;margin:0 auto;border:0;" /></section>
+<section data-wechat-cta="opening" data-zhijian-cta="v7-flow-gif" style="max-width:<主题宽度>px;margin:0 auto 18px;padding:24px 0 0;line-height:0;"><img data-wechat-cta-image="opening" src="https://…/zhijian-cta-opening-flow-376b7c890008.gif" alt="…" width="720" height="272" style="display:block;width:100%;max-width:360px;height:auto;margin:0 auto;border:0;" /></section>
 ```
 
 结尾引导同构（`720×300`，`margin:24px auto 0`）。`svg` 样式输出为：
 
 ```html
-<section data-wechat-cta="opening" data-zhijian-cta="v6" style="max-width:<主题宽度>px;margin:0 auto 18px;padding:0;line-height:0;"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 360 136" style="display:block;width:100%;height:auto;" role="img" aria-label="…" data-alt="…" data-semantic-text="…" data-zhijian-cta="opening">…</svg></section>
+<section data-wechat-cta="opening" data-zhijian-cta="v6" style="max-width:<主题宽度>px;margin:0 auto 18px;padding:24px 0 0;line-height:0;"><svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 360 136" style="display:block;width:100%;height:auto;" role="img" aria-label="…" data-alt="…" data-semantic-text="…" data-zhijian-cta="opening">…</svg></section>
 ```
 
 以下 SVG 兼容规则只适用于 `svg` 样式：
