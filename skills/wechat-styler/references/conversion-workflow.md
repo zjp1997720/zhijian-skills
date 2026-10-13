@@ -107,6 +107,8 @@ npm run qa:mobile -- /absolute/path/to/article_wechat.html \
   --screenshot /tmp/article-mobile.png
 ```
 
+未装 Google Chrome 时，macOS 自动改用已安装的 Chromium 内核浏览器（Ego Lite、Edge、Brave、Chromium），报告 `browser` 字段写明实际所用；也可用 `CHROME_EXECUTABLE=<浏览器可执行文件>` 指定。
+
 使用其他主题时去掉 `--expect-zhijian`。检查：
 
 - 390px 视口无横向溢出、坏图或异常重复图片 URL。

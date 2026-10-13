@@ -7,6 +7,8 @@ import { pathToFileURL } from 'node:url';
 
 import { chromium } from 'playwright-core';
 
+import { resolveBrowserLaunch } from './qa-browser.mjs';
+
 function parseArgs(argv) {
   const options = {
     input: '',
@@ -184,7 +186,9 @@ try {
   --expect-zhijian            Check Zhijian visual baseline
   --strict-image-uniqueness   Fail on unexpected repeated image URLs
   -h, --help                 Show help without launching a browser
-Environment: CHROME_CHANNEL selects browser channel (default: chrome)
+Environment: CHROME_EXECUTABLE (browser binary path) or CHROME_CHANNEL (Playwright channel).
+  Default: Google Chrome; on macOS without Chrome, an installed Chromium browser
+  (Ego Lite, Edge, Brave, Chromium), then Playwright's downloaded Chromium.
 Outputs: JSON report and full-page screenshot; exits 1 on QA failure`);
     process.exit(0);
   }
@@ -194,7 +198,12 @@ Outputs: JSON report and full-page screenshot; exits 1 on QA failure`);
   const screenshot = path.resolve(
     options.screenshot || path.join(os.tmpdir(), `${path.parse(input).name}-mobile-${options.width}.png`),
   );
-  browser = await chromium.launch({ channel: process.env.CHROME_CHANNEL || 'chrome', headless: true });
+  const { source, ...launch } = resolveBrowserLaunch();
+  try {
+    browser = await chromium.launch({ ...launch, headless: true });
+  } catch (error) {
+    throw new Error(`Browser launch failed (${source}): ${error.message.split('\n')[0]}. Set CHROME_EXECUTABLE to a Chromium-based browser binary.`);
+  }
   const page = await browser.newPage({ viewport: { width: options.width, height: options.height } });
   await page.goto(pathToFileURL(input).href, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts?.ready);
@@ -203,6 +212,7 @@ Outputs: JSON report and full-page screenshot; exits 1 on QA failure`);
   report.ok = report.failures.length === 0;
   report.input = input;
   report.screenshot = screenshot;
+  report.browser = source;
   console.log(JSON.stringify(report, null, 2));
   if (!report.ok) process.exitCode = 1;
 } catch (error) {
