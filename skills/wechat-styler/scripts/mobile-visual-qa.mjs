@@ -135,10 +135,10 @@ async function inspect(page, options) {
     }
     if (expectZhijian && bodyStyle && (
       bodyStyle.fontSize !== '15px'
-      || bodyStyle.fontWeight !== '450'
-      || Math.abs(Number.parseFloat(bodyStyle.lineHeight) - 25.2) > 0.2
+      || bodyStyle.fontWeight !== '400'
+      || Math.abs(Number.parseFloat(bodyStyle.lineHeight) - 28.5) > 0.2
     )) {
-      failures.push(`Zhijian body expected 15px/450/1.68, got ${bodyStyle.fontSize}/${bodyStyle.fontWeight}/${bodyStyle.lineHeight}`);
+      failures.push(`Zhijian body expected 15px/400/1.9, got ${bodyStyle.fontSize}/${bodyStyle.fontWeight}/${bodyStyle.lineHeight}`);
     }
     return {
       viewport: { width: window.innerWidth, height: window.innerHeight },

@@ -313,12 +313,14 @@ const presetDefaults = {
   'zhijian-warm-paper': {
     type_scale: { h1: 28, h2: 22, h3: 18, body: 15, caption: 13, code: 14 },
     rhythm: {
-      body_line_height: 1.68,
+      body_line_height: 1.9,
+      body_letter_spacing: '0.034em',
       heading_line_height: 1.22,
-      paragraph_margin: 19,
+      h2_margin_top: 0,
+      paragraph_margin: 16,
       section_padding_first: 20,
-      section_padding: 32,
-      list_item_margin: 10
+      section_padding: 20,
+      list_item_margin: 8
     },
     block_style: {
       heading_style: 'warm-bar',
@@ -476,6 +478,9 @@ function replaceBackground(html, theme, bg) {
 
 function toneBlockContent(html, theme, bg, color = theme.secondary_color) {
   let toned = replaceBackground(html, theme, bg).replaceAll(`color:${theme.text_color};`, `color:${color};`);
+  if (theme.body_text_color && theme.body_text_color !== theme.text_color) {
+    toned = toned.replaceAll(`color:${theme.body_text_color};`, `color:${color};`);
+  }
   
   // 移除列表作为最后一个元素时最外层的 margin-bottom 声明
   toned = toned.replace(/(<(?:ul|ol)[^>]+?margin:\s*0\s+0\s+\d+px\s*(?:;)?)(?=[^>]*>[\s\S]*<\/(?:ul|ol)>\s*$)/i, (match) => {
@@ -537,7 +542,7 @@ function createBaseRenderer(theme) {
     }
     const indent = rhythm.paragraph_indent || 0;
     const indentStyle = indent > 0 ? `text-indent:${indent}em;` : '';
-    return `<p style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:0.008em;text-align:justify;margin:0 0 ${rhythm.paragraph_margin}px;padding:0;${indentStyle}word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, text)}</p>\n`;
+    return `<p style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.body_text_color || theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:${rhythm.body_letter_spacing || '0.008em'};text-align:justify;margin:0 0 ${rhythm.paragraph_margin}px;padding:0;${indentStyle}word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, text)}</p>\n`;
   };
 
   renderer.strong = (text) => {
@@ -666,7 +671,7 @@ function createMagazineEditorialRenderer(theme) {
         return `<h1 style="font-family:${theme.heading_font};font-weight:500;color:${theme.text_color};word-break:break-word;background-color:${theme.surface_color};font-size:${scale.h1}px;line-height:${rhythm.heading_line_height};margin:0 0 18px;padding:12px 14px;">${bgSpan(theme, text, theme.surface_color)}</h1>\n`;
       }
       if (level === 2) {
-        return `<h2 style="font-family:${theme.heading_font};font-weight:500;color:${theme.text_color};word-break:break-word;background-color:${theme.surface_color};font-size:${scale.h2}px;line-height:${rhythm.heading_line_height};margin:32px 0 14px;padding:9px 12px;border-left:3px solid ${theme.accent_color};">${bgSpan(theme, text, theme.surface_color)}</h2>\n`;
+        return `<h2 style="font-family:${theme.heading_font};font-weight:500;color:${theme.text_color};word-break:break-word;background-color:${theme.surface_color};font-size:${scale.h2}px;line-height:${rhythm.heading_line_height};margin:32px 0 14px;padding:9px 8px;border-left:3px solid ${theme.accent_color};">${bgSpan(theme, text, theme.surface_color)}</h2>\n`;
       }
       if (level === 3) {
         return `<h3 style="${headingBase}font-size:${scale.h3}px;line-height:1.4;margin:24px 0 10px;padding:0 0 6px;border-bottom:1px dotted ${theme.divider_color};">${bgSpan(theme, text)}</h3>\n`;
@@ -957,12 +962,13 @@ function createZhijianWarmPaperRenderer(theme) {
   const headingWeight = theme.heading_weight || 500;
 
   renderer.heading = (text, level) => {
-    const headingFont = `font-family:${theme.heading_font};word-break:break-word;background-color:${theme.background_color};`;
+    // 显式字距 0：公众号正文容器默认继承约 0.034em 字距，标题不声明会被撑宽而多折一行。
+    const headingFont = `font-family:${theme.heading_font};letter-spacing:0;word-break:break-word;background-color:${theme.background_color};`;
     if (level === 1) {
       return `<h1 style="${headingFont}font-size:${scale.h1}px;font-weight:${headingWeight};color:${theme.text_color};line-height:${rhythm.heading_line_height};margin:0 0 18px;padding:0;">${bgSpan(theme, text)}</h1>\n`;
     }
     if (level === 2) {
-      return `<h2 style="${headingFont}font-size:${scale.h2}px;font-weight:${headingWeight};color:${theme.text_color};line-height:1.28;margin:30px 0 14px;padding:0 0 0 12px;border-left:4px solid ${theme.accent_color};border-radius:2px;">${bgSpan(theme, text)}</h2>\n`;
+      return `<h2 style="${headingFont}font-size:${scale.h2}px;font-weight:${headingWeight};color:${theme.text_color};line-height:1.28;margin:${rhythm.h2_margin_top ?? 30}px 0 14px;padding:0 0 0 12px;border-left:4px solid ${theme.accent_color};border-radius:2px;">${bgSpan(theme, text)}</h2>\n`;
     }
     if (level === 3) {
       return `<h3 style="${headingFont}font-size:${scale.h3}px;font-weight:${headingWeight};color:${trustBlue};line-height:1.32;margin:24px 0 10px;padding:0;">${bgSpan(theme, text)}</h3>\n`;
@@ -1002,11 +1008,11 @@ function createZhijianWarmPaperRenderer(theme) {
   renderer.list = (body, ordered) => {
     const tag = ordered ? 'ol' : 'ul';
     const listStyle = ordered ? 'list-style-type:decimal;' : 'list-style-type:disc;';
-    return `<${tag} style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.text_color};line-height:${rhythm.body_line_height};margin:0 0 ${rhythm.paragraph_margin}px;padding-left:24px;${listStyle}background-color:${theme.background_color};">\n${body}</${tag}>\n`;
+    return `<${tag} style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.body_text_color || theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:${rhythm.body_letter_spacing || '0.008em'};margin:0 0 ${rhythm.paragraph_margin}px;padding-left:24px;${listStyle}background-color:${theme.background_color};">\n${body}</${tag}>\n`;
   };
 
   renderer.listitem = (text) => {
-    return `<li style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.text_color};line-height:${rhythm.body_line_height};text-align:justify;margin:0 0 ${rhythm.list_item_margin}px;word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, processTaskListItem(text, theme))}</li>\n`;
+    return `<li style="font-family:${theme.font_family_cn};font-size:${scale.body}px;font-weight:${bodyWeight};color:${theme.body_text_color || theme.text_color};line-height:${rhythm.body_line_height};letter-spacing:${rhythm.body_letter_spacing || '0.008em'};text-align:justify;margin:0 0 ${rhythm.list_item_margin}px;word-break:break-word;background-color:${theme.background_color};">${bgSpan(theme, processTaskListItem(text, theme))}</li>\n`;
   };
 
   renderer.image = (href, title, text) => {
