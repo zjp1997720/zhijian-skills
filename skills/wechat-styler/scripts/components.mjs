@@ -37,6 +37,25 @@ function buildKeyquote(text, theme, subText) {
 }
 
 /**
+ * 块内行内渲染:提示块/警告块是 HTML block,marked 不再解析其内部,
+ * 这里复用正文同款 <strong>(强调色/500)与行内代码样式,避免 ** 原样漏出。
+ * ==标记== 已在此前由 applyHighlightPreMarkdown 转成 span,不在此处理。
+ */
+function renderInlineMarks(text, theme) {
+  const bg = theme.background_color;
+  const codeSize = theme.type_scale && theme.type_scale.code;
+  const codes = [];
+  let out = text.replace(/`([^`\n]+)`/g, (_, code) => {
+    const esc = code.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    codes.push(`<code style="font-family:${theme.code_font};${codeSize ? `font-size:${codeSize}px;` : ''}color:${theme.code_color};background-color:${theme.code_bg};padding:2px 6px;border-radius:3px;"><span style="background-color:${theme.code_bg};">${esc}</span></code>`);
+    return `\u0000${codes.length - 1}\u0000`;
+  });
+  out = out.replace(/\*\*([^*\n]+?)\*\*/g, (_, t) =>
+    `<strong style="color:${theme.accent_color};font-weight:500;background-color:${bg};"><span style="background-color:${bg};">${t}</span></strong>`);
+  return out.replace(/\u0000(\d+)\u0000/g, (_, i) => codes[Number(i)]);
+}
+
+/**
  * 提示块:结构色(墨蓝/次要色)前缀 + 同行正文
  * 关键修复:补 font-family,跟正文一致(之前漏写导致继承浏览器默认无衬线)
  */
@@ -47,7 +66,7 @@ function buildNote(text, theme) {
   const text_color = theme.text_color;
   // NOTE 用结构色(accent_secondary 或 secondary_color),不抢行动色
   const color = theme.accent_secondary || theme.secondary_color || theme.text_color;
-  return `<section style="margin:0 0 20px;background-color:${bg};"><p style="font-family:${bodyFont};font-size:16px;color:${text_color};line-height:1.75;margin:0;background-color:${bg};"><span style="font-family:${uiFont};font-size:12px;color:${color};letter-spacing:1.5px;font-weight:600;margin-right:10px;background-color:${bg};">提示</span>${text}</p></section>`;
+  return `<section style="margin:0 0 20px;background-color:${bg};"><p style="font-family:${bodyFont};font-size:16px;color:${text_color};line-height:1.75;margin:0;background-color:${bg};"><span style="font-family:${uiFont};font-size:12px;color:${color};letter-spacing:1.5px;font-weight:600;margin-right:10px;background-color:${bg};">提示</span>${renderInlineMarks(text, theme)}</p></section>`;
 }
 
 /**
@@ -60,7 +79,7 @@ function buildWarning(text, theme) {
   const text_color = theme.text_color;
   // WARNING 用行动色(accent_color)
   const color = theme.accent_color;
-  return `<section style="margin:0 0 20px;background-color:${bg};"><p style="font-family:${bodyFont};font-size:16px;color:${text_color};line-height:1.75;margin:0;background-color:${bg};"><span style="font-family:${uiFont};font-size:12px;color:${color};letter-spacing:1.5px;font-weight:600;margin-right:10px;background-color:${bg};">注意</span>${text}</p></section>`;
+  return `<section style="margin:0 0 20px;background-color:${bg};"><p style="font-family:${bodyFont};font-size:16px;color:${text_color};line-height:1.75;margin:0;background-color:${bg};"><span style="font-family:${uiFont};font-size:12px;color:${color};letter-spacing:1.5px;font-weight:600;margin-right:10px;background-color:${bg};">注意</span>${renderInlineMarks(text, theme)}</p></section>`;
 }
 
 /**
