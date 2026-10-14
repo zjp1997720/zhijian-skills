@@ -2,7 +2,7 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.18.2
+version: 1.19.0
 description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
 summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
 tags:
@@ -17,7 +17,7 @@ disable-model-invocation: true
 
 # WeChat Styler
 
-把已定稿或已授权排版的 Markdown 转成可评审公众号 HTML。默认保留正文并自动加入智见品牌首尾引导（默认 Flow 纸色底 GIF，SVG 为 `--cta-style svg` 备用）；组件改写、主题开场动画和微信编辑器注入按需加载。
+把已定稿或已授权排版的 Markdown 转成可评审公众号 HTML。默认保留正文并自动加入智见品牌首尾引导（默认大鹏 IP + 小蓝的纸色底 GIF，SVG 为 `--cta-style svg` 备用）；组件改写、主题开场动画和微信编辑器注入按需加载。
 
 ![WeChat Styler 左右并列效果预览](https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/img/wechat-styler-before-after-recent.png)
 
@@ -45,7 +45,7 @@ disable-model-invocation: true
 
 ### 1. 默认转换
 
-默认保留正文、不增加正文组件；转换器自动加入品牌开头与结尾引导（默认 Flow 生成的纸色底 GIF，`--cta-style svg` 切回透明内联 SVG）。开场互斥、关闭方式与素材维护见 `references/brand-cta.md`；每次转换读取该规则。按 `references/conversion-workflow.md` 选择主题与参数、运行转换并完成最小 QA。用户只给文件路径时默认使用 `zhijian`。
+默认保留正文、不增加正文组件；转换器自动加入品牌开头与结尾引导（默认大鹏 IP + 小蓝的纸色底 GIF，`--cta-style svg` 切回透明内联 SVG）。开场互斥、关闭方式与素材维护见 `references/brand-cta.md`；每次转换读取该规则。按 `references/conversion-workflow.md` 选择主题与参数、运行转换并完成最小 QA。用户只给文件路径时默认使用 `zhijian`。
 
 ### 2. 组件与动画
 
@@ -101,4 +101,4 @@ disable-model-invocation: true
 
 ---
 
-**版本：** 1.18.2 · **作者：** 大鹏
+**版本：** 1.19.0 · **作者：** 大鹏

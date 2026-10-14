@@ -4,8 +4,10 @@ import crypto from 'node:crypto';
 const assetDir = new URL('../assets/brand-cta/', import.meta.url);
 const manifest = JSON.parse(fs.readFileSync(new URL('manifest.json', assetDir), 'utf8'));
 export const brandCtaManifest = manifest;
-// Default CTA: Flow-generated paper-colour GIFs (hosted). Fallback: 1.17.0 transparent inline SVG.
+// Default CTA: hosted paper-colour GIFs (1.19.0: Dapeng IP + Xiaolan + end mark). Fallback: 1.17.0 transparent inline SVG.
 export const brandCtaAssets = manifest.assets;
+// Marker written on the GIF CTA section; follows the manifest so QA and tests track the current asset set.
+export const brandCtaMarker = manifest.marker;
 export const brandCtaSvgAssets = manifest.fallback.assets;
 // Earlier GIF versions: no longer shipped, only recognised so old drafts are cleaned on reprocessing.
 export const legacyBrandCtaAssets = (manifest.legacy || []).flatMap(entry => Object.values(entry.assets || {}));
@@ -36,7 +38,7 @@ export function brandCtaSvg(kind) {
   return svg;
 }
 
-/** Hosted Flow GIF as a flat <img>; the pixels already carry the paper background and the text. */
+/** Hosted GIF as a flat <img>; the pixels already carry the paper background and the text. */
 export function brandCtaImg(kind) {
   const a = brandCtaAssets[kind];
   if (!a) throw new Error(`unknown brand CTA: ${kind}`);
@@ -48,7 +50,7 @@ const looseSvg = /<svg\b[^>]*data-zhijian-cta="(?:opening|ending)"[^>]*>[\s\S]*?
 // A user/theme opening animation: any animated <svg> that is not one of our own CTA SVGs.
 const userSvgOpener = /<svg\b(?![^>]*data-zhijian-cta)[^>]*>(?:(?!<\/svg>)[\s\S])*?<animate(?:Transform|Motion)?\b/i;
 
-/** Remove every managed CTA: v6/v7 sections, loose SVG roots, and GIF <img> tags (by marker, file name or URL). */
+/** Remove every managed CTA: v6/v7/v8 sections, loose SVG roots, and GIF <img> tags (by marker, file name or URL). */
 export function stripBrandCta(html) {
   let result = html.replace(managedSection, '').replace(looseSvg, '');
   const legacy = [...legacyBrandCtaAssets, ...Object.values(brandCtaAssets)];
@@ -74,7 +76,7 @@ export function applyBrandCta(html, { mode = 'auto', style = 'gif', cover = fals
   // No background-color in either style: the GIF pixels already are the paper colour, the SVG is transparent.
   // Paper padding keeps the character off the root's top/bottom edge (1.18.1: it read as 'head-butting' on phones).
   const gif = style === 'gif';
-  const block = kind => `<section data-wechat-cta="${kind}" data-zhijian-cta="${gif ? 'v7-flow-gif' : 'v6'}" style="max-width:${Number(maxWidth)}px;margin:${kind === 'opening' ? '0 auto 18px' : '24px auto 0'};padding:${kind === 'opening' ? '24px 0 0' : '0 0 28px'};line-height:0;">${gif ? brandCtaImg(kind) : brandCtaSvg(kind)}</section>`;
+  const block = kind => `<section data-wechat-cta="${kind}" data-zhijian-cta="${gif ? brandCtaMarker : 'v6'}" style="max-width:${Number(maxWidth)}px;margin:${kind === 'opening' ? '0 auto 18px' : '24px auto 0'};padding:${kind === 'opening' ? '24px 0 0' : '0 0 28px'};line-height:0;">${gif ? brandCtaImg(kind) : brandCtaSvg(kind)}</section>`;
   const opening = mode === 'auto' && !hasSvgOpener ? block('opening') : '';
   if (!/data-wechat-root="article"/.test(result)) throw new Error('CTA insertion requires the article root');
   result = result.replace(/(<section\b[^>]*data-wechat-root="article"[^>]*>)/i, `$1\n${opening}`);
