@@ -8,6 +8,7 @@ import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
 
 import { resolveBrowserLaunch } from './qa-browser.mjs';
+import { brandCtaMarker } from './brand-cta.mjs';
 
 function parseArgs(argv) {
   const options = {
@@ -36,7 +37,7 @@ function parseArgs(argv) {
 }
 
 async function inspect(page, options) {
-  return page.evaluate(({ expectZhijian, strictImageUniqueness }) => {
+  return page.evaluate(({ expectZhijian, strictImageUniqueness, gifMarker }) => {
     const textRangeAfter = (mark, paragraph) => {
       const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
       let textNode = walker.nextNode();
@@ -139,11 +140,11 @@ async function inspect(page, options) {
         if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') failures.push(`Zhijian ${kind} CTA has a background (${bg}); it must stay transparent`);
         const gifImg = cta.querySelector('img[data-wechat-cta-image]');
         if (gifImg) {
-          // v7 default: the Flow GIF carries the paper colour and the text, so the wrapper adds neither.
-          if (cta.getAttribute('data-zhijian-cta') !== 'v7-flow-gif') failures.push(`Zhijian ${kind} CTA image is not marked v7-flow-gif`);
+          // GIF default: the pixels carry the paper colour and the text, so the wrapper adds neither.
+          if (cta.getAttribute('data-zhijian-cta') !== gifMarker) failures.push(`Zhijian ${kind} CTA image is not marked ${gifMarker}`);
           if (!/\.gif(?:[?#]|$)/i.test(gifImg.getAttribute('src') || '')) failures.push(`Zhijian ${kind} CTA image is not a GIF`);
         } else if (!cta.querySelector('svg[data-zhijian-cta] path')) {
-          failures.push(`Zhijian ${kind} CTA is neither the v7 Flow GIF nor the inline vector SVG`);
+          failures.push(`Zhijian ${kind} CTA is neither the ${gifMarker} GIF nor the inline vector SVG`);
         }
       });
     }
@@ -173,6 +174,7 @@ async function inspect(page, options) {
   }, {
     expectZhijian: options.expectZhijian,
     strictImageUniqueness: options.strictImageUniqueness,
+    gifMarker: brandCtaMarker,
   });
 }
 

@@ -9,7 +9,7 @@
 
 ## Brand CTAs
 
-Since 1.18.0 the default CTAs are two Flow-generated GIFs keyed onto the paper colour `#F5F4ED`, hosted on COS (URL, size, frames, fps, bytes, SHA256 and source in `brand-cta/manifest.json`); nothing is shipped for them. The 1.17.0 SVGs below remain as the `--cta-style svg` fallback.
+Since 1.19.0 the default CTAs are two dual-IP GIFs (Dapeng IP stills + the Flow-keyed Xiaolan) on the paper colour `#F5F4ED`, hosted on COS (URL, size, frames, fps, bytes, SHA256, source and layout in `brand-cta/manifest.json`); nothing is shipped for them. The 1.18.x Xiaolan-only Flow GIFs are in `legacy`. The 1.17.0 SVGs below remain as the `--cta-style svg` fallback.
 
 `brand-cta/manifest.json` `fallback` records the two SVG CTAs (`zhijian-cta-opening.svg`, `zhijian-cta-ending.svg`): SHA256, viewBox, display size, alt text and `format: "inline-svg"`. The converter reads these files and inlines them as one-line SVG with a transparent background, so nothing is uploaded or hosted. The SVGs are generated from the ZhiJian Xiaolan v003 vector source (flat vector character, text converted to paths, SMIL loops); regenerate there, copy here, and update the manifest SHA256 — the converter refuses a file whose SHA256 does not match.
 

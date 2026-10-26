@@ -17,18 +17,19 @@ const stripCta=s=>s.replace(/<section\b[^>]*data-wechat-cta="(?:opening|ending)"
 
 const GIF_BASE='https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/';
 const GIF={
- opening:{file:'zhijian-cta-opening-flow-376b7c890008.gif',w:720,h:272,frames:48,fps:12,bytes:800024,sha:'376b7c89000817b0d050bb1674578563ba35017846a1f68b029e93e7f0ffa490'},
- ending:{file:'zhijian-cta-ending-flow-5375c80db38d.gif',w:720,h:300,frames:72,fps:10,bytes:1286172,sha:'5375c80db38d67a5c1e11514f1c7bfab50311058aa913f90f9a9ca473c612c88'}
+ opening:{file:'zhijian-cta-opening-ip-c2448367902a.gif',w:720,h:272,frames:48,fps:12,bytes:480590,sha:'c2448367902aa65949119a8fa635d86fbc485f1ecd063cfd65b34fff5cca1406'},
+ ending:{file:'zhijian-cta-ending-ip-fca54158bd9a.gif',w:720,h:300,frames:80,fps:10,bytes:846622,sha:'fca54158bd9ab9be1b037f34ffa81a7e09e2e6d4d819463a6a20f63dea2de469'}
 };
 
-test('manifest: v7 Flow GIF default, SVG fallback, old GIFs legacy',()=>{
- assert.equal(brandCtaManifest.version,'2026-10-13-v7.1-flow-gif');
+test('manifest: v8 dual-IP GIF default, SVG fallback, old GIFs legacy',()=>{
+ assert.equal(brandCtaManifest.version,'2026-10-14-v8-ip-gif');
+ assert.equal(brandCtaManifest.marker,'v8-ip-gif');
  assert.deepEqual(fs.readdirSync(assetDir).filter(f=>f.endsWith('.gif')),[],'GIF payload is hosted, not shipped');
  for(const kind of ['opening','ending']){
   const a=brandCtaAssets[kind],g=GIF[kind];
   assert.equal(a.format,'gif');assert.equal(a.url,GIF_BASE+g.file);assert.equal(a.sha256,g.sha);
   assert.equal(a.width,g.w);assert.equal(a.height,g.h);assert.equal(a.frames,g.frames);assert.equal(a.fps,g.fps);assert.equal(a.bytes,g.bytes);
-  assert.match(a.source,/Google Flow Omni 1\.1 Flash/);
+  assert.match(a.source,/Dapeng IP/);assert.match(a.source,/Flow/);
   const f=brandCtaSvgAssets[kind];
   assert.equal(f.format,'inline-svg');assert.equal(f.url,undefined);
   const raw=fs.readFileSync(path.join(assetDir,f.file));
@@ -39,6 +40,7 @@ test('manifest: v7 Flow GIF default, SVG fallback, old GIFs legacy',()=>{
  assert.equal(brandCtaManifest.fallback.role,'fallback');
  assert.ok(legacyBrandCtaAssets.length>=2&&legacyBrandCtaAssets.every(a=>a.url&&a.sha256&&a.file.endsWith('.gif')));
  assert.ok(legacyBrandCtaAssets.every(a=>!Object.values(brandCtaAssets).some(n=>n.url===a.url)));
+ assert.ok(['zhijian-cta-opening-flow-376b7c890008.gif','zhijian-cta-ending-flow-5375c80db38d.gif'].every(f=>legacyBrandCtaAssets.some(a=>a.file===f)),'1.18.1 Flow GIFs are legacy');
 });
 
 test('CTA SVGs avoid markup WeChat strips or rejects',()=>{
@@ -55,14 +57,14 @@ test('CTA SVGs avoid markup WeChat strips or rejects',()=>{
  }
 });
 
-test('default emits v7 Flow GIF img, transparent wrapper, unique on reapplication',()=>{
+test('default emits the current GIF img (v8 dual IP), transparent wrapper, unique on reapplication',()=>{
  const a=applyBrandCta(shell);const b=applyBrandCta(a);
  assert.equal(b,a);
  assert.equal(count(b,'opening'),1);assert.equal(count(b,'ending'),1);
  assert.ok(b.indexOf('data-wechat-cta="opening"')<b.indexOf('保留正文'));
  assert.ok(b.indexOf('data-wechat-cta="ending"')>b.indexOf('保留正文'));
  const sections=ctaSections(b);assert.equal(sections.length,2);
- for(const s of sections){assert.match(s,/data-zhijian-cta="v7-flow-gif"/);assert.doesNotMatch(s,/background/i);}
+ for(const s of sections){assert.match(s,/data-zhijian-cta="v8-ip-gif"/);assert.doesNotMatch(s,/background/i);}
  // Paper padding keeps the character off the article card's top and bottom edges (1.18.1).
  assert.match(sections[0],/padding:24px 0 0;/);assert.match(sections[1],/padding:0 0 28px;/);
  for(const kind of ['opening','ending']){
@@ -90,7 +92,7 @@ test('--cta-style svg style emits the 1.17.0 inline SVG; style switches replace,
  assert.equal(applyBrandCta(gif,{style:'svg'}),svg,'gif -> svg');
 });
 
-test('dedupe across v5 GIF, v6 SVG and v7 GIF existing CTAs',()=>{
+test('dedupe across v5 GIF, v6 SVG and current GIF existing CTAs',()=>{
  const v5=legacyBrandCtaAssets.find(a=>a.file.includes('-opening-'));
  const v5End=legacyBrandCtaAssets.find(a=>a.file.includes('-ending-'));
  const v5Html=shell.replace('<p>',`<section data-wechat-cta="opening" style="background-color:#FFFFFF;"><img data-wechat-cta-image="opening" src="${v5.url}" alt="x" /></section><p>`).replace('</section><!--',`<img src="${v5End.url}"></section><!--`);
@@ -144,7 +146,7 @@ test('legacy GIF CTAs from earlier drafts are replaced, unrelated images preserv
  const a=applyBrandCta(html);
  for(const l of legacyBrandCtaAssets){assert.ok(!a.includes(l.file));}
  assert.doesNotMatch(a,/rehosted\.gif/);
- assert.equal((a.match(/data-wechat-cta-image/g)||[]).length,2,'only the two fresh v7 CTA images');
+ assert.equal((a.match(/data-wechat-cta-image/g)||[]).length,2,'only the two fresh current CTA images');
  assert.match(a,/example.com\/user.png/);
  assert.equal(count(a,'opening'),1);assert.equal(count(a,'ending'),1);
 });
@@ -159,7 +161,7 @@ test('real converter default, components, SVG and opt-out routes',()=>{
    assert.equal(count(h,'opening'),opening);assert.equal(count(h,'ending'),ending);
    assert.equal(stripCta(h).replace(/<section data-wechat-block="end-mark"[\s\S]*?<\/section>/,'').includes('<svg'),svg);assert.match(h,/正文保留/);
    for(const s of ctaSections(h)) assert.doesNotMatch(s,/background/i);
-   if(!args.includes('svg')&&!args.includes('--cover')&&ending) assert.match(h,/data-zhijian-cta="v7-flow-gif"/);
+   if(!args.includes('svg')&&!args.includes('--cover')&&ending) assert.match(h,/data-zhijian-cta="v8-ip-gif"/);
    if(args.includes('svg')) assert.match(h,/data-zhijian-cta="v6"/);
    assert.equal(validateHtml(h).errors.length,0,JSON.stringify(validateHtml(h).errors));
   }finally{fs.rmSync(dir,{recursive:true,force:true});}

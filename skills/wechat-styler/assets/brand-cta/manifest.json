@@ -1,38 +1,39 @@
 {
-  "version": "2026-10-13-v7.1-flow-gif",
+  "version": "2026-10-14-v8-ip-gif",
+  "marker": "v8-ip-gif",
   "default": "auto",
   "defaultStyle": "gif",
   "format": "gif",
   "assets": {
     "opening": {
-      "file": "zhijian-cta-opening-flow-376b7c890008.gif",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-376b7c890008.gif",
-      "sha256": "376b7c89000817b0d050bb1674578563ba35017846a1f68b029e93e7f0ffa490",
+      "file": "zhijian-cta-opening-ip-c2448367902a.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-ip-c2448367902a.gif",
+      "sha256": "c2448367902aa65949119a8fa635d86fbc485f1ecd063cfd65b34fff5cca1406",
       "width": 720,
       "height": 272,
       "frames": 48,
       "fps": 12,
-      "bytes": 800024,
+      "bytes": 480590,
       "loop": "forever",
       "alt": "关注大鹏，把 AI 用进真实工作",
       "format": "gif",
-      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013",
-      "layout": "paper margin 30px above / 18px below the character inside the 2x asset (1.18.1)"
+      "source": "Dual IP: Dapeng IP still poses from the approved character pack (code-timed pose switch and breathing) + Xiaolan from the 2026-10-13 Google Flow clips (green-screen keyed), composited with the approved text layer on #F5F4ED. Vault 05_附件/wechat-cta-ip-20261014",
+      "layout": "Xiaolan waves on the left, Dapeng IP (mirrored) presents the title with an open palm; same 30px/18px paper margins and text position as 1.18.1"
     },
     "ending": {
-      "file": "zhijian-cta-ending-flow-5375c80db38d.gif",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-5375c80db38d.gif",
-      "sha256": "5375c80db38d67a5c1e11514f1c7bfab50311058aa913f90f9a9ca473c612c88",
+      "file": "zhijian-cta-ending-ip-fca54158bd9a.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-ip-fca54158bd9a.gif",
+      "sha256": "fca54158bd9ab9be1b037f34ffa81a7e09e2e6d4d819463a6a20f63dea2de469",
       "width": 720,
       "height": 300,
-      "frames": 72,
+      "frames": 80,
       "fps": 10,
-      "bytes": 1286172,
+      "bytes": 846622,
       "loop": "forever",
       "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人",
       "format": "gif",
-      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013",
-      "layout": "paper margin 30px above / 18px below the character inside the 2x asset (1.18.1)"
+      "source": "Dual IP: Dapeng IP still poses from the approved character pack (code-timed pose switch and breathing) + Xiaolan from the 2026-10-13 Google Flow clips (green-screen keyed), composited with the approved text layer on #F5F4ED. Vault 05_附件/wechat-cta-ip-20261014",
+      "layout": "Xiaolan raises the check card (Flow clip), Dapeng IP gives a thumbs-up as the card arrives (2.75s) and holds until the 8s loop crossfades back. No end mark in the GIF: the article's own landing mark sits just above it"
     }
   },
   "fallback": {
@@ -62,6 +63,29 @@
     }
   },
   "legacy": [
+    {
+      "version": "2026-10-13-v7.1-flow-gif",
+      "format": "gif",
+      "note": "1.18.1 Flow GIFs (Xiaolan only); replaced in 1.19.0 by the dual-IP GIFs. Kept so reprocessing removes them.",
+      "assets": {
+        "opening": {
+          "file": "zhijian-cta-opening-flow-376b7c890008.gif",
+          "sha256": "376b7c89000817b0d050bb1674578563ba35017846a1f68b029e93e7f0ffa490",
+          "width": 720,
+          "height": 272,
+          "alt": "关注大鹏，把 AI 用进真实工作",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-376b7c890008.gif"
+        },
+        "ending": {
+          "file": "zhijian-cta-ending-flow-5375c80db38d.gif",
+          "sha256": "5375c80db38d67a5c1e11514f1c7bfab50311058aa913f90f9a9ca473c612c88",
+          "width": 720,
+          "height": 300,
+          "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-5375c80db38d.gif"
+        }
+      }
+    },
     {
       "version": "2026-10-13-v7-flow-gif",
       "format": "gif",

@@ -159,6 +159,17 @@ const rules = [
     }
   },
   {
+    name: '可见文本残留 Markdown 加粗 **',
+    level: 'ERROR',
+    test: (line, ctx) => {
+      if (ctx.inHead) return null;
+      // line 已剥离 code/pre/svg;去掉标签后只看可见文本
+      return /\*\*/.test(line.replace(/<[^>]*>/g, ''))
+        ? '可见文本残留 `**`(加粗未渲染,渲染泄漏)'
+        : null;
+    }
+  },
+  {
     name: '块级元素缺 style',
     level: 'WARN',
     test: (line) => {
