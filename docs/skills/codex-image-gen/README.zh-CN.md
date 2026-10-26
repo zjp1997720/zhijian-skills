@@ -27,18 +27,28 @@ npx skills add zjp1997720/zhijian-skills \
 ## 它能做什么
 
 - 文生图，支持 `--prompt` 或 `--prompt-file`
-- 图像编辑与 image-to-image：`--image` 与可重复传入的 `--reference-image`（本地路径、HTTP(S) URL 或 data URL）
-- 三档可控比例——`square`（1024x1024）、`landscape`（1536x1024）、`portrait`（1024x1536）——以及 `--quality low|medium|high`
+- 图像编辑与 image-to-image：`--image` 是要修改的主画布，`--reference-image` 只提供身份、风格或材质参考（都可重复，支持本地路径、HTTP(S) URL 或 data URL）。两类图片带语义标签按顺序发出，多图编辑时不再把参考图当成要改的画布
+- 每次生成都写一份 manifest（prompt、模型、输入图、成图 SHA-256 与实际尺寸）；`--continue-from <manifest>` 直接以上一张成图为画布接着返修，并带上可复用的参考图。图片和 manifest 一起挪目录也能找回
+- `--name hero` 输出 `hero.png`，同名已存在时自动改成 `hero-2.png`，从不覆盖；不传则用带随机后缀的文件名，同一提示词并行跑也不会互相覆盖
+- 附一份提示词写法指南（`references/prompting.md`）：封面、海报、课件页的“设计规则 / 画面主意 / 精确文字”三层写法，带中文标题的成品设计，头像与系列图的区分度做法
+- `--aspect square|landscape|portrait` 与 `--quality low|medium|high` 会写进请求，但 Codex 通道目前在服务端把尺寸和质量改成 `auto`（见下文“实测边界”），实际尺寸以 manifest 为准
 - 解析 access token 的 JWT 过期时间，过期时用 refresh token 刷新，并把新 token 写回 `~/.codex/auth.json`
 - 从 SSE 流提取最终图片，必要时回退到最后一帧 partial 图，保存为 PNG
-- 输出一行可解析的 JSON——`{"success": true, "image": "/absolute/path.png"}`
+- 输出一行可解析的 JSON，含 `image`、`manifest`、实际尺寸与所用模型
 
 ## 工作原理
 
 1. 脚本读取 `~/.codex/auth.json`，解码 access token 的 JWT payload，临过期时通过 `auth.openai.com` 刷新。
 2. 按后端要求的请求头（`User-Agent: codex_cli_rs/0.0.0`、`originator: codex_cli_rs`、`ChatGPT-Account-ID`）调用 Codex Responses 接口，这正是避免莫名 403 的关键。
-3. 外层模型挂载绑定 `gpt-image-2` 的 `image_generation` 工具；本地输入图会 base64 编码成 `input_image` 内容。
-4. SSE 解析器保留最后一个 `image_generation_call.result`，缺失时回退到最后一个 `partial_image_b64`，解码后写成 `codex-image-<时间戳>-<prompt哈希>.png`。
+3. 外层调度模型（默认 `gpt-6-astra`，可用 `--response-model` 换）挂载 `image_generation` 工具；本地图片 base64 编码成 `input_image`，每张图前插一句说明它是“主画布”还是“参考图”。
+4. SSE 解析器保留最后一个 `image_generation_call.result`，缺失时回退到最后一个 `partial_image_b64`，以独占方式写成 PNG，再写同名 `.manifest.json`。
+
+## 实测边界
+
+2026-10-26 实跑，服务端在 `response.completed` 里回显的工具配置是 `"model": "gpt-image-2-codex", "quality": "auto", "size": "auto"`，请求 `landscape` 得到 1254x1254。也就是说：
+
+- 经 Codex 订阅通道生图，用的是 `gpt-image-2` 的 Codex 版本，改 `--model` 不会换成 GPT Image 2.5。要用 2.5 只能走 OpenAI 平台 API Key。
+- 比例和质量目前由服务端决定。要横版或竖版，请在 prompt 里写清画幅；脚本不做裁切或扩边，实际尺寸记在 manifest 里。
 
 ## 示例请求
 
@@ -66,6 +76,7 @@ python3 scripts/codex_image.py \
 
 - 本 Skill 复用你自己的 ChatGPT/Codex 登录态，消耗该账号的生图额度；不会凭空产生额度。
 - refresh token 是一次性的，所以脚本刷新成功后立即以 `0600` 权限写回 `~/.codex/auth.json`。
+- 默认调度模型 `gpt-6-astra` 若你的账号用不了，会报 400/404 并提示改 `--response-model`，换成你的 Codex 里可选的模型即可。
 - `401` 表示本地登录态失效——重新执行 `codex auth login`。`403` 通常是请求头缺失或 Cloudflare/账号风控，不要误判成 prompt 问题。
 - 生图行为受你的账号条款约束；prompt 与参考图都应在账号允许处理的范围内。
 - 每次运行生成一张图。批量调度、任务队列和高级后处理明确不在范围内。
@@ -79,6 +90,7 @@ skills/codex-image-gen/
 ├── agents/openai.yaml
 ├── evals/evals.json
 ├── references/api-notes.md
+├── references/prompting.md
 ├── scripts/codex_image.py
 └── tests/test_codex_image.py
 ```

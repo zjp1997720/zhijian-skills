@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "帮我用本机 Codex 登录态生成一张蓝白色 AI 课程封面图，16:9，无文字，保存到 outputs/。",
-      "expected_output": "Agent 应调用 scripts/codex_image.py，使用 landscape/high 或 medium，输出 PNG 文件路径，并说明依赖 ~/.codex/auth.json。",
+      "expected_output": "Agent 应调用 scripts/codex_image.py，使用 landscape、high 或 medium，直接输出原生母版 PNG 路径，并说明依赖 ~/.codex/auth.json。",
       "files": []
     },
     {
@@ -17,7 +17,46 @@
       "id": 3,
       "prompt": "把 draft.png 这张草图改成干净的白板商业插图风格。",
       "expected_output": "Agent 应使用 --image draft.png 做 image-to-image/editing；若文件不存在，应先检查并报清楚。",
-      "files": ["draft.png"]
+      "files": [
+        "draft.png"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "生成一张公众号 2.35:1 封面，标题必须完整保留。",
+      "expected_output": "Agent 应在 prompt 中声明四周安静、可延展背景，使用 --aspect landscape 和 --quality high，直接输出 1536x1024 原生母版 PNG，不做生成后比例适配。",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "把主画布 draft.png 按角色参考 xiaolan.png 返修，保持草图布局不变。",
+      "expected_output": "Agent 应把 draft.png 作为 --image，把 xiaolan.png 作为 --reference-image，并使用默认 gpt-6-astra 外层调度和 gpt-image-2 生图；不得把两张图当成无角色差别的参考图。",
+      "files": [
+        "draft.png",
+        "xiaolan.png"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "上一轮已经生成并返回 run.png.manifest.json。保持其他内容不变，只放大主标题。",
+      "expected_output": "Agent 应传 --continue-from run.png.manifest.json 与新的变化 prompt，复用上一轮成图和参考图，继续使用 quality=high；成功后返回新的图片和 manifest 路径。",
+      "files": [
+        "run.png.manifest.json"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "我传了 --aspect square，但上游实际返回了横图，不能裁掉主体。",
+      "expected_output": "脚本应记录实际 PNG 尺寸；若与请求母版不一致，提示返修或重生成，不做扩边、裁切或缩放。",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "给 7 位 AI 同事批量生成头像，中国浪漫水彩画风，会裁成圆形放在聊天列表里，文件名用各自的名字。outputs/ 里已经有一张 宁助理.png。",
+      "expected_output": "Agent 应先按 references/prompting.md「头像与系列图」列区分表（主色、轮廓、道具至少两列互不相同），把“中国浪漫水彩”只写成笔触与用色并约束背景不出现传统文化元素；每张调用脚本时传 --aspect square 与 --name <角色名>；宁助理因同名不覆盖，输出为 宁助理-2.png 及同名 manifest，Agent 以 JSON 的 image/manifest 字段报告实际路径；该 manifest 可直接用于 --continue-from。",
+      "files": [
+        "outputs/宁助理.png"
+      ]
     }
   ]
 }

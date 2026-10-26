@@ -69,7 +69,7 @@
       "name": "codex-image-gen",
       "source": "./plugins/codex-image-gen",
       "description": "把已经登录的 Codex CLI 变成任何 Agent 都能用的生图能力——不需要 API Key，一个零依赖的 Python 脚本。",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "author": {
         "name": "智见 AI"
       },

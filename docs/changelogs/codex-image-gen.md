@@ -1,5 +1,15 @@
 # codex-image-gen Changelog
 
+## 1.1.0 — 2026-10-26
+
+- Separate the edit canvas (`--image`) from guidance images (`--reference-image`) and label each image's role in the request.
+- Write a run manifest next to every image and add `--continue-from` to keep editing the previous result with its reusable references; fall back to the manifest folder when files were moved together.
+- Add `--name` for predictable output names that never overwrite (`-2`, `-3` suffixes), and add a random suffix to default names so parallel runs of the same prompt cannot collide.
+- Add `--response-model` (default `gpt-6-astra`) and an actionable error when the account cannot use the dispatcher model.
+- Add `references/prompting.md`: three-layer prompts for covers, posters, and slides, exact-text rules, and distinct avatar series.
+- Document measured server behavior: the Codex channel echoes `gpt-image-2-codex` with `quality` and `size` set to `auto`.
+- Cover labeling, naming, and continuation in the test suite.
+
 ## 1.0.0 — 2026-08-18
 
 - Publish the first independently governed Portfolio release.
