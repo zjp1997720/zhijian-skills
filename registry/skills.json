@@ -109,12 +109,12 @@
     {
       "name": "codex-image-gen",
       "lifecycle": "active",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "path": "skills/codex-image-gen",
       "documentation": "docs/skills/codex-image-gen/README.md",
       "documentation_zh": "docs/skills/codex-image-gen/README.zh-CN.md",
       "changelog": "docs/changelogs/codex-image-gen.md",
-      "canonical_tag": "codex-image-gen/v1.0.0",
+      "canonical_tag": "codex-image-gen/v1.1.0",
       "validation": {
         "commands": [
           "python3 -m unittest discover -s skills/codex-image-gen/tests -v"

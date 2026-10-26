@@ -75,7 +75,7 @@ class RequestBodyTests(unittest.TestCase):
     def test_text_to_image_shape(self) -> None:
         args = codex_image.parse_args(["--prompt", "cover"])
         body = codex_image.build_request_body(args, "cover")
-        self.assertEqual(body["model"], "gpt-5.5")
+        self.assertEqual(body["model"], "gpt-6-astra")
         self.assertEqual(body["stream"], True)
         tool = body["tools"][0]
         self.assertEqual(tool["type"], "image_generation")
@@ -98,14 +98,30 @@ class RequestBodyTests(unittest.TestCase):
             args = codex_image.parse_args(["--prompt", "edit", "--image", str(image)])
             content = codex_image.build_request_body(args, "edit")["input"][0]["content"]
             self.assertEqual(content[0]["type"], "input_text")
-            self.assertTrue(content[1]["image_url"].startswith("data:image/"))
+            self.assertIn("Target/input image 1", content[1]["text"])
+            self.assertTrue(content[2]["image_url"].startswith("data:image/"))
 
     def test_remote_and_data_sources_pass_through(self) -> None:
         args = codex_image.parse_args(
             ["--prompt", "x", "--reference-image", "https://example.com/ref.png"]
         )
         content = codex_image.build_request_body(args, "x")["input"][0]["content"]
-        self.assertEqual(content[1]["image_url"], "https://example.com/ref.png")
+        self.assertEqual(content[2]["image_url"], "https://example.com/ref.png")
+
+    def test_targets_and_references_are_labeled_in_order(self) -> None:
+        args = codex_image.parse_args(
+            [
+                "--prompt", "x",
+                "--image", "https://example.com/canvas.png",
+                "--reference-image", "https://example.com/face.png",
+            ]
+        )
+        content = codex_image.build_request_body(args, "x")["input"][0]["content"]
+        self.assertIn("Target/input image 1", content[1]["text"])
+        self.assertEqual(content[2]["image_url"], "https://example.com/canvas.png")
+        self.assertIn("Reference image 1", content[3]["text"])
+        self.assertIn("Do not treat it as the target canvas", content[3]["text"])
+        self.assertEqual(content[4]["image_url"], "https://example.com/face.png")
 
 
 class SseParsingTests(unittest.TestCase):
@@ -205,13 +221,77 @@ class OutputNamingTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             path = codex_image.output_path_for("cover prompt", tmp)
             self.assertTrue(str(path).startswith(str(Path(tmp).resolve())))
-            self.assertRegex(path.name, r"^codex-image-\d{8}-\d{6}-[0-9a-f]{12}\.png$")
+            self.assertRegex(path.name, r"^codex-image-\d{8}-\d{6}-[0-9a-f]{12}-[0-9a-f]{6}\.png$")
 
-    def test_same_prompt_is_stable_per_second(self) -> None:
+    def test_parallel_same_prompt_gets_distinct_names(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
-            first = codex_image.output_path_for("stable", tmp).name
-            second = codex_image.output_path_for("stable", tmp).name
-            self.assertEqual(first[-16:], second[-16:])
+            first = codex_image.save_new_image(b"a", "stable", tmp)
+            second = codex_image.save_new_image(b"b", "stable", tmp)
+            self.assertNotEqual(first, second)
+            self.assertEqual(first.read_bytes(), b"a")
+
+    def test_name_never_overwrites(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            first = codex_image.save_new_image(b"a", "x", tmp, "hero.png")
+            (Path(tmp) / "hero-2.png.manifest.json").write_text("{}", encoding="utf-8")
+            second = codex_image.save_new_image(b"b", "x", tmp, "hero")
+            self.assertEqual(first.name, "hero.png")
+            self.assertEqual(second.name, "hero-3.png")
+            self.assertEqual(first.read_bytes(), b"a")
+
+    def test_name_rejects_directories(self) -> None:
+        for bad in ("../x", "a/b", "  ", ".png"):
+            with self.assertRaises(codex_image.CodexImageError):
+                codex_image.normalize_output_name(bad)
+
+
+class ContinuationTests(unittest.TestCase):
+    def _manifest(self, directory: Path, image: Path, refs: list) -> Path:
+        manifest = {
+            "schema_version": 1,
+            "output": {"image": {"kind": "local_file", "source": str(image), "reusable": True}},
+            "reference_images": refs,
+        }
+        path = directory / (image.name + ".manifest.json")
+        path.write_text(json.dumps(manifest), encoding="utf-8")
+        return path
+
+    def test_previous_image_and_reusable_references_carry_over(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            image = directory / "round1.png"
+            image.write_bytes(b"png")
+            refs = [
+                {"source": "https://example.com/face.png", "reusable": True},
+                {"source": "data:image/png;base64,AAA", "reusable": False},
+            ]
+            manifest = self._manifest(directory, image, refs)
+            args = codex_image.parse_args(
+                ["--prompt", "fix hair", "--continue-from", str(manifest),
+                 "--reference-image", "https://example.com/style.png"]
+            )
+            continued = codex_image.apply_continuation(args)
+            self.assertEqual(args.image, [str(image.resolve())])
+            self.assertEqual(
+                args.reference_image,
+                ["https://example.com/face.png", "https://example.com/style.png"],
+            )
+            self.assertEqual(continued["path"], str(manifest.resolve()))
+
+    def test_moved_folder_falls_back_to_manifest_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            image = directory / "round1.png"
+            image.write_bytes(b"png")
+            manifest = self._manifest(directory, Path("/old/place/round1.png"), [])
+            args = codex_image.parse_args(["--prompt", "x", "--continue-from", str(manifest)])
+            codex_image.apply_continuation(args)
+            self.assertEqual(args.image, [str(image.resolve())])
+
+    def test_missing_manifest_is_actionable(self) -> None:
+        args = codex_image.parse_args(["--prompt", "x", "--continue-from", "/nonexistent/m.json"])
+        with self.assertRaises(codex_image.CodexImageError):
+            codex_image.apply_continuation(args)
 
 
 class CliContractTests(unittest.TestCase):
@@ -223,7 +303,10 @@ class CliContractTests(unittest.TestCase):
             timeout=60,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        for token in ("--prompt", "--aspect", "--quality", "--image", "--reference-image"):
+        for token in (
+            "--prompt", "--aspect", "--quality", "--image", "--reference-image",
+            "--response-model", "--continue-from", "--manifest-out", "--name",
+        ):
             self.assertIn(token, result.stdout)
 
 
