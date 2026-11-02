@@ -58,33 +58,27 @@ layers:
 node scripts/convert.mjs article.md --components --figure-png <目录> --output article_wechat.html
 ```
 
-`--figure-png` 写出 `<id>.svg`、`<id>.png`、`contact.png`、`report.json`。不带它也会在有浏览器时跑全部检查，只是不落文件；没有浏览器时照常出稿，并提示渲染检查未执行。浏览器按 `CHROME_EXECUTABLE` 等 `mobile-visual-qa.mjs` 的同一顺序查找。
+`--figure-png` 写出 `<id>.svg`、`<id>.png`、`contact.png`、`report.json`。发到知乎、CSDN、头条这类不支持动画的平台时，再加 `--figure-static-md <路径>`，会多写一份 Markdown：每个 `:::figure` 换成 `![标题](相对路径/<id>.png)`，其余内容原样保留。不带它也会在有浏览器时跑全部检查，只是不落文件；没有浏览器时照常出稿，并提示渲染检查未执行。浏览器按 `CHROME_EXECUTABLE` 等 `mobile-visual-qa.mjs` 的同一顺序查找。
 
 任何一张不过都不生成 HTML，错误行形如 `图解 <id>：<原因>`，退出码 1：
 
 - **规格放不下**：消息会说哪里放不下，缩短文字或拆图。
 - **结构白名单**：`tag-not-allowed`、`anim-attr-not-allowed`、`id-attribute`、`font-too-small`（手机下限 12px）、`too-large`（单张 30KB）。
 - **渲染实测**：`text-off-canvas`、`text-out-of-box`、`text-on-line`、`text-overlap`、`not-animated`、`hold-too-short`（定格不足 2 秒，也会拦下基态隐藏语义内容）、`tour-content-moves`。
-- **对比度**：`contrast:<前景>/<背景>=<比值>`，低于 4.5 报错，不自动改色。
+- **主题**：`图解目前只支持 zhijian 主题`，见下面「主题」。
+- **对比度**：`contrast:<前景>/<背景>=<比值>`，低于 4.5 报错，不自动改色。用 `--accent-color` 等参数改了 `zhijian` 的颜色时可能触发。
 
 然后打开 `contact.png` 目检，每行是三个动画中途帧和最右的静态图。完成标准：不读正文判断成立，中途帧看得出动的就是论点，强调色落在要看的那一处，静态图和定格时一样完整。
 
 ## 主题
 
-颜色从主题 YAML 读：`bg`=`background_color`，`node`=`surface_color`，`rule`=`divider_color`，`text`=`text_color`，`muted`=`secondary_color`，`faint`=`tertiary_color`，`struct`=`accent_secondary`，`keyStroke` 和 `dot`=`accent_color`。`sunken` 由背景向分隔线混 80% 得到；`keyText` 取 `primary_text`，主题没有这个键时取 `accent_color`。
+颜色从 `zhijian` 主题 YAML 读：`bg`=`background_color`，`node`=`surface_color`，`rule`=`divider_color`，`text`=`text_color`，`muted`=`secondary_color`，`faint`=`tertiary_color`，`struct`=`accent_secondary`，`keyStroke` 和 `dot`=`accent_color`。`sunken` 由背景向分隔线混 80% 得到；`keyText` 取 `primary_text`，主题没有这个键时取 `accent_color`。
 
-目前只有 `zhijian` 通过对比度检查。其余 7 个主题的三级文字色给正文说明用，达不到图解 12px 小字的要求：
-
-| 主题 | 不达标 |
-|---|---|
-| `kami`、`magazine-forest`、`magazine-indigo`、`magazine-ink` | `faint/bg` |
-| `elegant`、`minimal`、`modern` | `muted/bg`、`faint/bg` |
-
-用这些主题写 `:::figure` 会报错，按需去掉围栏或换 `zhijian`。
+**图解目前只支持 zhijian 主题。** 其他主题写 `:::figure` 会直接报错，不出稿，也不自动改色：它们的三级文字色给正文说明用，达不到图解 12px 小字要求的 4.5:1。默认模式不受影响，围栏照常降级成引用。
 
 ## 字形
 
-`zhijian` 主题的标题和中心数字转路径。字体按 `--figure-font`、环境变量 `WECHAT_STYLER_FIGURE_FONT`、常见字体目录的顺序查找 `LXGWWenKai-Medium.ttf`。找不到或其他主题时退回 `<text>` 并使用主题的 `heading_font`，同时在报告里写明。所有 `<text>` 都带 `<tspan leaf="">`。
+标题和中心数字转路径。字体按 `--figure-font`、环境变量 `WECHAT_STYLER_FIGURE_FONT`、常见字体目录的顺序查找 `LXGWWenKai-Medium.ttf`。找不到时退回 `<text>` 并使用主题的 `heading_font`，同时在报告里写明。所有 `<text>` 都带 `<tspan leaf="">`。
 
 有字体时，所有 `<text>` 里连续的拉丁段（英文、数字、半角符号）都转字形路径，中文段留 `<text>`，避开 iOS 微信正式阅读器漏画混排英文的问题（`svg-animation-design.md` 踩坑 14）。无字体时拉丁段留在 `<text>` 里，报告标出风险，这种稿子发布前要换有字体的环境重新生成。
 

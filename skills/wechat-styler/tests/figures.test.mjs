@@ -12,6 +12,7 @@ import { Fig, SpecError, W, balance, fixed, stripAnimation } from '../scripts/fi
 import { buildFigure } from '../scripts/figures/figure.mjs';
 import { loadFont, resolveFigureFont } from '../scripts/figures/fonts.mjs';
 import { checkRendered, checkStructure, checkTheme } from '../scripts/figures/gates.mjs';
+import { staticMarkdown } from '../scripts/figures/pipeline.mjs';
 import { themeTokens } from '../scripts/figures/theme.mjs';
 import { launchBrowser, makeTestFont } from './figures-helpers.mjs';
 
@@ -60,7 +61,7 @@ describe('结构白名单', () => {
 });
 
 describe('主题', () => {
-  // 主题原有的三级文字色是给正文说明用的，多数达不到图解 12px 小字要求的 4.5:1。不自动改色，就报错。
+  // 引擎层的现状：这些主题的三级文字色达不到图解 12px 小字要求的 4.5:1。convert 目前只开放 zhijian。
   const KNOWN_CONTRAST_FAILURES = {
     elegant: ['muted/bg', 'faint/bg'],
     kami: ['faint/bg'],
@@ -80,7 +81,7 @@ describe('主题', () => {
     );
   });
 
-  test('8 个主题都能生成；对比度不足的如实报出，不改色', () => {
+  test('引擎对 8 个主题都能生成；对比度不足的如实报出，不改色', () => {
     assert.deepEqual(THEME_NAMES, Object.keys(KNOWN_CONTRAST_FAILURES));
     for (const name of THEME_NAMES) {
       const tokens = themeTokens(loadThemeYaml(name));
@@ -365,11 +366,53 @@ describe(':::figure 围栏', () => {
     assert.equal(html, null);
   });
 
-  test('对比度不足的主题报错，不改色也不出稿', () => {
-    const { result, html } = convert(ARTICLE(FENCE(BAR)), ['--components', '--theme', 'kami']);
+  test('非 zhijian 主题写明只支持 zhijian，不改色也不出稿', () => {
+    for (const name of THEME_NAMES.filter((theme) => theme !== 'zhijian')) {
+      const { result, html } = convert(ARTICLE(FENCE(BAR)), ['--components', '--theme', name]);
+      assert.equal(result.status, 1, name);
+      assert.match(result.stderr, new RegExp(`图解 demo：图解目前只支持 zhijian 主题，当前主题是 ${name}`));
+      assert.equal(html, null, name);
+    }
+  });
+
+  test('非 zhijian 主题未开组件模式仍降级成引用', () => {
+    const { result, html } = convert(ARTICLE(FENCE(BAR)), ['--theme', 'kami']);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(html, /能用之前的四层/);
+    assert.ok(!html.includes(':::'));
+  });
+
+  test('静态版把围栏换成 Markdown 图片，其余原样保留', () => {
+    const source = `---\ntitle: 示例\n---\n\n前文。\n\n${FENCE(BAR)}\n\n\`\`\`\n${FENCE('type: pie')}\n\`\`\`\n\n后文。\n`;
+    const out = staticMarkdown(source, path.join('..', 'my figs'));
+    assert.ok(out.startsWith('---\ntitle: 示例\n---\n'));
+    assert.match(out, /\n!\[能用之前的四层\]\(\.\.\/my%20figs\/demo\.png\)\n/);
+    assert.ok(!out.includes('layers:'));
+    assert.ok(out.includes('type: pie'), '代码块里的示例不动');
+    assert.match(staticMarkdown(FENCE(BAR), ''), /\(demo\.png\)/);
+    assert.match(staticMarkdown(FENCE('id: a\ntitle: 甲[乙]'), 'x'), /!\[甲\\\[乙\\\]\]\(x\/a\.png\)/);
+  });
+
+  test('--figure-static-md 缺 --figure-png 时报错', () => {
+    const { result } = convert(ARTICLE(FENCE(BAR)), ['--components', '--figure-static-md', 'x.md']);
     assert.equal(result.status, 1);
-    assert.match(result.stderr, /图解 demo：contrast:faint\/bg=3\.31/);
-    assert.equal(html, null);
+    assert.match(result.stderr, /需要同时带 --components 和 --figure-png/);
+  });
+
+  test('--figure-static-md 写出能找到 PNG 的 Markdown', async (t) => {
+    const { browser, reason } = await launchBrowser();
+    if (!browser) return t.skip(reason);
+    await browser.close();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'figure-static-'));
+    const md = path.join(dir, 'out/a.md');
+    const { result } = convert(ARTICLE(FENCE(BAR)), ['--components', '--figure-png', path.join(dir, 'figs'), '--figure-static-md', md]);
+    assert.equal(result.status, 0, result.stderr);
+    const text = fs.readFileSync(md, 'utf8');
+    const target = text.match(/!\[能用之前的四层\]\(([^)]+)\)/)?.[1];
+    assert.equal(target, '../figs/demo.png');
+    assert.ok(fs.existsSync(path.resolve(path.dirname(md), target)));
+    assert.ok(!text.includes(':::'));
+    return undefined;
   });
 
   test('代码块里的 :::figure 原样保留', () => {

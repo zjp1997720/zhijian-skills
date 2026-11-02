@@ -12,6 +12,7 @@ import { PAGE, checkRendered, checkStructure, checkTheme } from './gates.mjs';
 import { themeTokens } from './theme.mjs';
 
 const MAX_FIGURES = 5;
+const SUPPORTED_THEMES = ['zhijian'];
 
 /** details 每行一条，都带图 ID 和原因。 */
 export class FigureError extends Error {
@@ -98,6 +99,11 @@ export function prepareFigures(markdown, theme, { font: fontFlag = null, env = p
     seen.add(id);
   }
   const tokens = themeTokens(theme);
+  if (!SUPPORTED_THEMES.includes(theme.name)) {
+    const failed = checkTheme(tokens);
+    const detail = failed.length ? `（${failed.join('；')}）` : '';
+    throw new FigureError(parsed.map(({ id }) => `图解 ${id}：图解目前只支持 zhijian 主题，当前主题是 ${theme.name}${detail}`));
+  }
   const font = resolveFigureFont({ flag: fontFlag, env });
   const loaded = font.path ? loadFont(font.path) : null;
   const figures = [];
@@ -116,6 +122,18 @@ export function prepareFigures(markdown, theme, { font: fontFlag = null, env = p
   const svgById = new Map(figures.map(({ id, fig }) => [id, fig.svg]));
   const html = replaceBlocks(found, (_, index) => `\n<section style="margin:20px 0;line-height:0;">${svgById.get(parsed[index].id)}</section>\n`);
   return { markdown: html, figures, font };
+}
+
+/** 给不支持动画的平台：围栏换成 Markdown 图片，其余内容原样保留。pngPath 是 md 到 PNG 目录的相对路径。 */
+export function staticMarkdown(raw, pngPath) {
+  const found = findBlocks(raw);
+  const parsed = found.blocks.map(parseBlock);
+  const dir = pngPath.split(path.sep).join('/').replace(/ /g, '%20');
+  return replaceBlocks(found, (_, index) => {
+    const { id, spec } = parsed[index];
+    const alt = String(spec.title).replace(/[[\]]/g, '\\$&');
+    return `![${alt}](${dir ? `${dir}/` : ''}${id}.png)`;
+  });
 }
 
 async function launch() {

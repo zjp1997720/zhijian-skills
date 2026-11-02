@@ -19,7 +19,7 @@ import { applyBrandCta } from './brand-cta.mjs';
 import { extractArticleDocument } from './wechat-publish-core.mjs';
 import { generateCoverAnimation } from './generate-cover-animation.mjs';
 import { analyzeContentDensity, formatDensityReport } from './content-density-audit.mjs';
-import { FigureError, applyFigureFallback, prepareFigures, stripFigureFences, verifyFigures } from './figures/pipeline.mjs';
+import { FigureError, applyFigureFallback, prepareFigures, staticMarkdown, stripFigureFences, verifyFigures } from './figures/pipeline.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +40,9 @@ function parseArgs() {
   --components [false|0|no]   Enable component rendering, including :::figure
   --figure-png <dir>          With --components, also write figure PNG/SVG,
                               contact.png and report.json to <dir>
+  --figure-static-md <path>   With --figure-png, also write a Markdown copy with
+                              each :::figure replaced by its PNG, for platforms
+                              without SVG animation
   --figure-font <path>        LXGWWenKai-Medium.ttf for figure glyph paths (then
                               WECHAT_STYLER_FIGURE_FONT, then common font folders)
   --strict-density           Stop if paragraph density fails
@@ -89,6 +92,7 @@ function parseArgs() {
     strictDensity: false,
     figurePng: null,
     figureFont: null,
+    figureStaticMd: null,
     keepH1: false,
     noOpen: false
   };
@@ -156,6 +160,9 @@ function parseArgs() {
       case 'figure-png':
         options.figurePng = value;
         break;
+      case 'figure-static-md':
+        options.figureStaticMd = value;
+        break;
       case 'figure-font':
         options.figureFont = value;
         break;
@@ -202,6 +209,15 @@ function parseArgs() {
         options.coverAuthor = value ?? '';
         break;
     }
+  }
+
+  if (options.figureStaticMd && !(options.components && options.figurePng)) {
+    console.error('Error: --figure-static-md 需要同时带 --components 和 --figure-png');
+    process.exit(1);
+  }
+  if (options.figureStaticMd && options.input?.includes('*')) {
+    console.error('Error: --figure-static-md 只支持单个文件');
+    process.exit(1);
   }
 
   if (!options.input) {
@@ -1259,8 +1275,14 @@ async function convertFile(inputPath, theme, options) {
         const report = await verifyFigures(prepared, { pngDir: options.figurePng });
         console.log(`✓ 图解 ${report.figures.length} 张，渲染检查：${report.rendered === 'pass' ? '通过' : '未执行'}，字体：${report.font || '无'}`);
         for (const note of report.notes) console.warn(`⚠ 图解：${note}`);
+        if (options.figureStaticMd) {
+          const relative = path.relative(path.dirname(path.resolve(options.figureStaticMd)), path.resolve(options.figurePng));
+          fs.mkdirSync(path.dirname(path.resolve(options.figureStaticMd)), { recursive: true });
+          fs.writeFileSync(options.figureStaticMd, staticMarkdown(content, relative), 'utf8');
+          console.log(`✓ 静态版 Markdown: ${options.figureStaticMd}`);
+        }
       } else if (options.figurePng) {
-        console.warn('⚠ --figure-png：这篇没有 :::figure，没有输出');
+        console.warn('⚠ --figure-png / --figure-static-md：这篇没有 :::figure，没有输出');
       }
     } else {
       markdown = applyFigureFallback(source);
