@@ -1,5 +1,5 @@
 // 画布、文字和时间轴。基态永远等于终态，动画只负责“先收起、再按序回来”或“高亮巡游”。
-import { glyphPath } from './fonts.mjs';
+import { glyphPath, missingChars } from './fonts.mjs';
 
 export const W = 360;
 export const M = 20;
@@ -120,6 +120,7 @@ export class Fig {
     this.end = BUILD_FROM;
     this.mode = 'build';
     this.fixedDur = null;
+    this.notes = [];
   }
 
   // —— 绘制 ——
@@ -127,13 +128,13 @@ export class Fig {
     this.parts.push(part);
   }
 
-  text(s, x, y, size, fill, { weight = null, anchor = 'start', box = null, aux = false } = {}) {
+  text(s, x, y, size, fill, { weight = null, anchor = 'start', box = null, family = null } = {}) {
     if (size < 12) throw new SpecError(`字号 ${size} 小于手机下限 12：${s}`);
     let attrs = weight ? ` font-weight="${weight}"` : '';
     if (anchor !== 'start') attrs += ` text-anchor="${anchor}"`;
+    if (family) attrs += ` font-family="${family}"`;
     if (box) attrs += ` data-box="${box.map(num).join(',')}"`;
-    if (aux) attrs += ' data-aux="1"';
-    return `<text x="${num(x)}" y="${num(y)}" font-size="${size}"${attrs} fill="${fill}">${escapeText(s)}</text>`;
+    return `<text x="${num(x)}" y="${num(y)}" font-size="${size}"${attrs} fill="${fill}"><tspan leaf="">${escapeText(s)}</tspan></text>`;
   }
 
   rect(x, y, w, h, fill = 'none', stroke = null, sw = 1, rx = 8) {
@@ -146,12 +147,21 @@ export class Fig {
       + `stroke="${stroke || this.t.rule}" stroke-width="${sw}" stroke-linecap="round"/>`;
   }
 
+  /** 判断字：智见主题有字体时转路径，否则退回 <text> 并用主题的标题字体。 */
+  usesGlyphs(s) {
+    if (!this.t.glyphTitle || !this.font) return false;
+    const missing = missingChars(this.font, s);
+    if (missing.length) throw new SpecError(`字体缺字：${missing.join('')}`);
+    return true;
+  }
+
   display(s, x, baseline, size, fill, anchor = 'middle') {
-    return `<path d="${glyphPath(this.font, s, size, x, baseline, anchor).d}" fill="${fill}"/>`;
+    if (this.usesGlyphs(s)) return `<path d="${glyphPath(this.font, s, size, x, baseline, anchor).d}" fill="${fill}"/>`;
+    return this.text(s, x, baseline, size, fill, { weight: this.t.headingWeight, anchor, family: this.t.headingFont });
   }
 
   displayWidth(s, size) {
-    return glyphPath(this.font, s, size, 0, 0).width;
+    return this.usesGlyphs(s) ? glyphPath(this.font, s, size, 0, 0).width : estWidth(s, size);
   }
 
   // —— 时间轴：enter 系列的基态都是终态 ——
@@ -226,7 +236,7 @@ export class Fig {
     const qa = `<svg viewBox="0 0 ${W} ${h}" width="${W}" height="${h}" xmlns="http://www.w3.org/2000/svg" `
       + `style='display:block;width:100%;max-width:100%;height:auto;font-family:${FONT_STACK};'>`
       + `<rect x="0" y="0" width="${W}" height="${h}" fill="${this.t.bg}"/>${body}</svg>`;
-    return { svg: qa.replace(/ data-(?:box|aux)="[^"]*"/g, ''), qa, dur };
+    return { svg: qa.replace(/ data-box="[^"]*"/g, ''), qa, dur };
   }
 }
 

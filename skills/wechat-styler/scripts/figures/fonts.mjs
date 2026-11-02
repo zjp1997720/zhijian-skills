@@ -1,13 +1,38 @@
 // 字体解析放在这里，只有文章真的用到图解时才加载 opentype.js。
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
+import os from 'node:os';
+import path from 'node:path';
 
+const FONT_FILE = 'LXGWWenKai-Medium.ttf';
 const require = createRequire(import.meta.url);
 const fixedRound = (value) => Number(value.toFixed(1));
 const short = (value) => {
   const text = value.toFixed(1);
   return text.endsWith('.0') ? text.slice(0, -2) : text;
 };
+
+function fontDirs(env, platform, home) {
+  if (platform === 'darwin') return [path.join(home, 'Library/Fonts'), '/Library/Fonts'];
+  if (platform === 'win32') return [path.join(env.LOCALAPPDATA || '', 'Microsoft/Windows/Fonts'), 'C:/Windows/Fonts'];
+  return [path.join(home, '.local/share/fonts'), path.join(home, '.fonts'), '/usr/local/share/fonts', '/usr/share/fonts/truetype/lxgw', '/usr/share/fonts'];
+}
+
+/** 查找顺序：--figure-font → WECHAT_STYLER_FIGURE_FONT → 常见字体目录。找不到不报错，由调用方退回 <text>。 */
+export function resolveFigureFont({ flag = null, env = process.env, platform = process.platform, home = os.homedir(), exists = fs.existsSync } = {}) {
+  const missing = [];
+  for (const [candidate, source] of [[flag, '--figure-font'], [env.WECHAT_STYLER_FIGURE_FONT, 'WECHAT_STYLER_FIGURE_FONT']]) {
+    if (!candidate) continue;
+    if (exists(candidate)) return { path: candidate, source, note: missing.join('；') || null };
+    missing.push(`${source} 指向的字体不存在：${candidate}`);
+  }
+  for (const dir of fontDirs(env, platform, home)) {
+    const candidate = path.join(dir, FONT_FILE);
+    if (exists(candidate)) return { path: candidate, source: 'font-dir', note: missing.join('；') || null };
+  }
+  missing.push(`没找到 ${FONT_FILE}，标题和数字退回 <text>，字形取决于读者设备`);
+  return { path: null, source: null, note: missing.join('；') };
+}
 
 export function loadFont(fontPath) {
   const opentype = require('opentype.js');

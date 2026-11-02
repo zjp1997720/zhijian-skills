@@ -270,7 +270,8 @@ function cycle(f, s, y) {
     const hasFrom = center.from !== undefined && center.from !== null;
     const room = Math.min(cx - freeL, freeR - cx) * 2 - 16;
     const widest = Math.max(...[to, hasFrom ? String(center.from) : to].map((v) => f.displayWidth(v, 40)));
-    const big = Math.max(20, Math.trunc(Math.min(40, (40 * room) / widest)));
+    // <text> 的盒子比字形路径高，字号上限收一点，才不和上下两行小字碰。
+    const big = Math.max(20, Math.trunc(Math.min(f.usesGlyphs(to) ? 40 : 34, (40 * room) / widest)));
     if (hasFrom) {
       f.glow(f.display(String(center.from), cx, cy + 16, big, t.faint), [[RESET_TO, swapAt - 0.15]]);
       f.swap(f.display(to, cx, cy + 16, big, t.keyFill === t.node ? t.keyStroke : t.text),

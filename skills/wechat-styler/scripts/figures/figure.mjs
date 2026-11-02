@@ -35,5 +35,5 @@ export function buildFigure(spec, theme, { font = null, holdTail } = {}) {
     y += 23;
   }
   const { svg, qa, dur } = f.render(y - 23 + 20);
-  return { svg, qa, dur, mode: f.mode, theme: theme.name, title, conclusion, type };
+  return { svg, qa, dur, mode: f.mode, theme: theme.name, title, conclusion, type, notes: f.notes };
 }

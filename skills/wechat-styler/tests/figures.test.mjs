@@ -1,22 +1,28 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 import { after, before, describe, test } from 'node:test';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+
+import yaml from 'js-yaml';
 
 import { SpecError, W, balance, fixed, stripAnimation } from '../scripts/figures/core.mjs';
 import { buildFigure } from '../scripts/figures/figure.mjs';
+import { resolveFigureFont } from '../scripts/figures/fonts.mjs';
 import { checkRendered, checkStructure, checkTheme } from '../scripts/figures/gates.mjs';
+import { themeTokens } from '../scripts/figures/theme.mjs';
 import { launchBrowser, makeTestFont } from './figures-helpers.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
+const skillRoot = path.dirname(root);
 const showcase = JSON.parse(fs.readFileSync(path.join(root, 'fixtures/figure-showcase.json'), 'utf8'));
 const SPECS = Object.fromEntries(showcase.figures.map((f) => [f.id, f]));
 const copy = (value) => JSON.parse(JSON.stringify(value));
-const TOKENS = {
-  name: 'zhijian', bg: '#F5F4ED', node: '#FAF9F5', sunken: '#E8E6DC', rule: '#E5E3D8', text: '#141413', muted: '#504E49', faint: '#6B6A64',
-  struct: '#1B365D', keyFill: '#FAF9F5', keyStroke: '#B85235', keyText: '#A04A2E', dot: '#B85235',
-};
+const loadThemeYaml = (name) => yaml.load(fs.readFileSync(path.join(skillRoot, 'themes', `${name}.yaml`), 'utf8'));
+const THEME_NAMES = fs.readdirSync(path.join(skillRoot, 'themes')).map((f) => f.replace('.yaml', '')).sort();
+const TOKENS = themeTokens(loadThemeYaml('zhijian'));
 const font = makeTestFont(`${JSON.stringify(showcase)}0123456789 这是一个远远超过十三个字的结论式标题写法第几版`);
 const good = (id = 'stack', options = {}) => buildFigure(copy(SPECS[id]), TOKENS, { font, ...options });
 const mutate = (fig, fn) => ({ ...fig, svg: fn(fig.svg), qa: fn(fig.qa) });
@@ -50,6 +56,73 @@ describe('结构白名单', () => {
   test('对比度不足亮红灯', () => {
     assert.deepEqual(checkTheme(TOKENS), []);
     assert.ok(checkTheme({ ...TOKENS, faint: '#CCCCCC' }).length);
+  });
+});
+
+describe('主题', () => {
+  // 主题原有的三级文字色是给正文说明用的，多数达不到图解 12px 小字要求的 4.5:1。不自动改色，就报错。
+  const KNOWN_CONTRAST_FAILURES = {
+    elegant: ['muted/bg', 'faint/bg'],
+    kami: ['faint/bg'],
+    'magazine-forest': ['faint/bg'],
+    'magazine-indigo': ['faint/bg'],
+    'magazine-ink': ['faint/bg'],
+    minimal: ['muted/bg', 'faint/bg'],
+    modern: ['muted/bg', 'faint/bg'],
+    zhijian: [],
+  };
+
+  test('zhijian 推导出的色板和原色板相同', () => {
+    const { bg, node, sunken, rule, text, muted, faint, struct, keyFill, keyStroke, keyText, dot } = TOKENS;
+    assert.deepEqual(
+      { bg, node, sunken, rule, text, muted, faint, struct, keyFill, keyStroke, keyText, dot },
+      { bg: '#F5F4ED', node: '#FAF9F5', sunken: '#e8e6dc', rule: '#E5E3D8', text: '#141413', muted: '#504E49', faint: '#6B6A64', struct: '#1B365D', keyFill: '#FAF9F5', keyStroke: '#B85235', keyText: '#A04A2E', dot: '#B85235' },
+    );
+  });
+
+  test('8 个主题都能生成；对比度不足的如实报出，不改色', () => {
+    assert.deepEqual(THEME_NAMES, Object.keys(KNOWN_CONTRAST_FAILURES));
+    for (const name of THEME_NAMES) {
+      const tokens = themeTokens(loadThemeYaml(name));
+      for (const spec of showcase.figures) assert.deepEqual(checkStructure(buildFigure(copy(spec), tokens, { font }).svg), [], `${name}/${spec.id}`);
+      const pairs = checkTheme(tokens).map((issue) => issue.match(/^contrast:(.+)=/)[1]);
+      assert.deepEqual(pairs, KNOWN_CONTRAST_FAILURES[name], name);
+    }
+  });
+});
+
+describe('字体', () => {
+  const none = () => false;
+  const only = (target) => (p) => p === target;
+
+  test('按 --figure-font、环境变量、字体目录的顺序查找', () => {
+    const base = { platform: 'darwin', home: '/h' };
+    const dirHit = '/h/Library/Fonts/LXGWWenKai-Medium.ttf';
+    assert.equal(resolveFigureFont({ ...base, flag: '/a.ttf', env: { WECHAT_STYLER_FIGURE_FONT: '/b.ttf' }, exists: () => true }).source, '--figure-font');
+    assert.equal(resolveFigureFont({ ...base, flag: '/a.ttf', env: { WECHAT_STYLER_FIGURE_FONT: '/b.ttf' }, exists: only('/b.ttf') }).source, 'WECHAT_STYLER_FIGURE_FONT');
+    const found = resolveFigureFont({ ...base, env: {}, exists: only(dirHit) });
+    assert.equal(found.path, dirHit);
+    assert.equal(resolveFigureFont({ ...base, flag: '/a.ttf', env: {}, exists: only(dirHit) }).note, '--figure-font 指向的字体不存在：/a.ttf');
+  });
+
+  test('没有字体不报错，标题退回 <text> 并用主题标题字体', () => {
+    assert.equal(resolveFigureFont({ platform: 'darwin', home: '/h', env: {}, exists: none }).path, null);
+    const fig = buildFigure(copy(SPECS.cycle), TOKENS, { font: null });
+    assert.match(fig.svg, /<text [^>]*font-family="'LXGW WenKai'[^>]*><tspan leaf="">问题变成修复<\/tspan><\/text>/);
+    assert.deepEqual(checkStructure(fig.svg), []);
+  });
+
+  test('zhijian 有字体转路径，其他主题用 <text>', () => {
+    assert.ok(!good('stack').svg.includes('能用之前的四层'));
+    const other = buildFigure(copy(SPECS.stack), themeTokens(loadThemeYaml('kami')), { font });
+    assert.match(other.svg, /font-family="'TsangerJinKai02'[^>]*><tspan leaf="">能用之前的四层/);
+  });
+
+  test('所有 <text> 都带 tspan leaf', () => {
+    for (const id of Object.keys(SPECS)) {
+      const { svg } = buildFigure(copy(SPECS[id]), TOKENS, { font: null });
+      for (const [inner] of svg.matchAll(/<text\b[^>]*>.*?<\/text>/g)) assert.match(inner, /<text\b[^>]*><tspan leaf="">[^<]*<\/tspan><\/text>/);
+    }
   });
 });
 
@@ -107,6 +180,16 @@ describe('渲染检查', () => {
     for (const id of Object.keys(SPECS)) assert.deepEqual(await issues(good(id)), [], id);
   });
 
+  rendered('8 个主题的几何和动画检查都通过（有字体和无字体）', async () => {
+    for (const name of THEME_NAMES) {
+      const tokens = themeTokens(loadThemeYaml(name));
+      for (const spec of [SPECS.stack, SPECS.cycle]) {
+        assert.deepEqual(await issues(buildFigure(copy(spec), tokens, { font })), [], `${name}/${spec.id}`);
+        assert.deepEqual(await issues(buildFigure(copy(spec), tokens, { font: null })), [], `${name}/${spec.id}/无字体`);
+      }
+    }
+  });
+
   rendered('删掉动画等于终态，定格不少于 2 秒', async () => {
     const fig = good('sequence');
     assert.doesNotMatch(stripAnimation(fig.svg), /<animate/);
@@ -154,5 +237,107 @@ describe('渲染检查', () => {
   rendered('拦下不动的图', async () => {
     const fig = good('stack');
     has(await issues({ ...fig, svg: stripAnimation(fig.svg) }), 'not-animated');
+  });
+});
+
+describe(':::figure 围栏', () => {
+  const FENCE = (body) => `:::figure\n${body}\n:::`;
+  const BAR = 'id: demo\ntype: stack\ntitle: 能用之前的四层\nconclusion: 四层都垫好才有用\nlayers:\n  - label: 运行环境\n  - label: 验收';
+  const ARTICLE = (fence) => `---\ntitle: 示例\n---\n\n# 标题\n\n前面一段。\n\n${fence}\n\n后面一段。\n`;
+
+  function convert(markdown, args = [], env = {}) {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'figure-'));
+    const input = path.join(dir, 'a.md');
+    const output = path.join(dir, 'a.html');
+    fs.writeFileSync(input, markdown);
+    const result = spawnSync(process.execPath, [path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', output, '--no-open', '--brand-cta', 'none', ...args],
+      { encoding: 'utf8', env: { ...process.env, CHROME_EXECUTABLE: env.chrome ?? process.env.CHROME_EXECUTABLE } });
+    return { result, dir, html: fs.existsSync(output) ? fs.readFileSync(output, 'utf8') : null };
+  }
+
+  test('组件模式换成内联 SVG，不留 ::: 和 YAML', () => {
+    const { result, html } = convert(ARTICLE(FENCE(BAR)), ['--components']);
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(html, /<section style="margin:20px 0;line-height:0;"><svg viewBox="0 0 360 /);
+    assert.equal((html.match(/<svg viewBox="0 0 360 /g) || []).length, 1);
+    assert.ok(!html.includes(':::'));
+    assert.ok(!html.includes('layers:'));
+  });
+
+  test('未开组件模式降级成标题加结论句的引用', () => {
+    const { result, html } = convert(ARTICLE(FENCE(BAR)));
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(!html.includes('<svg viewBox="0 0 360'));
+    assert.ok(!html.includes(':::'));
+    assert.ok(!html.includes('layers:'));
+    const quoted = convert(ARTICLE('> **能用之前的四层**\n>\n> 四层都垫好才有用'));
+    assert.equal(html, quoted.html);
+  });
+
+  test('失败时报出图 ID 和原因，不出稿', () => {
+    for (const [fence, want] of [
+      [FENCE('id: bad-type\ntype: pie\ntitle: 甲\nconclusion: 乙'), /图解 bad-type：type 只能是/],
+      [FENCE('id: bad-yaml\nlayers: [unterminated'), /图解 bad-yaml：YAML 解析失败/],
+      [FENCE('id: ../evil\ntype: stack'), /id 只能用字母/],
+      [':::figure\nid: open\ntype: stack', /没有闭合/],
+      [`${FENCE(BAR)}\n\n${FENCE(BAR)}`, /图解 demo：id 重复/],
+    ]) {
+      const { result, html } = convert(ARTICLE(fence), ['--components']);
+      assert.equal(result.status, 1, fence);
+      assert.match(result.stderr, want);
+      assert.equal(html, null);
+    }
+  });
+
+  test('一篇超过 5 张报错', () => {
+    const fences = [1, 2, 3, 4, 5, 6].map((i) => FENCE(BAR.replace('id: demo', `id: f${i}`))).join('\n\n后文。\n\n');
+    const { result, html } = convert(ARTICLE(fences), ['--components']);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /图解 f6：一篇不超过 5 张/);
+    assert.equal(html, null);
+  });
+
+  test('对比度不足的主题报错，不改色也不出稿', () => {
+    const { result, html } = convert(ARTICLE(FENCE(BAR)), ['--components', '--theme', 'kami']);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /图解 demo：contrast:faint\/bg=3\.31/);
+    assert.equal(html, null);
+  });
+
+  test('代码块里的 :::figure 原样保留', () => {
+    const { result, html } = convert(ARTICLE(`\`\`\`\n${FENCE('type: pie')}\n\`\`\``), ['--components']);
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(html.includes(':::figure'));
+  });
+
+  test('默认转换没有图解时不碰浏览器', () => {
+    const { result } = convert('# 标题\n\n一段正文。\n', ['--components'], { chrome: '/missing/chrome' });
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(!result.stdout.includes('图解'));
+  });
+
+  test('没有可用浏览器时照常出稿并写明没查；要 PNG 则报错', () => {
+    const plain = convert(ARTICLE(FENCE(BAR)), ['--components'], { chrome: '/missing/chrome' });
+    assert.equal(plain.result.status, 0, plain.result.stderr);
+    assert.match(plain.result.stderr, /渲染检查未执行/);
+    assert.ok(plain.html);
+    const png = convert(ARTICLE(FENCE(BAR)), ['--components', '--figure-png', 'x'], { chrome: '/missing/chrome' });
+    assert.equal(png.result.status, 1);
+    assert.match(png.result.stderr, /--figure-png 需要浏览器/);
+  });
+
+  test('--figure-png 输出 PNG、SVG、联系图和报告', async (t) => {
+    const { browser, reason } = await launchBrowser();
+    if (!browser) return t.skip(reason);
+    await browser.close();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'figure-png-'));
+    const { result, html } = convert(ARTICLE(FENCE(BAR)), ['--components', '--figure-png', dir]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(html);
+    for (const file of ['demo.png', 'demo.svg', 'contact.png', 'report.json']) assert.ok(fs.existsSync(path.join(dir, file)), file);
+    const report = JSON.parse(fs.readFileSync(path.join(dir, 'report.json'), 'utf8'));
+    assert.equal(report.status, 'pass');
+    assert.ok(report.figures[0].hold >= 2);
+    return undefined;
   });
 });
