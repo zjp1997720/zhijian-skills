@@ -16,6 +16,7 @@
  *   :::flow A → B → C :::  → 流程卡片(section + flex 横排 + 箭头)
  *   :::compare tag|title|desc :::  → 对比卡片(section + flex 多栏)
  *   :::timeline date|title|desc ::: → 时间线(竖向圆点 + 竖线)
+ *   :::figure YAML :::     → 动态图解,在 convert.mjs 里由 figures/pipeline.mjs 先行处理
  */
 
 // ═══════════════════════ 组件 HTML 构建函数 ═══════════════════════

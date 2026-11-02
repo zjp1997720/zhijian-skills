@@ -29,6 +29,7 @@ Works with any agent runtime that loads SKILL.md (Codex, Claude Code, OpenCode, 
 - **Markdown → WeChat HTML in one step.** All styles inlined, all backgrounds solid hex, paste straight into the editor — no format loss.
 - **8 themes with real typographic personality.** Not color swaps. `magazine-ink` is a classic editorial layout; `magazine-indigo` is a research column with uppercase headings; `magazine-forest` is a field note with centered kaishu titles. Each theme has its own heading structure, quote style, list marker, and code block.
 - **Optional component layer (`--components`).** 8 structured expressions (keyquote, inline highlight, note, warning, steps, flow, compare, timeline) for visualizing comparisons, flows, history, and key points. Off by default — pure markdown rendering for 90% of cases; opt in when you need structured presentation. Layout components use section + flex; dense matrices remain Markdown tables when they communicate better.
+- **Animated figures (`:::figure`).** Inside the component layer, six looping SVG structures for judgments that lose their shape as a list of text: size, loops, branching, layers, time gaps. Generated from a YAML spec and hard-checked (whitelist, mobile font floor, overlap, hold, 30KB per figure). Figures support the `zhijian` theme only for now. The published iOS and Android reader has not been verified yet.
 - **Deterministic compatibility gate.** `validate.mjs` scans the output for everything WeChat strips (`<style>`, `class`, `rgba()`, `position:fixed`, `@media`…) and prints a line-numbered report. The rules are enforced by script, not by the model remembering them.
 - **Recoverable WeChat editor publishing.** The OpenCLI injector syncs body content, metadata, and the cover while recognizing qlogo/qpic transfer states. When the type=77 body-cover picker fails, `--cover-file` uploads, selects, and crops a local cover automatically. Both success and failure produce token-redacted JSON reports.
 - **Placeholder mechanism.** Write `【插入:screenshot】` on its own line while images aren't ready; it renders as a dashed placeholder box. Replace it with a normal Markdown image link when the asset lands.
@@ -38,7 +39,7 @@ Works with any agent runtime that loads SKILL.md (Codex, Claude Code, OpenCode, 
 Three pieces, each with one job:
 
 1. **`scripts/convert.mjs`** — parses Markdown via `marked`, applies a theme-specific renderer (6 renderer presets backing 8 themes), emits fully inlined HTML.
-2. **`scripts/components.mjs`** — optional component layer (8 structured expressions, enabled with `--components`).
+2. **`scripts/components.mjs`** and **`scripts/figures/`** — optional component layer (8 structured expressions plus animated figures, enabled with `--components`).
 3. **`scripts/validate.mjs`** — scans the output against WeChat compatibility rules (5 ERROR classes, 3 WARN classes). Runs as a soft gate inside convert, or standalone with exit codes for CI.
 4. **`themes/*.yaml`** — one file per theme. Colors, fonts, type scale, rhythm, block style. Add a theme by dropping in a new YAML; no code change needed.
 

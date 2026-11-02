@@ -2,7 +2,7 @@
 name: wechat-styler
 slug: wechat-styler
 displayName: WeChat Styler
-version: 1.18.3
+version: 1.19.0
 description: "将Markdown排版为公众号HTML；组件、动画及已授权的编辑器注入按需启用。"
 summary: Markdown → 可评审的公众号 HTML，可选组件、动画与草稿注入。
 tags:
@@ -29,6 +29,7 @@ disable-model-invocation: true
 |---|---|---|
 | 公众号排版、HTML、换主题、批量转换 | 默认转换 | `references/conversion-workflow.md`；主题需要判断时再读 `references/theme-guide.md` |
 | 结构化组件、丰富排版、开场动画 | 组件与动画 | 默认转换 reference + `references/component-guide.md` + `references/svg-animation-design.md` |
+| 动态图解、SVG 动画配图、`:::figure` | 组件与动画 | 上一行全部 + `references/figure-guide.md` |
 | 注入公众号、保存草稿、核验编辑器中的成品 | 编辑器注入 | `references/opencli-injection.md` + `references/wechat-compatibility.md` |
 | 修改 Zhijian 主题视觉基线 | 主题维护 | `references/zhijian-theme-baseline.md` + `references/theme-guide.md` |
 
@@ -54,7 +55,7 @@ disable-model-invocation: true
 执行时遵守：
 
 - 金句、NOTE、WARNING 和其他组件替换对应原文，不在正文后重复同一意思。
-- `:::compare`、`:::flow`、`:::timeline` 独占一行且前后留空行；矩阵对比保留 table。
+- `:::compare`、`:::flow`、`:::timeline`、`:::figure` 独占一行且前后留空行；矩阵对比保留 table。
 - 卡片只放短文本；组件数量、横向布局和完整语法按 `references/component-guide.md`。
 - 从正文推断开场标题、副标题和不超过 3 个标签；模板选择与 SVG 技术边界按 `references/svg-animation-design.md`。
 - 话题标签：frontmatter 没有 `topics` 时，从正文选 3–4 个写入转换用的 frontmatter（或传 `--topics`）：栏目/合集标签固定在首位，再加 2–3 个对准目标读者或本篇主题的话题；不用「人工智能」「AI」这类泛词，品牌或产品名只在正文确实展示该产品时使用，不超过公众号上限 10 个。用户指定标签或明确不要时照办（`--topics none`）。
@@ -83,7 +84,7 @@ disable-model-invocation: true
 - 默认输入 `article.md`，输出同目录 `article_wechat.html`；也可显式指定输出路径。
 - 输出为完整内联样式 HTML，可复制或在获授权后注入公众号编辑器。
 - 占位图、参数、主题、输出路径和命令见 `references/conversion-workflow.md`。
-- 品牌引导位于文章首尾，正文中间使用静态组件。明确启用 SVG 开场动画时只保留结尾引导。
+- 品牌引导位于文章首尾，正文中间放静态组件或循环的动态图解。明确启用 SVG 开场动画时只保留结尾引导。
 - 开场动画承担文章标题：启用 `--cover` 时自动移除正文开头的一级标题（首个非空行的 `# 标题`），动画标题依次取 `--cover-title`、frontmatter.title、该一级标题；正文中段的一级标题不受影响，确需保留时传 `--keep-h1`。
 - 话题标签渲染在正文末尾（结尾引导之前），结构复刻公众号编辑器原生 `a.wx_topic_link`，斜体 14px；注入后编辑器识别为话题，保存即生效。
 
@@ -94,6 +95,7 @@ disable-model-invocation: true
 | `references/conversion-workflow.md` | 默认转换、参数、主题、占位符与 390px QA |
 | `references/theme-guide.md` | 主题选择、YAML 参数或扩展主题 |
 | `references/component-guide.md` | 组件语法、密度预算、改写与检查清单 |
+| `references/figure-guide.md` | 动态图解语法、结构选型、硬检查、主题与字形 |
 | `references/svg-animation-design.md` | 动画模板选择、SVG 技术约束与回归要求 |
 | `references/wechat-compatibility.md` | 公众号兼容硬规则 |
 | `references/opencli-injection.md` | 已授权的编辑器注入、封面、图片、保存证据与恢复 |
@@ -101,4 +103,4 @@ disable-model-invocation: true
 
 ---
 
-**版本：** 1.18.3 · **作者：** 大鹏
+**版本：** 1.19.0 · **作者：** 大鹏

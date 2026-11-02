@@ -12,6 +12,7 @@
   "dependencies": {
     "js-yaml": "^4.3.0",
     "marked": "^12.0.2",
+    "opentype.js": "^2.0.0",
     "tinyglobby": "^0.2.17"
   },
   "devDependencies": {

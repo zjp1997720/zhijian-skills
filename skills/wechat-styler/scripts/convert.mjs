@@ -19,6 +19,7 @@ import { applyBrandCta } from './brand-cta.mjs';
 import { extractArticleDocument } from './wechat-publish-core.mjs';
 import { generateCoverAnimation } from './generate-cover-animation.mjs';
 import { analyzeContentDensity, formatDensityReport } from './content-density-audit.mjs';
+import { FigureError, applyFigureFallback, prepareFigures, staticMarkdown, stripFigureFences, verifyFigures } from './figures/pipeline.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +37,14 @@ function parseArgs() {
   --accent-color <hex>        Accent color
   --background-color <hex>    Background color
   --max-width <px>            Content width (default: 640)
-  --components [false|0|no]   Enable component rendering
+  --components [false|0|no]   Enable component rendering, including :::figure
+  --figure-png <dir>          With --components, also write figure PNG/SVG,
+                              contact.png and report.json to <dir>
+  --figure-static-md <path>   With --figure-png, also write a Markdown copy with
+                              each :::figure replaced by its PNG, for platforms
+                              without SVG animation
+  --figure-font <path>        LXGWWenKai-Medium.ttf for figure glyph paths (then
+                              WECHAT_STYLER_FIGURE_FONT, then common font folders)
   --strict-density           Stop if paragraph density fails
   --cover [false|0|no]        Enable SVG opening animation
   --cover-template <name>     Animation template (default: ink-wash)
@@ -82,6 +90,9 @@ function parseArgs() {
     ctaStyle: 'gif',
     topics: null,
     strictDensity: false,
+    figurePng: null,
+    figureFont: null,
+    figureStaticMd: null,
     keepH1: false,
     noOpen: false
   };
@@ -146,6 +157,15 @@ function parseArgs() {
         if (!['gif','svg'].includes(value)) throw new Error('--cta-style requires gif or svg');
         options.ctaStyle = value;
         break;
+      case 'figure-png':
+        options.figurePng = value;
+        break;
+      case 'figure-static-md':
+        options.figureStaticMd = value;
+        break;
+      case 'figure-font':
+        options.figureFont = value;
+        break;
       case 'theme':
         options.theme = value;
         break;
@@ -189,6 +209,15 @@ function parseArgs() {
         options.coverAuthor = value ?? '';
         break;
     }
+  }
+
+  if (options.figureStaticMd && !(options.components && options.figurePng)) {
+    console.error('Error: --figure-static-md 需要同时带 --components 和 --figure-png');
+    process.exit(1);
+  }
+  if (options.figureStaticMd && options.input?.includes('*')) {
+    console.error('Error: --figure-static-md 只支持单个文件');
+    process.exit(1);
   }
 
   if (!options.input) {
@@ -1208,15 +1237,21 @@ ${section}
 }
 
 // Convert single file
-function convertFile(inputPath, theme, options) {
+async function convertFile(inputPath, theme, options) {
   if (!fs.existsSync(inputPath)) {
     console.error(`Error: Input file not found: ${inputPath}`);
     return false;
   }
 
   const content = fs.readFileSync(inputPath, 'utf8');
-  const { frontmatter, markdown } = parseMarkdown(content);
-  const densityReport = analyzeContentDensity(markdown, inputPath, 'markdown');
+  const { frontmatter, markdown: source } = parseMarkdown(content);
+  let audited;
+  try {
+    audited = stripFigureFences(source);
+  } catch (error) {
+    return reportFigureFailure(error);
+  }
+  const densityReport = analyzeContentDensity(audited, inputPath, 'markdown');
   console.log(formatDensityReport(densityReport));
   if (options.strictDensity && densityReport.status === 'fail') {
     console.error('Error: 段落密度硬门未通过，已停止生成 HTML');
@@ -1229,6 +1264,33 @@ function convertFile(inputPath, theme, options) {
     topics.length = MAX_TOPICS;
   }
   if (topics.length) console.log(`✓ 话题标签: ${topics.map((t) => `#${t}`).join(' ')}`);
+
+  // 图解先生成并过硬检查，任何一张不过都不出稿
+  let markdown;
+  try {
+    if (options.components) {
+      const prepared = prepareFigures(source, theme, { font: options.figureFont });
+      markdown = prepared.markdown;
+      if (prepared.figures.length) {
+        const report = await verifyFigures(prepared, { pngDir: options.figurePng });
+        console.log(`✓ 图解 ${report.figures.length} 张，渲染检查：${report.rendered === 'pass' ? '通过' : '未执行'}，字体：${report.font || '无'}`);
+        for (const note of report.notes) console.warn(`⚠ 图解：${note}`);
+        if (options.figureStaticMd) {
+          const relative = path.relative(path.dirname(path.resolve(options.figureStaticMd)), path.resolve(options.figurePng));
+          fs.mkdirSync(path.dirname(path.resolve(options.figureStaticMd)), { recursive: true });
+          fs.writeFileSync(options.figureStaticMd, staticMarkdown(content, relative), 'utf8');
+          console.log(`✓ 静态版 Markdown: ${options.figureStaticMd}`);
+        }
+      } else if (options.figurePng) {
+        console.warn('⚠ --figure-png / --figure-static-md：这篇没有 :::figure，没有输出');
+      }
+    } else {
+      markdown = applyFigureFallback(source);
+      if (options.figurePng) console.warn('⚠ --figure-png 只在 --components 下生效');
+    }
+  } catch (error) {
+    return reportFigureFailure(error);
+  }
 
   // Generate HTML
   const html = generateHTML(markdown, theme, frontmatter, { ...options, resolvedTopics: topics })
@@ -1252,6 +1314,14 @@ function convertFile(inputPath, theme, options) {
   console.log(formatReport(report));
 
   return outputPath;
+}
+
+function reportFigureFailure(error) {
+  if (!(error instanceof FigureError)) throw error;
+  for (const detail of error.details) console.error(`Error: ${detail}`);
+  console.error('Error: 图解未通过，已停止生成 HTML');
+  process.exitCode = 1;
+  return false;
 }
 
 // Main function
@@ -1301,7 +1371,8 @@ async function main() {
     for (const file of files) {
       const inputPath = path.resolve(file);
       console.log(`Converting: ${file}`);
-      const outputPath = convertFile(inputPath, theme, { ...options, output: null });
+      const figurePng = options.figurePng && path.join(options.figurePng, path.basename(file, path.extname(file)));
+      const outputPath = await convertFile(inputPath, theme, { ...options, output: null, figurePng });
       if (outputPath) results.push(outputPath);
     }
 
@@ -1319,7 +1390,7 @@ async function main() {
     // Single file conversion
     console.log(`Converting: ${options.input}`);
     const inputPath = path.resolve(options.input);
-    const outputPath = convertFile(inputPath, theme, options);
+    const outputPath = await convertFile(inputPath, theme, options);
 
     if (!outputPath && options.strictDensity) {
       process.exitCode = 1;
