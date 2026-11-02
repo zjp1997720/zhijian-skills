@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Correct two SVG rules from real draft tests (1.18.3): looping explanatory figures may sit mid-article when they pass the static-base rule and hold each round for at least 2 seconds, while play-once animation stays opening-only; `<image>` handling now differs by address type (WeChat material URLs kept, external URLs removed, data URIs emptied).
+
 - Run mobile QA without Google Chrome (1.18.2): `mobile-visual-qa.mjs` now resolves the browser as `CHROME_EXECUTABLE` → `CHROME_CHANNEL` → installed Google Chrome → on macOS another installed Chromium browser (Ego Lite, Edge, Brave, Chromium) → Playwright's downloaded Chromium. The report gains a `browser` field naming the source, and launch failures say which source failed and point to `CHROME_EXECUTABLE`. Previously the script hard-coded the `chrome` channel and failed on machines where Chrome was uninstalled.
 
 - Doc fixes (1.18.2): SKILL.md now says the default brand CTA is the Flow GIF (`--cta-style svg` is the fallback) and its footer version is current; `references/component-guide.md` states that a multi-line golden quote must be one `> **...**` line with inline `<br>`, because the converter matches `> **...**` per line and Markdown hard breaks across several `>` lines render as separate golden blocks with a stray `\` subtitle.

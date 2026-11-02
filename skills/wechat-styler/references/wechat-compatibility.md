@@ -84,6 +84,6 @@
 
 SVG 内的 `<animate>` / `<animateTransform>` 标签在微信客户端可用（通过 opencli DOM 注入），validate 会跳过 SVG 内容不做检查。
 
-SVG 角色帧必须使用原生 `<path>` / `<rect>` 图形。公众号保存会删除 `<image>` 的 `href` / `xlink:href`，即使该引用是内嵌 PNG data URI；空 `<image>` 节点仍会保留，不能只检查节点数量判断图片有效。
+SVG 角色帧必须使用原生 `<path>` / `<rect>` 图形。`<image>` 保存后的结果取决于地址：微信素材地址（`mmbiz.qpic.cn`）保留；外部地址整个节点被删；内嵌 data URI 的节点保留但 `href` / `xlink:href` 被清空，不能只检查节点数量判断图片有效。
 
 详见 `references/svg-animation-design.md` 和 `references/opencli-injection.md`。
