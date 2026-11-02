@@ -29,6 +29,7 @@ npx skills add zjp1997720/zhijian-skills -g -a codex --skill wechat-styler -y
 - **一次转好，粘贴不丢格式。** 所有样式内联，背景色全部使用 solid hex；从浏览器复制进公众号编辑器后，颜色、对齐和引用块都能保留。
 - **8 套主题有真正的版式人格。** `magazine-ink` 是经典杂志内页，`magazine-indigo` 是研究栏加全大写标题，`magazine-forest` 是田野笔记加居中楷体标题。每套主题都有自己的标题结构、引用样式、列表 marker 和代码块。
 - **可选组件拓展层（`--components`）。** 8 种结构化表达（金句、行内标记、提示、警告、步骤、流程、对比、时间线）用于呈现对比、流程、演进和要点。默认关闭；需要结构化呈现时显式启用。布局组件使用 `section + flex`；高密度矩阵在表达更清楚时继续保留 Markdown 表格。
+- **动态图解（`:::figure`）。** 组件拓展层内的六种循环 SVG 结构，用于写成一列文字会丢掉形状的判断：大小、闭环、分发、分层、时间间隔。由 YAML 规格生成并硬检查（白名单、手机字号下限、重叠、定格时长、单张 30KB）。颜色取自主题，目前只有 `zhijian` 通过对比度检查。正式读者端（iOS、安卓）尚未核对。
 - **兼容性由脚本把关。** `validate.mjs` 扫描公众号会剥离的内容（`<style>`、`class`、`rgba()`、`position:fixed`、`@media` 等），并输出带行号的报告。转换时自动执行，也能单独用于 CI。
 - **可恢复的公众号后台发布。** OpenCLI 注入器能同步正文、标题、摘要和封面，识别 qlogo/qpic 转存状态；type=77 正文封面选择失败时可用 `--cover-file` 自动上传、选图和裁剪。成功与失败都会生成脱敏 JSON 报告。
 - **占位符机制。** 图床尚未准备好时，在 Markdown 中写 `【插入:文章开头截图】`，即可渲染成虚线占位框；图片就绪后再替换为普通 Markdown 图片链接。
@@ -38,7 +39,7 @@ npx skills add zjp1997720/zhijian-skills -g -a codex --skill wechat-styler -y
 四个部分，各管一件事：
 
 1. **`scripts/convert.mjs`** — 用 `marked` 解析 Markdown，按主题对应的 renderer（6 个 preset 支撑 8 套主题）渲染，输出全内联 HTML。
-2. **`scripts/components.mjs`** — 8 种结构化表达的可选组件拓展层，通过 `--components` 启用。
+2. **`scripts/components.mjs`** 和 **`scripts/figures/`** — 8 种结构化表达加动态图解的可选组件拓展层，通过 `--components` 启用。
 3. **`scripts/validate.mjs`** — 按公众号兼容规则扫描产物（5 类 ERROR + 3 类 WARN）；既作为转换流程的软门，也能独立运行并返回 exit code。
 4. **`themes/*.yaml`** — 每个主题一个文件。颜色、字体、字号、间距和版式风格都写在 YAML 中，新增主题无需修改代码。
 
