@@ -1,0 +1,41 @@
+{
+  "theme": "zhijian-paper",
+  "figures": [
+    {"id": "sequence", "type": "sequence", "kicker": "示例：前后对比", "title": "时间耗在反复确认上",
+     "conclusion": "写和改都快了，中间两次确认还是那么长",
+     "axis": "一件事走完的时间",
+     "rows": [
+       {"label": "过去", "static": true, "segments": [{"label": "写稿", "len": 3}, {"label": "确认", "len": 2, "key": true}, {"label": "修改", "len": 3}, {"label": "确认", "len": 2, "key": true}, {"label": "发布", "len": 3}]},
+       {"label": "现在", "segments": [{"label": "写稿", "len": 1.5}, {"label": "确认", "len": 2, "key": true}, {"label": "修改", "len": 1.5}, {"label": "确认", "len": 2, "key": true}, {"label": "发布", "len": 1.5}]}
+     ]},
+    {"id": "timeline", "type": "timeline", "kicker": "示例：一段时长", "title": "下单一小时后才有人接",
+     "conclusion": "等待的时间比处理的时间更长",
+     "ticks": ["9:00", "10:00", "11:00", "12:00"],
+     "span": {"from": 0.08, "to": 0.42, "label": "1 小时"},
+     "events": [
+       {"at": 0.08, "side": "up", "label": "客户提交需求"},
+       {"at": 0.42, "side": "down", "label": "顾问接手，开始处理", "key": true},
+       {"at": 0.95, "side": "up", "label": "交付方案"}
+     ]},
+    {"id": "stack", "type": "stack", "kicker": "示例：层层垫高", "title": "能用之前的四层",
+     "conclusion": "四层都垫好，上面的入口才有用", "top": "对话入口",
+     "layers": [
+       {"label": "运行环境", "desc": "关掉电脑也能继续跑"},
+       {"label": "知识沉淀", "desc": "一个人学会全组能用"},
+       {"label": "权限审计", "desc": "出了问题找得到人"},
+       {"label": "验收", "desc": "完成以人验收为准"}
+     ]},
+    {"id": "route", "type": "route", "kicker": "示例：一分多", "title": "换个地方执行",
+     "conclusion": "入口不变，只换执行工具的地方", "edge": "工具调用",
+     "source": {"label": "主流程", "sub": "跑在云端"},
+     "targets": [{"label": "云端沙箱", "sub": "默认"}, {"label": "办公电脑", "sub": "内网资料"}, {"label": "本地文件夹", "sub": "最常用", "key": true}]},
+    {"id": "cycle", "type": "cycle", "kicker": "示例：闭环", "title": "问题变成修复",
+     "conclusion": "示例数据：新增问题从 80 条降到 50 条",
+     "nodes": ["收集问题", "每日巡检", "建单修复", "次日对比"],
+     "center": {"label": "新增问题", "from": 80, "to": 50}},
+    {"id": "bars", "type": "bars", "kicker": "示例：数据对比", "title": "又快又省",
+     "conclusion": "示例数据：方案甲通过率最高，单次成本也最低",
+     "columns": [{"label": "通过率", "max": 100, "suffix": "%"}, {"label": "单次成本", "max": 20, "prefix": "¥"}],
+     "rows": [{"label": "方案甲", "values": [70, 2], "key": true}, {"label": "方案乙", "values": [66, 4]}, {"label": "方案丙", "values": [63, 18]}]}
+  ]
+}
