@@ -58,7 +58,7 @@ layers:
 node scripts/convert.mjs article.md --components --figure-png <目录> --output article_wechat.html
 ```
 
-`--figure-png` 写出 `<id>.svg`、`<id>.png`、`contact.png`、`report.json`。发到知乎、CSDN、头条这类不支持动画的平台时，再加 `--figure-static-md <路径>`，会多写一份 Markdown：每个 `:::figure` 换成 `![标题](相对路径/<id>.png)`，其余内容原样保留。不带它也会在有浏览器时跑全部检查，只是不落文件；没有浏览器时照常出稿，并提示渲染检查未执行。浏览器按 `CHROME_EXECUTABLE` 等 `mobile-visual-qa.mjs` 的同一顺序查找。
+`--figure-png` 写出 `<id>.svg`、`<id>.png`、`contact.png`、`report.json`。发到知乎、CSDN、头条这类不支持动画的平台时，再加 `--figure-static-md <路径>`，会多写一份 Markdown：每个 `:::figure` 换成一张 Markdown 图片，alt 是图解标题，路径是从这份 md 到 PNG 的相对路径，其余内容原样保留。不带它也会在有浏览器时跑全部检查，只是不落文件；没有浏览器时照常出稿，并提示渲染检查未执行。浏览器按 `CHROME_EXECUTABLE` 等 `mobile-visual-qa.mjs` 的同一顺序查找。
 
 任何一张不过都不生成 HTML，错误行形如 `图解 <id>：<原因>`，退出码 1：
 
