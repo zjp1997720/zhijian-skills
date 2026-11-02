@@ -8,9 +8,9 @@ import { fileURLToPath } from 'node:url';
 
 import yaml from 'js-yaml';
 
-import { SpecError, W, balance, fixed, stripAnimation } from '../scripts/figures/core.mjs';
+import { Fig, SpecError, W, balance, fixed, stripAnimation } from '../scripts/figures/core.mjs';
 import { buildFigure } from '../scripts/figures/figure.mjs';
-import { resolveFigureFont } from '../scripts/figures/fonts.mjs';
+import { loadFont, resolveFigureFont } from '../scripts/figures/fonts.mjs';
 import { checkRendered, checkStructure, checkTheme } from '../scripts/figures/gates.mjs';
 import { themeTokens } from '../scripts/figures/theme.mjs';
 import { launchBrowser, makeTestFont } from './figures-helpers.mjs';
@@ -126,6 +126,57 @@ describe('字体', () => {
   });
 });
 
+describe('中英混排', () => {
+  const PHRASES = ['你创建的 Skill', 'AI 复盘提议', 'What 和 How 都有了', '2026 年', '90%'];
+  const phraseFont = makeTestFont(`${PHRASES.join('')}${JSON.stringify(showcase)}`);
+  const fig = (spec, options) => buildFigure({ id: 'x', type: 'route', title: '换个地方执行', conclusion: '入口不变', ...spec }, TOKENS, options);
+  const ROUTE = { source: { label: '你创建的 Skill', sub: '放在哪' }, targets: [{ label: 'AI 复盘提议', sub: '项目级' }, { label: '用户级', sub: 'What 和 How' }] };
+  const textRuns = (svg) => [...svg.matchAll(/<text\b[^>]*>(.*?)<\/text>/g)].map((m) => m[1].replace(/<[^>]+>/g, ''));
+
+  test('拉丁段不出现在任何 <text> 内，中文段还在', () => {
+    const { svg, notes } = fig(ROUTE, { font: phraseFont });
+    const runs = textRuns(svg);
+    assert.ok(runs.every((t) => !/[A-Za-z0-9]/.test(t)), runs.join('|'));
+    assert.ok(runs.includes('你创建的'));
+    assert.ok(runs.includes('复盘提议'));
+    assert.match(svg, /aria-label="你创建的 Skill"/);
+    assert.deepEqual(notes, []);
+    assert.doesNotMatch(svg, /data-glyph/);
+  });
+
+  test('纯中文不拆段，不加分组', () => {
+    const { svg } = good('stack');
+    assert.match(svg, /<text [^>]*><tspan leaf="">运行环境<\/tspan><\/text>/);
+  });
+
+  test('拉丁段宽度算进对齐：居中时两段关于 x 对称', () => {
+    const f = new Fig({}, TOKENS, { font: phraseFont });
+    const markup = f.text('AI 复盘', 180, 100, 14, '#000', { anchor: 'middle' });
+    const x = Number(markup.match(/<text x="([\d.]+)"/)[1]);
+    assert.match(markup, /<path d="M/);
+    // AI 和空格共 3 个 0.6em，“复盘”2 个 1em，总宽 53.2，起点 153.4，中文段从 153.4 + 25.2 开始
+    assert.ok(Math.abs(x - 178.6) < 0.11, String(x));
+    assert.doesNotMatch(markup, /text-anchor/);
+  });
+
+  test('无字体时保留 <text>，并标出风险', () => {
+    const { svg, notes } = fig(ROUTE, { font: null });
+    assert.ok(textRuns(svg).includes('你创建的 Skill'));
+    assert.ok(notes.includes('你创建的 Skill'));
+  });
+
+  test('有真实字体时单张仍不超过 30KB', (t) => {
+    const found = resolveFigureFont();
+    if (!found.path) return t.skip('本机没有 LXGWWenKai-Medium.ttf');
+    const real = loadFont(found.path);
+    for (const id of Object.keys(SPECS)) assert.deepEqual(checkStructure(buildFigure(copy(SPECS[id]), TOKENS, { font: real }).svg), [], id);
+    const { svg } = fig(ROUTE, { font: real });
+    assert.ok(textRuns(svg).every((text) => !/[A-Za-z0-9]/.test(text)));
+    assert.deepEqual(checkStructure(svg), []);
+    return undefined;
+  });
+});
+
 describe('规格', () => {
   test('放不下的直接报错', () => {
     const bad = (mutator, id = 'stack') => {
@@ -234,6 +285,23 @@ describe('渲染检查', () => {
     has(await issues(withExtra(good('route'), '<path d="M150 90h100v30h-100z" fill="#000"/>')), '压住节点框');
   });
 
+  rendered('拉丁段压线、出框同样被拦下', async () => {
+    const f = new Fig({}, TOKENS, { font: makeTestFont('Skill') });
+    has(await issues(withExtra(good('stack'), f.text('Skill', 60, 80.5, 13, '#000'))), 'text-on-line:Skill');
+    const qa = good('stack');
+    const out = { ...qa, qa: qa.qa.replace('</svg>', `${f.text('Skill', 60, 200, 13, '#000', { box: [20, 0, 40, 20] })}</svg>`) };
+    has(await issues(out), 'text-out-of-box:Skill');
+  });
+
+  rendered('读者端继承字距时文字不被撑开', async () => {
+    const { svg } = good('stack');
+    const measure = async (spacing) => {
+      await page.setContent(`<div style="letter-spacing:${spacing}">${stripAnimation(svg)}</div>`);
+      return page.evaluate(() => document.querySelector('text').getBoundingClientRect().width);
+    };
+    assert.equal(await measure('0.544px'), await measure('0'));
+  });
+
   rendered('拦下不动的图', async () => {
     const fig = good('stack');
     has(await issues({ ...fig, svg: stripAnimation(fig.svg) }), 'not-animated');
@@ -338,6 +406,24 @@ describe(':::figure 围栏', () => {
     const report = JSON.parse(fs.readFileSync(path.join(dir, 'report.json'), 'utf8'));
     assert.equal(report.status, 'pass');
     assert.ok(report.figures[0].hold >= 2);
+    return undefined;
+  });
+
+  test('无字体时报告写明退回 <text> 和拉丁文风险', async (t) => {
+    const { browser, reason } = await launchBrowser();
+    if (!browser) return t.skip(reason);
+    await browser.close();
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'figure-nofont-'));
+    const fence = FENCE(BAR.replace('运行环境', 'AI 运行环境'));
+    const input = path.join(dir, 'a.md');
+    fs.writeFileSync(input, ARTICLE(fence));
+    const result = spawnSync(process.execPath, [path.join(skillRoot, 'scripts/convert.mjs'), input, '--output', path.join(dir, 'a.html'), '--no-open', '--components', '--figure-png', path.join(dir, 'figs')],
+      { encoding: 'utf8', env: { ...process.env, HOME: dir, WECHAT_STYLER_FIGURE_FONT: '' } });
+    assert.equal(result.status, 0, result.stderr);
+    const report = JSON.parse(fs.readFileSync(path.join(dir, 'figs/report.json'), 'utf8'));
+    assert.equal(report.font, null);
+    assert.ok(report.notes.some((note) => note.includes('退回 <text>')), report.notes.join('|'));
+    assert.ok(report.notes.some((note) => note.includes('AI 运行环境')), report.notes.join('|'));
     return undefined;
   });
 });

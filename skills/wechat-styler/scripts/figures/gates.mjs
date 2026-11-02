@@ -12,11 +12,11 @@ export const PAGE = (svg) => `<!doctype html><html><body style="margin:0;backgro
 
 const measureTexts = () => {
   const out = [];
-  for (const t of document.querySelectorAll('text')) {
+  for (const t of document.querySelectorAll('text, path[data-glyph]')) {
     const b = t.getBoundingClientRect();
     let op = 1;
     for (let e = t; e && e.tagName !== 'svg'; e = e.parentElement) op *= parseFloat(getComputedStyle(e).opacity);
-    out.push({ s: t.textContent, l: b.left, r: b.right, t: b.top, b: b.bottom, op, box: t.getAttribute('data-box') });
+    out.push({ s: t.getAttribute('data-glyph') || t.textContent, l: b.left, r: b.right, t: b.top, b: b.bottom, op, box: t.getAttribute('data-box') });
   }
   return out;
 };
@@ -32,7 +32,7 @@ const measureCollisions = () => {
     for (let e = el; e && e.tagName !== 'svg'; e = e.parentElement) if (parseFloat(getComputedStyle(e).opacity) < 0.01) return false;
     return true;
   };
-  for (const t of svg.querySelectorAll('text')) {
+  for (const t of svg.querySelectorAll('text, path[data-glyph]')) {
     if (!visible(t)) continue;
     const b = t.getBoundingClientRect();
     for (const l of lines) {
@@ -47,12 +47,12 @@ const measureCollisions = () => {
         }
       }
       if (hit) {
-        hits.push(t.textContent);
+        hits.push(t.getAttribute('data-glyph') || t.textContent);
         break;
       }
     }
   }
-  for (const p of svg.querySelectorAll('path:not([fill="none"])')) {
+  for (const p of svg.querySelectorAll('path:not([fill="none"]):not([data-glyph])')) {
     if (!visible(p)) continue;
     const b = p.getBoundingClientRect();
     boxes.push({ s: '[标题或数字]', l: b.left, r: b.right, t: b.top, b: b.bottom, op: 1, box: null });

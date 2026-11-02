@@ -139,8 +139,9 @@ async function writeContactSheet(browser, rows, file) {
  */
 export async function verifyFigures(prepared, { pngDir = null } = {}) {
   const { figures, font } = prepared;
-  const notes = [...new Set(figures.flatMap(({ fig }) => fig.notes))];
-  if (font?.note) notes.unshift(font.note);
+  const notes = font?.note ? [font.note] : [];
+  const exposed = [...new Set(figures.flatMap(({ fig }) => fig.notes))];
+  if (exposed.length) notes.push(`风险：这些拉丁文留在 <text> 里，iOS 微信正式阅读器可能漏画（svg-animation-design.md 踩坑 14）：${exposed.join('、')}`);
   const report = {
     status: 'pass',
     font: font?.path ? path.basename(font.path) : null,

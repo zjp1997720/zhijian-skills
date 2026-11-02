@@ -50,6 +50,19 @@ export function escapeText(value) {
   return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+const escapeAttr = (value) => escapeText(value).replace(/"/g, '&quot;');
+
+/** 切成连续的拉丁段和中文段。字体里没有的字符留给 <text>，空白归拉丁段，避免 <text> 首尾的空格被折叠。 */
+function latinRuns(text, font) {
+  const runs = [];
+  for (const char of text) {
+    const glyph = char.codePointAt(0) <= 0x2E7F && !missingChars(font, char).length;
+    if (runs.at(-1)?.glyph === glyph) runs.at(-1).text += char;
+    else runs.push({ glyph, text: char });
+  }
+  return runs;
+}
+
 /** 布局用的估算宽度；真实宽度由 gates 在浏览器里复核。 */
 export function estWidth(text, size) {
   let total = 0;
@@ -130,11 +143,30 @@ export class Fig {
 
   text(s, x, y, size, fill, { weight = null, anchor = 'start', box = null, family = null } = {}) {
     if (size < 12) throw new SpecError(`字号 ${size} 小于手机下限 12：${s}`);
-    let attrs = weight ? ` font-weight="${weight}"` : '';
-    if (anchor !== 'start') attrs += ` text-anchor="${anchor}"`;
-    if (family) attrs += ` font-family="${family}"`;
-    if (box) attrs += ` data-box="${box.map(num).join(',')}"`;
-    return `<text x="${num(x)}" y="${num(y)}" font-size="${size}"${attrs} fill="${fill}"><tspan leaf="">${escapeText(s)}</tspan></text>`;
+    const text = String(s);
+    const style = `${weight ? ` font-weight="${weight}"` : ''}${family ? ` font-family="${family}"` : ''}`;
+    const qaBox = box ? ` data-box="${box.map(num).join(',')}"` : '';
+    const node = (content, nx, nanchor) => `<text x="${num(nx)}" y="${num(y)}" font-size="${size}"${style}${nanchor !== 'start' ? ` text-anchor="${nanchor}"` : ''}${qaBox} fill="${fill}"><tspan leaf="">${escapeText(content)}</tspan></text>`;
+    if (!/[^\u2E80-\u{10FFFF}\s]/u.test(text)) return node(text, x, anchor);
+    if (!this.font) {
+      this.notes.push(text);
+      return node(text, x, anchor);
+    }
+    // iOS 微信正式阅读器会漏画 <text> 里的拉丁段（svg-animation-design.md 踩坑 14）：拉丁段转路径，中文段留 <text>。
+    const runs = latinRuns(text, this.font);
+    if (runs.some((run) => !run.glyph && /[A-Za-z0-9]/.test(run.text))) this.notes.push(text);
+    const widths = runs.map((run) => (run.glyph ? glyphPath(this.font, run.text, size, 0, 0, 'start').width : estWidth(run.text, size)));
+    const total = widths.reduce((sum, width) => sum + width, 0);
+    // 路径没有粗体可选，加粗的文字描一圈细边，和旁边的粗体中文对齐分量。
+    const bold = weight >= 600 ? ` stroke="${fill}" stroke-width="${num(size * 0.035)}"` : '';
+    let cursor = anchor === 'middle' ? x - total / 2 : anchor === 'end' ? x - total : x;
+    let out = '';
+    runs.forEach((run, i) => {
+      if (!run.glyph) out += node(run.text, cursor, 'start');
+      else if (run.text.trim()) out += `<path d="${glyphPath(this.font, run.text, size, cursor, y, 'start').d}"${qaBox} data-glyph="${escapeAttr(run.text)}" fill="${fill}"${bold}/>`;
+      cursor += widths[i];
+    });
+    return `<g aria-label="${escapeAttr(text)}">${out}</g>`;
   }
 
   rect(x, y, w, h, fill = 'none', stroke = null, sw = 1, rx = 8) {
@@ -234,9 +266,9 @@ export class Fig {
     const body = this.parts.map((p) => (typeof p === 'function' ? p(dur) : p)).join('');
     const h = round(height);
     const qa = `<svg viewBox="0 0 ${W} ${h}" width="${W}" height="${h}" xmlns="http://www.w3.org/2000/svg" `
-      + `style='display:block;width:100%;max-width:100%;height:auto;font-family:${FONT_STACK};'>`
+      + `style='display:block;width:100%;max-width:100%;height:auto;letter-spacing:0;font-family:${FONT_STACK};'>`
       + `<rect x="0" y="0" width="${W}" height="${h}" fill="${this.t.bg}"/>${body}</svg>`;
-    return { svg: qa.replace(/ data-box="[^"]*"/g, ''), qa, dur };
+    return { svg: qa.replace(/ data-(?:box|glyph)="[^"]*"/g, ''), qa, dur };
   }
 }
 
