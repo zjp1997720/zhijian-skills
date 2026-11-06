@@ -9,8 +9,8 @@
 
 ## Brand CTAs
 
-Since 1.18.0 the default CTAs are two Flow-generated GIFs keyed onto the paper colour `#F5F4ED`, hosted on COS (URL, size, frames, fps, bytes, SHA256 and source in `brand-cta/manifest.json`); nothing is shipped for them. The 1.17.0 SVGs below remain as the `--cta-style svg` fallback.
+Since 1.19.0 the default (and only) CTAs are two photo GIFs: a formal portrait of the author plus brand typography (logo, name, title, landing line and ochre dot) with a small motion loop, on the paper colour `#F5F4ED`. They are hosted on COS (URL, size, frames, fps, bytes, SHA256, alt and source in `brand-cta/manifest.json`); nothing is shipped for them. There is no cartoon character in the official-account CTAs.
 
-`brand-cta/manifest.json` `fallback` records the two SVG CTAs (`zhijian-cta-opening.svg`, `zhijian-cta-ending.svg`): SHA256, viewBox, display size, alt text and `format: "inline-svg"`. The converter reads these files and inlines them as one-line SVG with a transparent background, so nothing is uploaded or hosted. The SVGs are generated from the ZhiJian Xiaolan v003 vector source (flat vector character, text converted to paths, SMIL loops); regenerate there, copy here, and update the manifest SHA256 — the converter refuses a file whose SHA256 does not match.
+The 1.17.0 Xiaolan inline SVGs (`zhijian-cta-opening.svg`, `zhijian-cta-ending.svg`) and `--cta-style svg` were removed in 1.19.0. The manifest `legacy` field keeps the file names, URLs and SHA256 of every earlier GIF generation (white GIFs up to 1.16.0, Flow GIFs 1.18.x) and records the SVG generation, only so that reprocessing an old draft removes them instead of stacking a second CTA. Generated previews and private source images are not part of this payload.
 
-The white-background GIFs used up to 1.16.0 are no longer shipped. Their file names, URLs and SHA256 stay in the manifest `legacy` field only so that reprocessing an old draft removes them instead of stacking a second CTA. Generated previews and private source images are not part of this payload.
+`zhijian-theme-mobile-baseline.png` was captured with the CTA GIFs served from local files after their text had faded in (the GIFs are not on COS until uploaded), so its CTAs show the portrait header and the footer text.

@@ -138,12 +138,11 @@ async function inspect(page, options) {
         const bg = getComputedStyle(cta).backgroundColor;
         if (bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') failures.push(`Zhijian ${kind} CTA has a background (${bg}); it must stay transparent`);
         const gifImg = cta.querySelector('img[data-wechat-cta-image]');
-        if (gifImg) {
-          // v7 default: the Flow GIF carries the paper colour and the text, so the wrapper adds neither.
-          if (cta.getAttribute('data-zhijian-cta') !== 'v7-flow-gif') failures.push(`Zhijian ${kind} CTA image is not marked v7-flow-gif`);
+        // v8 default: the photo GIF carries the paper colour, the portrait and the text, so the wrapper adds none of them.
+        if (!gifImg) failures.push(`Zhijian ${kind} CTA has no photo GIF image`);
+        else {
+          if (cta.getAttribute('data-zhijian-cta') !== 'v8-photo-gif') failures.push(`Zhijian ${kind} CTA image is not marked v8-photo-gif`);
           if (!/\.gif(?:[?#]|$)/i.test(gifImg.getAttribute('src') || '')) failures.push(`Zhijian ${kind} CTA image is not a GIF`);
-        } else if (!cta.querySelector('svg[data-zhijian-cta] path')) {
-          failures.push(`Zhijian ${kind} CTA is neither the v7 Flow GIF nor the inline vector SVG`);
         }
       });
     }
