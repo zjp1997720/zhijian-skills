@@ -50,8 +50,8 @@ function parseArgs() {
   --cover-author <text|none>  Cover byline, used verbatim (scroll-painting);
                               default "<top label> 出品"; "none" hides it
   --brand-cta <mode>          auto | ending | none (default: auto)
-  --cta-style <style>         gif | svg (default: gif); gif = Flow paper-colour GIF,
-                              svg = transparent inline SVG fallback
+  --cta-style <style>         gif (default and only value; svg was removed in 1.19.0);
+                              gif = photo paper-colour GIF, use --brand-cta none to opt out
   --no-open                   Do not open the result in a browser (also skipped
                               under node --test, CI, or WECHAT_STYLER_NO_OPEN=1)
   --topics <a,b,c|none>       WeChat topic tags at the end of the body, rendered
@@ -143,7 +143,8 @@ function parseArgs() {
         options.brandCta = value;
         break;
       case 'cta-style':
-        if (!['gif','svg'].includes(value)) throw new Error('--cta-style requires gif or svg');
+        if (value === 'svg') throw new Error('--cta-style svg was removed in 1.19.0 (the character SVG fallback is gone); use --brand-cta none to opt out of the CTAs');
+        if (value !== 'gif') throw new Error('--cta-style requires gif');
         options.ctaStyle = value;
         break;
       case 'theme':

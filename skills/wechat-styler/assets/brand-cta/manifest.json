@@ -1,67 +1,73 @@
 {
-  "version": "2026-10-13-v7.1-flow-gif",
+  "version": "2026-11-06-v8-photo-gif",
   "default": "auto",
   "defaultStyle": "gif",
   "format": "gif",
   "assets": {
     "opening": {
-      "file": "zhijian-cta-opening-flow-376b7c890008.gif",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-376b7c890008.gif",
-      "sha256": "376b7c89000817b0d050bb1674578563ba35017846a1f68b029e93e7f0ffa490",
-      "width": 720,
-      "height": 272,
-      "frames": 48,
-      "fps": 12,
-      "bytes": 800024,
+      "file": "zhijian-cta-opening-photo-674d9c689c38.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-photo-674d9c689c38.gif",
+      "sha256": "674d9c689c380168e6082de10a903df244fd87b07e5c1b571c1d5fa64dd91ae7",
+      "width": 1160,
+      "height": 498,
+      "frames": 160,
+      "fps": 20,
+      "bytes": 413718,
       "loop": "forever",
-      "alt": "关注大鹏，把 AI 用进真实工作",
+      "alt": "智见AI 大鹏，AI 落地专家：把 AI 用进真实工作",
       "format": "gif",
-      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013",
-      "layout": "paper margin 30px above / 18px below the character inside the 2x asset (1.18.1)"
+      "source": "Local HTML typesetting of the brand portrait + logo + landing line, CDP frame render and ffmpeg palette GIF onto #F5F4ED; Vault 05_附件/wechat-cta-photo-20261106",
+      "layout": "1160x498 at 1x design size, paper margins baked into the pixels; displayed at full column width"
     },
     "ending": {
-      "file": "zhijian-cta-ending-flow-5375c80db38d.gif",
-      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-5375c80db38d.gif",
-      "sha256": "5375c80db38d67a5c1e11514f1c7bfab50311058aa913f90f9a9ca473c612c88",
-      "width": 720,
-      "height": 300,
-      "frames": 72,
-      "fps": 10,
-      "bytes": 1286172,
+      "file": "zhijian-cta-ending-photo-ad13d9c0b716.gif",
+      "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-photo-ad13d9c0b716.gif",
+      "sha256": "ad13d9c0b716e37a82eea17ea105bf37f76198f6aff8b07088b182fe99640517",
+      "width": 1160,
+      "height": 400,
+      "frames": 160,
+      "fps": 20,
+      "bytes": 424209,
       "loop": "forever",
-      "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人",
+      "alt": "有用，就留一份：点赞、收藏、转给需要的人。关注大鹏，下篇见",
       "format": "gif",
-      "source": "Google Flow Omni 1.1 Flash reference-to-video, green-screen keyed onto #F5F4ED; Vault 05_附件/wechat-cta-flow-20261013",
-      "layout": "paper margin 30px above / 18px below the character inside the 2x asset (1.18.1)"
-    }
-  },
-  "fallback": {
-    "version": "2026-10-13-v6-svg",
-    "format": "inline-svg",
-    "role": "fallback",
-    "note": "1.17.0 transparent inline SVG; selected with --cta-style svg.",
-    "assets": {
-      "opening": {
-        "file": "zhijian-cta-opening.svg",
-        "sha256": "613c966fe4fa108344058fc1fb0898461952ff623aa7cbd96769ed0903c606e4",
-        "viewBox": "0 0 360 136",
-        "width": 360,
-        "height": 136,
-        "alt": "关注大鹏，把 AI 用进真实工作",
-        "format": "inline-svg"
-      },
-      "ending": {
-        "file": "zhijian-cta-ending.svg",
-        "sha256": "813eae51b644ea9d73bf7fd26e1d968325cadf18681606481678f8c7361a6586",
-        "viewBox": "0 0 360 150",
-        "width": 360,
-        "height": 150,
-        "alt": "有用，就留一份：点赞、收藏、转给需要的人",
-        "format": "inline-svg"
-      }
+      "source": "Local HTML typesetting of the brand portrait + logo + landing line, CDP frame render and ffmpeg palette GIF onto #F5F4ED; Vault 05_附件/wechat-cta-photo-20261106",
+      "layout": "1160x400 at 1x design size, paper margins baked into the pixels; displayed at full column width"
     }
   },
   "legacy": [
+    {
+      "version": "2026-10-13-v7.1-flow-gif",
+      "format": "gif",
+      "note": "1.18.1-1.18.3 Flow GIFs with the 3D Xiaolan character; replaced in 1.19.0 when the official account dropped cartoon characters. Kept so reprocessing removes them.",
+      "assets": {
+        "opening": {
+          "file": "zhijian-cta-opening-flow-376b7c890008.gif",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-opening-flow-376b7c890008.gif",
+          "sha256": "376b7c89000817b0d050bb1674578563ba35017846a1f68b029e93e7f0ffa490",
+          "width": 720,
+          "height": 272,
+          "alt": "关注大鹏，把 AI 用进真实工作"
+        },
+        "ending": {
+          "file": "zhijian-cta-ending-flow-5375c80db38d.gif",
+          "url": "https://obsidian-1344509300.cos.ap-beijing.myqcloud.com/obsidian/2026/03/zhijian-cta-ending-flow-5375c80db38d.gif",
+          "sha256": "5375c80db38d67a5c1e11514f1c7bfab50311058aa913f90f9a9ca473c612c88",
+          "width": 720,
+          "height": 300,
+          "alt": "有用，就留一份，点赞 · 收藏 · 转给需要的人"
+        }
+      }
+    },
+    {
+      "version": "2026-10-13-v6-svg",
+      "format": "inline-svg",
+      "note": "1.17.0 Xiaolan inline SVG CTAs (--cta-style svg), removed in 1.19.0 together with the SVG files. Reprocessing removes them by the data-wechat-cta / data-zhijian-cta markers, so no asset list is needed.",
+      "files": [
+        "zhijian-cta-opening.svg",
+        "zhijian-cta-ending.svg"
+      ]
+    },
     {
       "version": "2026-10-13-v7-flow-gif",
       "format": "gif",

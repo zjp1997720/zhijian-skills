@@ -7,7 +7,7 @@
 - 输入为一个 Markdown 文件或匹配多个文件的 glob。
 - 未指定主题时使用 `zhijian`。
 - 默认输出为输入文件同目录下的 `<name>_wechat.html`。
-- 默认模式不改写 Markdown，不添加正文组件；自动加入品牌首尾引导（默认 Flow 纸色底 GIF，`--cta-style svg` 为透明内联 SVG 备选）。必读 `brand-cta.md` 的开场互斥和去重规则。
+- 默认模式不改写 Markdown，不添加正文组件；自动加入品牌首尾引导（默认真人照排版纸色底微动态 GIF，无卡通角色）。必读 `brand-cta.md` 的开场互斥和去重规则。
 - `--components` 的 Markdown 改写由 Agent 完成，`convert.mjs` 只负责渲染。
 
 ## 常用命令
@@ -66,7 +66,7 @@ node scripts/convert.mjs /tmp/rewritten.md \
 | `--strict-density` | 密度失败时停止 | `false`；正式候选必传 |
 | `--cover` | SVG 开场，自动省略开头引导 | `false` |
 | `--brand-cta` | `auto` 首尾引导、`ending` 仅结尾、`none` 全部关闭 | `auto` |
-| `--cta-style` | `gif` Flow 纸色底 GIF、`svg` 透明内联 SVG 备选 | `gif` |
+| `--cta-style` | 只剩 `gif`（真人照纸色底 GIF）；`svg` 角色版 1.19.0 起移除，传入会报错，要关闭引导用 `--brand-cta none` | `gif` |
 | `--cover-template` | 动画模板 | `ink-wash` |
 | `--cover-title` | 动画主标题 | frontmatter.title，其次正文开头的一级标题 |
 | `--keep-h1` | 启用开场动画时仍保留正文开头的一级标题；默认移除以免与动画标题重复 | `false` |
